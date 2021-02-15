@@ -40,12 +40,6 @@ int http1()
   // 各accfd用string
   std::string recv_str[MAX_SESSION];
 
-  // selectのタイムアウト用
-  int selectReturn;
-  struct timeval tv;
-  tv.tv_sec = 5;
-  tv.tv_usec = 0;  
-
   int j = 0; // 動作確認用
   while (1) {
     std::cout << j++ << "回目\n";
@@ -61,26 +55,14 @@ int http1()
         }
       }
     }
+    // std::cout << "before select() : " << width << '\n'; // 動作確認
     // select
     // https://linuxjm.osdn.jp/html/LDP_man-pages/man2/select.2.html
-    if ((selectReturn = select(width, &fds, NULL,NULL, &tv)) == -1) {
+    if (select(width, &fds, NULL,NULL, NULL) == -1) {
       std::cout << "select() failed." << std::endl;
       break;
     }
-    // https://linuxjm.osdn.jp/html/LDP_man-pages/man2/select.2.html のタイムアウトを参照。
-    // timeoutした後は初期化が必要
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;       
-    if (selectReturn == 0) {
-      std::cout << "select() timeout." << std::endl;
-      for (int i = 0; i < width; i++) {
-        if (accfd[i] != -1) {
-          close(accfd[i]);
-          accfd[i] = -1;
-        }
-      }
-      continue;
-    }
+    // std::cout << "after select() : " << width << '\n'; // 動作確認
 
     if (FD_ISSET(sock->get_listenfd(), &fds)) {
       int connfd = accept(sock->get_listenfd(), (struct sockaddr*)NULL, NULL);
@@ -204,10 +186,8 @@ int http1()
           //使い終わったファイルのクローズ
           recv_str[i].clear();
           output_file.close();
-
-          // keep-alive対応でcloseしない。ソケットのクローズはgraceful shutdownか、timeoutにまかせる
-          //close(accfd[i]);
-          //accfd[i] = -1;
+          close(accfd[i]);
+          accfd[i] = -1;
         }
       }
     }
