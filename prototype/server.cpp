@@ -217,13 +217,18 @@ int http1()
               std::cout << "write() failed." << std::endl;
           }
 
+          // keep-alive対応でcloseしない。ソケットのクローズはgraceful shutdownか、timeoutにまかせる
+          // プロトコルがhttp1.0の場合はソケットをcloseする
+          // [task]ちゃんとヘッダを追加解析して条件分岐させること
+          if (recv_str[i].find(std::string("HTTP/1.0")) != std::string::npos) {
+            close(accfd[i]);
+            accfd[i] = -1;
+          }
+          
           //使い終わったファイルのクローズ
           recv_str[i].clear();
           output_file.close();
 
-          // keep-alive対応でcloseしない。ソケットのクローズはgraceful shutdownか、timeoutにまかせる
-          //close(accfd[i]);
-          //accfd[i] = -1;
         }
       }
     }
