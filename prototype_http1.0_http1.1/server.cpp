@@ -160,8 +160,6 @@ int http1()
           recv_str[i].clear();
           continue;
         }
-        // readの後はerrornoを起動して見てはいけないそうなので、
-        // read_sizeが-1にの場合は何もしないで、closeはtimeoutにまかせるのがいいかもです。
         if (read_size == -1 && errno != EAGAIN) {
           std::cout << "read() failed." << std::endl;
           std::cout << "ERROR: " << errno << std::endl;
