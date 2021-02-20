@@ -214,6 +214,11 @@ int http1(char *envp[])
           std::cout << "write() failed." << std::endl;
       }
 
+      // とりあえずbufを1MBにしてる。
+      // 大きいファイルの場合は分割して読み込んで送信しないといけないので、
+      // readをwhileで回してstat_buf.st_size分だけ取得する必要がある
+      // あー、readが0になるまで読み込むでもいいか…
+      // http://research.nii.ac.jp/~ichiro/syspro98/wwwserver.html
       char buf[1000000];
       int read_fd;
       read_fd = open(path_string.c_str(), O_RDONLY, 0666);
