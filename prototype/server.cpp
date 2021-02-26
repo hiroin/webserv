@@ -162,7 +162,7 @@ int http1()
         }
         // readの後はerrornoを起動して見てはいけないそうなので、
         // read_sizeが-1にの場合は何もしないで、closeはtimeoutにまかせるのがいいかもです。
-        if (read_size == -1 && errno != EAGAIN) {
+        if (read_size == -1) {
           std::cout << "read() failed." << std::endl;
           std::cout << "ERROR: " << errno << std::endl;
           close(accfd[i]);

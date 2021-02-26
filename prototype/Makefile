@@ -1,6 +1,6 @@
 CC = clang++
 HTTP1 = server
-HTTP1_SOURCE = server.cpp socket.cpp http1header.cpp http1parser.cpp http1response.cpp
+HTTP1_SOURCE = server.cpp socket.cpp http1header.cpp http1parser.cpp http1response.cpp ft_memcpy.cpp
 
 .PHONY: all clean
 
