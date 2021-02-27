@@ -5,6 +5,7 @@
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
+#include <map>
 #include "ft.hpp"
 
 #define SUCCESS 1
@@ -23,6 +24,9 @@ class Client {
   std::string getHTTPVersion() const;
   void getHeaderFromRecvData();
   bool parseRequestTarget();
+  std::string getAbsolutePath() const;
+  std::string getQuery() const;
+  std::string getAuthority() const;
   bool parseHeader();
   char *getMessageBody() const;
 
@@ -34,7 +38,7 @@ class Client {
   char *recvData_;
   size_t recvDataSize_;
   std::string messageHeader_;
-  size_t messageHeaderEndPosition_;
+  size_t messageBodyStartPosition_;
   std::string requestLine_;
 
   // requestLine_をparseした結果を格納
@@ -48,6 +52,9 @@ class Client {
   std::string absolutePath_; // OPTIONSの*の場合のここにいれる
   std::string query_;
   std::string authority_; // CONNECTの場合の接続先
+
+  // headerを格納
+  std::multimap<std::string, std::string> header_;
 
   char *messageBody_;
 };

@@ -42,10 +42,10 @@ void Client::getRequestLineFromRecvData()
 
 bool Client::parseRequestLine()
 {
-  // 改行コードが\rでも\nでも\r\nでもOKなように対応
+  // 改行コードが\rでも\nでも\r\nでもOKなように対応する場合
   // RFCは\r\n
-  requestLine_ = ReplaceString(requestLine_, "\r\n", "\n");
-  requestLine_ = ReplaceString(requestLine_, "\r", "\n");
+  // requestLine_ = ReplaceString(requestLine_, "\r\n", "\n");
+  // requestLine_ = ReplaceString(requestLine_, "\r", "\n");
   std::string::size_type firstSpPos = requestLine_.find(std::string(" "));
   if (firstSpPos == std::string::npos)
     return FAILURE;
@@ -104,7 +104,7 @@ void Client::getHeaderFromRecvData()
   if (pos != std::string::npos)
   {
     messageHeader_ = stringRecvData.substr(0, pos);
-    messageHeaderEndPosition_ = pos;
+    messageBodyStartPosition_ = pos + 4;
   }
 }
 
@@ -115,8 +115,6 @@ std::string Client::getMessageHeader() const
 
 bool Client::parseRequestTarget()
 {
-  std::cout << "requestTarget_ : " << requestTarget_ << std::endl;
-
   if (method_ == client::OPTIONS && requestTarget_ == "*")
   {
     absolutePath_ = "*";
@@ -127,17 +125,71 @@ bool Client::parseRequestTarget()
     if(!isAuthority(requestTarget_))
       return false;
     authority_ = getHostAndPort(requestTarget_);
+    std::cout << "[DEBUG]authority_ : " << authority_ << std::endl;
+    return true;
   }
-  else
+  // absolute-form
+  // http://example.com/のような場合
+  if (requestTarget_[0] != '/')
   {
-    // ここから書く
+    std::string::size_type pos = requestTarget_.find(std::string("//"));
+    if (pos == std::string::npos)
+      return false;
+    pos = requestTarget_.find(std::string("/"), pos + 2);
+    if (pos == std::string::npos)
+      return false;        
+    requestTarget_ = requestTarget_.substr(pos);
   }
-  std::cout << "authority_ : " << authority_ << std::endl;
+  // origin-form
+  // /insex.htmlのように/ではじまる場合
+  if (requestTarget_[0] != '/')
+    return false;
+  // ?があった場合、前後に分割
+  std::string::size_type pos = requestTarget_.find(std::string("?"));
+  if (pos != std::string::npos)
+  {
+    query_ = requestTarget_.substr(pos + 1);
+    requestTarget_ = requestTarget_.substr(0, pos - 1);
+  }
+  // std::cout << "[DEBUG]requestTarget_ : " << requestTarget_ << std::endl;
+  // std::cout << "[DEBUG]query_ : " << query_ << std::endl;
   return SUCCESS;
+}
+
+std::string Client::getAbsolutePath() const
+{
+  return absolutePath_;
+}
+
+std::string Client::getQuery() const
+{
+  return query_;
+}
+
+std::string Client::getAuthority() const
+{
+  return authority_;
 }
 
 bool Client::parseHeader()
 {
+  std::string::size_type pos = messageHeader_.find(std::string("\r\n"));
+  std::string header = messageHeader_.substr(pos + 2);
+  std::cout << "header\n" << header << std::endl;
+  // 1行取り出す
+  while ((pos = header.find(std::string("\r\n"))) != std::string::npos)
+  {
+    std::string headerField = header.substr(0, pos - 1);
+    header = header.substr(pos + 2);
+    // :の前を取り出す
+    if ((pos = header.find(std::string(":"))) != std::string::npos)
+      return false;
+    std::string fieldName = header.substr(0, pos - 1);
+    // :の後ろを取り出す
+    // https://ez-net.jp/article/4F/0d70wr5G/IL_TpJGp50p1/
+    // trim関数
+
+  }
   return SUCCESS;
 }
 
@@ -206,7 +258,7 @@ std::string Client::getHostAndPort(std::string requestTarget)
 Client::Client() :
   recvData_(NULL),
   recvDataSize_(0),
-  messageHeaderEndPosition_(0),
+  messageBodyStartPosition_(0),
   method_(client::OTHER),
   messageBody_(NULL)
 {
@@ -222,9 +274,77 @@ Client::~Client()
 // clang++ -g -Wall -Wextra -Werror -fsanitize=address,leak client.cpp ft_memcpy.cpp ft_replaceString.cpp
 int main()
 {
+  // {
+  //   Client c;
+  //   std::string stringData1 = "CONNECT 153.127.88.54 HTTP/1.1\r\n\r\n";
+  //   const char *data1 = stringData1.c_str();
+
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   c.parseRequestTarget();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  // std::cout << "----------------------------" << std::endl;
+  // {
+  //   Client c;
+  //   std::string stringData1 = "CONNECT 153.127.88.54:80 HTTP/1.1\r\n\r\n";
+  //   const char *data1 = stringData1.c_str();
+
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   c.parseRequestTarget();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  // std::cout << "----------------------------" << std::endl;
+  // {
+  //   Client c;
+  //   std::string stringData1 = "CONNECT 153.127.88.54:80/index.html HTTP/1.1\r\n\r\n";
+  //   const char *data1 = stringData1.c_str();
+
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   c.parseRequestTarget();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  // std::cout << "----------------------------" << std::endl;
+  // {
+  //   Client c;
+  //   std::string stringData1 = "CONNECT 153.127.88.54/index.html HTTP/1.1\r\n\r\n";
+  //   const char *data1 = stringData1.c_str();
+
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   c.parseRequestTarget();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  std::cout << "----------------------------" << std::endl;
   {
     Client c;
-    std::string stringData1 = "CONNECT 153.127.88.54 HTTP/1.1\r\n\r\n";
+    std::string stringData1 = "GET / HTTP/1.1\r\nHost: server\r\nUser-Agent: curl/7.58.0\r\nAccept: */*\r\n\r\nPOSTDATA";
     const char *data1 = stringData1.c_str();
 
     c.setData(data1, stringData1.size() + 1);
@@ -236,110 +356,95 @@ int main()
     std::cout << std::endl;
     c.getHeaderFromRecvData();
     c.parseRequestTarget();
-    std::cout << c.getMessageHeader() << '\n';
+    if (!c.parseHeader())
+      return 1;
+    // std::cout << c.getMessageHeader() << '\n';
   }
   std::cout << "----------------------------" << std::endl;
-  {
-    Client c;
-    std::string stringData1 = "CONNECT 153.127.88.54:80 HTTP/1.1\r\n\r\n";
-    const char *data1 = stringData1.c_str();
+  // {
+  //   Client c;
+  //   std::string stringData1 = "GET /index.html HTTP/1.1\r\nHost: server\r\n\r\nPOSTDATA";
+  //   const char *data1 = stringData1.c_str();
 
-    c.setData(data1, stringData1.size() + 1);
-    c.getRequestLineFromRecvData();
-    if (!c.parseRequestLine())
-      return 1;
-    std::cout << "method = " << c.getMethod() << std::endl;
-    std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
-    std::cout << std::endl;
-    c.getHeaderFromRecvData();
-    c.parseRequestTarget();
-    std::cout << c.getMessageHeader() << '\n';
-  }
-  std::cout << "----------------------------" << std::endl;
-  {
-    Client c;
-    std::string stringData1 = "CONNECT 153.127.88.54:80/index.html HTTP/1.1\r\n\r\n";
-    const char *data1 = stringData1.c_str();
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   c.parseRequestTarget();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  // std::cout << "----------------------------" << std::endl;
+  // {
+  //   Client c;
+  //   std::string stringData1 = "GET http://127.0.0.1/index.html HTTP/1.1\r\nHost: server\r\n\r\nPOSTDATA";
+  //   const char *data1 = stringData1.c_str();
 
-    c.setData(data1, stringData1.size() + 1);
-    c.getRequestLineFromRecvData();
-    if (!c.parseRequestLine())
-      return 1;
-    std::cout << "method = " << c.getMethod() << std::endl;
-    std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
-    std::cout << std::endl;
-    c.getHeaderFromRecvData();
-    c.parseRequestTarget();
-    std::cout << c.getMessageHeader() << '\n';
-  }
-  std::cout << "----------------------------" << std::endl;
-  {
-    Client c;
-    std::string stringData1 = "CONNECT 153.127.88.54/index.html HTTP/1.1\r\n\r\n";
-    const char *data1 = stringData1.c_str();
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   c.parseRequestTarget();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  // std::cout << "----------------------------" << std::endl;
+  // {
+  //   Client c;
+  //   std::string stringData1 = "GET http://127.0.0.1/index.html?name=hkamiya HTTP/1.1\r\nHost: server\r\n\r\nPOSTDATA";
+  //   const char *data1 = stringData1.c_str();
 
-    c.setData(data1, stringData1.size() + 1);
-    c.getRequestLineFromRecvData();
-    if (!c.parseRequestLine())
-      return 1;
-    std::cout << "method = " << c.getMethod() << std::endl;
-    std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
-    std::cout << std::endl;
-    c.getHeaderFromRecvData();
-    c.parseRequestTarget();
-    std::cout << c.getMessageHeader() << '\n';
-  }
-  std::cout << "----------------------------" << std::endl;
-  {
-    Client c;
-    std::string stringData1 = "GET / HTTP/1.1\r\nHost: server\r\n\r\nPOSTDATA";
-    const char *data1 = stringData1.c_str();
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   c.parseRequestTarget();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  // std::cout << "----------------------------" << std::endl;
+  // {
+  //   Client c;
+  //   std::string stringData1 = "GET / HTTP/1.0\r\n";
+  //   std::string stringData2 = "Host: server\r\n\r\nPOSTDATA";
+  //   const char *data1 = stringData1.c_str();
+  //   const char *data2 = stringData2.c_str();
 
-    c.setData(data1, stringData1.size() + 1);
-    c.getRequestLineFromRecvData();
-    if (!c.parseRequestLine())
-      return 1;
-    std::cout << "method = " << c.getMethod() << std::endl;
-    std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
-    std::cout << std::endl;
-    c.getHeaderFromRecvData();
-    c.parseRequestTarget();
-    std::cout << c.getMessageHeader() << '\n';
-  }
-  std::cout << "----------------------------" << std::endl;
-  {
-    Client c;
-    std::string stringData1 = "GET / HTTP/1.0\r\n";
-    std::string stringData2 = "Host: server\r\n\r\nPOSTDATA";
-    const char *data1 = stringData1.c_str();
-    const char *data2 = stringData2.c_str();
+  //   c.setData(data1, stringData1.size());
+  //   c.setData(data2, stringData2.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
+  // std::cout << "----------------------------" << std::endl;
+  // {
+  //   Client c;
+  //   std::string stringData1 = "GET / HTTP/0.9\r\nHost: server\r\n\r\nPOSTDATA";
+  //   const char *data1 = stringData1.c_str();
 
-    c.setData(data1, stringData1.size());
-    c.setData(data2, stringData2.size() + 1);
-    c.getRequestLineFromRecvData();
-    if (!c.parseRequestLine())
-      return 1;
-    std::cout << "method = " << c.getMethod() << std::endl;
-    std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
-    std::cout << std::endl;
-    c.getHeaderFromRecvData();
-    std::cout << c.getMessageHeader() << '\n';
-  }
-  std::cout << "----------------------------" << std::endl;
-  {
-    Client c;
-    std::string stringData1 = "GET / HTTP/0.9\r\nHost: server\r\n\r\nPOSTDATA";
-    const char *data1 = stringData1.c_str();
-
-    c.setData(data1, stringData1.size() + 1);
-    c.getRequestLineFromRecvData();
-    if (!c.parseRequestLine())
-      return 1;
-    std::cout << "method = " << c.getMethod() << std::endl;
-    std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
-    std::cout << std::endl;
-    c.getHeaderFromRecvData();
-    std::cout << c.getMessageHeader() << '\n';
-  }
+  //   c.setData(data1, stringData1.size() + 1);
+  //   c.getRequestLineFromRecvData();
+  //   if (!c.parseRequestLine())
+  //     return 1;
+  //   std::cout << "method = " << c.getMethod() << std::endl;
+  //   std::cout << "HTTPVersion = " << c.getHTTPVersion() << std::endl;
+  //   std::cout << std::endl;
+  //   c.getHeaderFromRecvData();
+  //   std::cout << c.getMessageHeader() << '\n';
+  // }
   return 0;
 }
