@@ -9,7 +9,9 @@
 
 #define SUCCESS 1
 #define FAILURE 0
-enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER};
+namespace client {
+  enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER};
+}
 
 class Client {
  public:
@@ -17,9 +19,10 @@ class Client {
   void getRequestLineFromRecvData();
   bool parseRequestLine();
   std::string getMessageHeader() const;
-  enum method getMethod() const;
+  enum client::method getMethod() const;
   std::string getHTTPVersion() const;
   void getHeaderFromRecvData();
+  bool parseRequestTarget();
   bool parseHeader();
   char *getMessageBody() const;
 
@@ -35,15 +38,16 @@ class Client {
   std::string requestLine_;
 
   // requestLine_をparseした結果を格納
-  enum method method_;
+  enum client::method method_;
   std::string requestTarget_;
   std::string HTTPVersion_;
 
   // requestTarget_をparseした結果を格納
-  std::string absolutePath_;
+  bool isAuthority(std::string requestTarget);
+  std::string getHostAndPort(std::string requestTarget);
+  std::string absolutePath_; // OPTIONSの*の場合のここにいれる
   std::string query_;
   std::string authority_; // CONNECTの場合の接続先
-  std::string asteriskForm; // OPTIONSの*の場合
 
   char *messageBody_;
 };
