@@ -103,7 +103,7 @@ void Client::getHeaderFromRecvData()
   std::string::size_type pos = stringRecvData.find(std::string("\r\n\r\n"));
   if (pos != std::string::npos)
   {
-    messageHeader_ = stringRecvData.substr(0, pos);
+    messageHeader_ = stringRecvData.substr(0, pos + 2);
     messageBodyStartPosition_ = pos + 4;
   }
 }
@@ -173,22 +173,24 @@ std::string Client::getAuthority() const
 
 bool Client::parseHeader()
 {
-  std::string::size_type pos = messageHeader_.find(std::string("\r\n"));
+  std::string::size_type pos = messageHeader_.find("\r\n");
   std::string header = messageHeader_.substr(pos + 2);
   std::cout << "header\n" << header << std::endl;
   // 1行取り出す
-  while ((pos = header.find(std::string("\r\n"))) != std::string::npos)
+  while ((pos = header.find("\r\n")) != std::string::npos)
   {
-    std::string headerField = header.substr(0, pos - 1);
+    std::string headerField = header.substr(0, pos);
     header = header.substr(pos + 2);
     // :の前を取り出す
-    if ((pos = header.find(std::string(":"))) != std::string::npos)
+    if ((pos = headerField.find(":")) == std::string::npos)
       return false;
-    std::string fieldName = header.substr(0, pos - 1);
+    std::string fieldName = headerField.substr(0, pos);
     // :の後ろを取り出す
-    // https://ez-net.jp/article/4F/0d70wr5G/IL_TpJGp50p1/
-    // trim関数
+    std::string fieldValue = ft_trim(headerField.substr(pos + 1), " \t");
+    std::cout << "fieldName : " << fieldName << std::endl;
+    std::cout << "fieldValue : " << fieldValue << std::endl;
 
+    // ここからmultimapにいれていく
   }
   return SUCCESS;
 }

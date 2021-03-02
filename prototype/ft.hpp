@@ -11,5 +11,10 @@ std::string ReplaceString
   , std::string String2   // 検索対象
   , std::string String3   // 置き換える内容
 );
+std::string ft_trim
+(
+    const std::string& string
+  , const char* trimCharacterList
+);
 
 #endif
