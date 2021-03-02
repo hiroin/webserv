@@ -13,7 +13,6 @@ void Socket::set_sockaddr_in() {
 
   this->serv_addr.sin_family = AF_INET;
   this->serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  //this->serv_addr.sin_addr.s_addr = inet_addr("172.0.0.1");
   this->serv_addr.sin_port = htons(this->port);
 }
 
@@ -46,6 +45,20 @@ int Socket::set_socket() {
     std::cout << "listen() failed." << std::endl;
     close(this->listenfd);
     return -1;
+  }
+
+  // ノンブロッキングのソケットに変更
+  int flags = fcntl(this->listenfd, F_GETFL);
+  if(-1 == flags)
+  {
+    std::cout << "fcntl() failed." << std::endl;
+    close(this->listenfd);
+  }
+  int result = fcntl(this->listenfd, F_SETFL, flags | O_NONBLOCK);
+  if(-1 == result)
+  {
+    std::cout << "fcntl() failed." << std::endl;
+    close(this->listenfd);
   }
 
   return 0;

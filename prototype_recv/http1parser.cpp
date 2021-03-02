@@ -39,7 +39,7 @@ std::string HTTP1_Parser::argv_path_analyzer(std::string request_path, const cha
   return path_string;
 }
 
-std::string HTTP1_Parser::get_requestline_path(char _pbuf[BUF_SIZE]) {
+std::string HTTP1_Parser::get_requestline_path(const char _pbuf[BUF_SIZE]) {
   int space_num = 0;
   char path_buffer[32];
   int current_point = 0;
