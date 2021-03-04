@@ -1,6 +1,6 @@
 #include "HTTPMessageParser.hpp"
 
-bool HTTPMessageParser::parseRequestLine(std::string requestLine)
+bool HTTPMessageParser::parseRequestLine(const std::string requestLine)
 {
   requestLine_ = requestLine;
   std::string::size_type firstSpPos = requestLine.find(std::string(" "));
@@ -75,13 +75,17 @@ bool HTTPMessageParser::parseRequestTarget(std::string requestTarget)
   // http://example.com/のような場合
   if (requestTarget[0] != '/')
   {
-    std::string::size_type pos = requestTarget.find(std::string("//"));
-    if (pos == std::string::npos)
+    std::string::size_type pos;
+    pos = requestTarget.find(std::string(":///"));
+    if (pos != std::string::npos)
       return false;
-    pos = requestTarget.find(std::string("/"), pos + 2);
+    pos = requestTarget.find(std::string("://"));
+    if (pos == std::string::npos || pos == 0)
+      return false;
+    pos = requestTarget.find(std::string("/"), pos + 3);
     if (pos == std::string::npos)
       return false;        
-    requestTarget = requestTarget_.substr(pos);
+    requestTarget = requestTarget.substr(pos);
   }
   // origin-form
   // /insex.htmlのように/ではじまる場合
@@ -91,7 +95,7 @@ bool HTTPMessageParser::parseRequestTarget(std::string requestTarget)
   std::string::size_type pos = requestTarget.find(std::string("?"));
   if (pos != std::string::npos)
   {
-    absolutePath_ = requestTarget.substr(0, pos - 1);
+    absolutePath_ = requestTarget.substr(0, pos);
     query_ = requestTarget.substr(pos + 1);
   }
   else
@@ -243,6 +247,21 @@ int main()
   {
     HTTPMessageParser c;
     if (!c.parseRequestLine("GET http://127.0.0.1/www/index.html HTTP/1.1"))
+      return 1;
+    std::cout << "method = " << c.getMethod() << std::endl;
+    std::cout << "request-target = " << c.getRequestTarget() << std::endl;
+    std::cout << "HTTP-version = " << c.getHTTPVersion() << std::endl;
+    std::cout << std::endl;
+    if (!c.parseRequestTarget(c.getRequestTarget()))
+      return 1;
+    std::cout << "absolute-path = " << c.getAbsolutePath() << std::endl;
+    std::cout << "query = " << c.getQuery() << std::endl;
+  }
+  std::cout << "--end----------------------------" << std::endl;
+  std::cout << "--start--------------------------" << std::endl;
+  {
+    HTTPMessageParser c;
+    if (!c.parseRequestLine("GET http:/// HTTP/1.1"))
       return 1;
     std::cout << "method = " << c.getMethod() << std::endl;
     std::cout << "request-target = " << c.getRequestTarget() << std::endl;

@@ -14,7 +14,7 @@ namespace httpMessageParser {
 
 class HTTPMessageParser {
  public:
-  bool parseRequestLine(std::string requestLine);
+  bool parseRequestLine(const std::string requestLine);
   std::string getMessageHeader() const;
   enum httpMessageParser::method getMethod() const;
   std::string getRequestTarget() const;
