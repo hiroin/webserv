@@ -6,18 +6,21 @@
 #include "ft.hpp"
 #include <sys/socket.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define SUCCESS 1
 #define FAILURE 0
-#define RECV_BUFFSIZE 1024
 
 class recvData {
+ private:
+  static unsigned long recvBuffsize_;
+
  public:
   void clearData();
   void setSocketFd(int fd);
-  int recvFromSocket();
-  int cutOutRecvDataBySpecifyingBytes(size_t size);
-  int cutOutRecvDataToEol();
+  bool recvFromSocket();
+  bool cutOutRecvDataBySpecifyingBytes(size_t size);
+  bool cutOutRecvDataToEol();
   std::string getRecvData() const;
   std::string getExtractedData() const;
 

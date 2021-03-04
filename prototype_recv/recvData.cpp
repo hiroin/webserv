@@ -1,5 +1,7 @@
 #include "recvData.hpp"
 
+unsigned long recvData::recvBuffsize_ = 1000000;
+
 void recvData::clearData()
 {
   recvData_.clear();
@@ -11,16 +13,16 @@ void recvData::setSocketFd(int fd)
   socketFd_ = fd;
 }
 
-int recvData::recvFromSocket()
+bool recvData::recvFromSocket()
 {
   int read_size;
-  char buf[RECV_BUFFSIZE];
+  char buf[recvBuffsize_];
+  std::string tmp;
 
   ft_memset(buf, 0, sizeof(buf));
   read_size = recv(socketFd_, buf, sizeof(buf), 0);
   if (read_size == 0) {
     std::cout << "graceful shutdown." << std::endl;
-    close(socketFd_);
     recvData_.erase();
     extractedData_.erase();
     return FAILURE;
@@ -28,16 +30,23 @@ int recvData::recvFromSocket()
   if (read_size == -1 && errno != EAGAIN) {
     std::cout << "read() failed." << std::endl;
     std::cout << "ERROR: " << errno << std::endl;
-    close(socketFd_);
     recvData_.erase();
     extractedData_.erase();
     return FAILURE;
   }
-  recvData_.append(buf);
+  // 1バイトずつデータをいれるので遅い
+  // unsigned long i = 0;
+  // while (i < read_size)
+  // {
+  //   recvData_ += buf[i++];
+  // }
+  tmp.clear();
+  tmp.assign(buf, read_size);
+  recvData_ += tmp;
   return SUCCESS;
 }
 
-int recvData::cutOutRecvDataBySpecifyingBytes(size_t size)
+bool recvData::cutOutRecvDataBySpecifyingBytes(size_t size)
 {
   if (recvData_.size() < size)
     return FAILURE;
@@ -46,7 +55,7 @@ int recvData::cutOutRecvDataBySpecifyingBytes(size_t size)
   return SUCCESS;
 }
 
-int recvData::cutOutRecvDataToEol()
+bool recvData::cutOutRecvDataToEol()
 {
   std::string::size_type pos;
   

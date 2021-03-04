@@ -1,0 +1,42 @@
+== Info:   Trying 127.0.0.1...
+== Info: TCP_NODELAY set
+== Info: Connected to 127.0.0.1 (127.0.0.1) port 80 (#0)
+=> Send header, 189 bytes (0xbd)
+0000: POST /test.php HTTP/1.1
+0019: Host: 127.0.0.1
+002a: User-Agent: curl/7.58.0
+0043: Accept: */*
+0050: Content-Length: 239
+0065: Content-Type: multipart/form-data; boundary=--------------------
+00a5: ----8c857c294f34001a
+00bb: 
+=> Send data, 239 bytes (0xef)
+0000: --------------------------8c857c294f34001a
+002c: Content-Disposition: form-data; name="name"
+0059: 
+005b: ap2
+0060: --------------------------8c857c294f34001a
+008c: Content-Disposition: form-data; name="name2"
+00ba: 
+00bc: c9w
+00c1: --------------------------8c857c294f34001a--
+<= Recv header, 17 bytes (0x11)
+0000: HTTP/1.1 200 OK
+<= Recv header, 31 bytes (0x1f)
+0000: Server: nginx/1.14.0 (Ubuntu)
+<= Recv header, 37 bytes (0x25)
+0000: Date: Tue, 02 Mar 2021 23:48:16 GMT
+<= Recv header, 40 bytes (0x28)
+0000: Content-Type: text/html; charset=UTF-8
+<= Recv header, 28 bytes (0x1c)
+0000: Transfer-Encoding: chunked
+<= Recv header, 24 bytes (0x18)
+0000: Connection: keep-alive
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 73 bytes (0x49)
+0000: 3e
+0004: test.Array.(.).Array.(.    [name] => ap2.    [name2] => c9w.).
+0044: 0
+0047: 
+== Info: Connection #0 to host 127.0.0.1 left intact

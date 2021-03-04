@@ -13,8 +13,6 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
-#include <future>
-#include <thread>
 
 #include "socket.hpp"
 #include "http1response.hpp"
@@ -111,6 +109,7 @@ int http1()
       }
       if (FD_ISSET(accfd[i], &fds)) {
         if (!recvData[i].recvFromSocket()) {
+          close(accfd[i]);
           accfd[i] = -1;
           continue;
         }
@@ -132,7 +131,51 @@ int http1()
         //   std::cout << "------------------------" << std::endl;
         // }
         // ソケットのクローズ
-        if (0) {
+        if (1) {
+
+
+          if (recvData[i].cutOutRecvDataToEol()) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+          if (recvData[i].cutOutRecvDataToEol()) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+          if (recvData[i].cutOutRecvDataToEol()) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+          if (recvData[i].cutOutRecvDataToEol()) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+          if (recvData[i].cutOutRecvDataToEol()) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+          if (recvData[i].cutOutRecvDataToEol()) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+          if (recvData[i].cutOutRecvDataToEol()) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+
+          if (recvData[i].cutOutRecvDataBySpecifyingBytes(18)) {
+            std::cout << "------------------------" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]" << std::endl;
+            std::cout << "------------------------" << std::endl;
+          }
+
           recvData[i].clearData();
           close(accfd[i]);
           accfd[i] = -1;

@@ -11,6 +11,8 @@
 #include "configure.hpp"
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <cstdlib>
+#include <errno.h>
 
 class Socket {
  private:
@@ -19,7 +21,7 @@ class Socket {
   struct sockaddr_in serv_addr;
 
  public:
-  explicit Socket(int port_): port{port_} {}
+  explicit Socket(int port_);
   void set_listenfd();
   void set_sockaddr_in();
   int set_socket();

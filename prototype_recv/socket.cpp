@@ -4,7 +4,7 @@ void Socket::set_listenfd() {
   this->listenfd = socket(AF_INET, SOCK_STREAM, 0);
   if (this->listenfd == -1) {
     std::cout << "socket() failed." << std::endl;
-    exit(1);
+    std::exit(1);
   }
 }
 
@@ -62,4 +62,9 @@ int Socket::set_socket() {
   }
 
   return 0;
+}
+
+Socket::Socket(int port_) : port(port_)
+{
+
 }
