@@ -122,8 +122,22 @@ std::string HTTPMessageParser::getAuthority() const
 
 bool HTTPMessageParser::parseHeader(std::string header)
 {
-  (void)header;
+  if (!validationHeader(header))
+    return FAILURE;
+  std::string::size_type pos = header.find(std::string(":"));
+  if (pos == std::string::npos)
+    return FAILURE;
+  std::string fieldName = header.substr(0, pos);
+  std::string fieldValue  = header.substr(pos + 1);
+  fieldValue = ft_trim(fieldValue, " \t");
+  if (!pushFieldNameAndValue(fieldName, fieldValue))
+    return FAILURE;
   return SUCCESS;
+}
+
+std::map<std::string, std::string> HTTPMessageParser::getHeaders() const
+{
+  return headers_;
 }
 
 bool HTTPMessageParser::isAuthority(std::string requestTarget)
@@ -183,6 +197,68 @@ std::string HTTPMessageParser::getHostAndPort(std::string requestTarget)
   return requestTarget.substr(0, i);
 }
 
+bool HTTPMessageParser::validationHeader(std::string header)
+{
+  size_t i = 0;
+  if (!ft_istchar(header[i++]))
+    return FAILURE;
+  while (ft_istchar(header[i]))
+    i++;
+  if (header[i++] != ':')
+    return FAILURE;
+  while (ft_isspase_and_htab(header[i++]))
+    ;
+  if (!ft_isvchar(header[i++]))
+    return FAILURE;
+  while (ft_isvchar(header[i]) || ft_isspase_and_htab(header[i]))
+    i++;
+  if (i == header.size())
+    return SUCCESS;
+  return FAILURE;
+}
+
+bool HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string fieldValue)
+{
+  std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), tolower);
+  if (fieldName == "accept" \
+    || fieldName == "accept-charsets" \
+    || fieldName == "accept-language"
+    )
+  {
+    std::map<std::string, std::string>::const_iterator itr = headers_.find(fieldName);
+    if (itr != headers_.end())
+    {
+      headers_[fieldName] += ',';
+      headers_[fieldName] += fieldValue;
+    }
+    else
+      headers_[fieldName] = fieldValue;
+  }
+  else if (fieldName == "authorization" \
+    || fieldName == "content-length" \
+    || fieldName == "content-type" \
+    || fieldName == "date" \
+    || fieldName == "host" \
+    || fieldName == "referer" \
+    || fieldName == "transfer-encoding" \
+    || fieldName == "user-agent"
+    )
+  {
+    std::map<std::string, std::string>::const_iterator itr = headers_.find(fieldName);
+    if (itr != headers_.end())
+      return FAILURE;
+    headers_[fieldName] = fieldValue;
+  }
+  else
+  {
+    std::map<std::string, std::string>::const_iterator itr = headers_.find(fieldName);
+    if (itr != headers_.end())
+      return FAILURE;
+    headers_[fieldName] = fieldValue;
+  }
+  return SUCCESS;
+}
+
 HTTPMessageParser::HTTPMessageParser() :
   method_(httpMessageParser::OTHER)
 {
@@ -193,7 +269,7 @@ HTTPMessageParser::~HTTPMessageParser()
 {
 }
 
-// clang++ -g -Wall -Wextra -Werror -std=c++98 -fsanitize=address,leak HTTPMessageParser.cpp ft_memcpy.cpp ft_replaceString.cpp -D MAIN
+// clang++ -g -Wall -Wextra -Werror -std=c++98 -fsanitize=address,leak HTTPMessageParser.cpp ft_memcpy.cpp ft_replaceString.cpp ft_istchar.cpp ft_isspase_and_htab.cpp ft_isvchar.cpp ft_trim.cpp -D MAIN
 // "GET / HTTP/1.1\r\nHost: server\r\nUser-Agent: curl/7.58.0\r\nAccept: */*\r\n\r\nPOSTDATA"
 #ifdef MAIN
 int main()
@@ -273,6 +349,31 @@ int main()
     std::cout << "query = " << c.getQuery() << std::endl;
   }
   std::cout << "--end----------------------------" << std::endl;
+
   return 0;
 }
 #endif
+
+// int main()
+// {
+//   std::cout << "--start--------------------------" << std::endl;
+//   {
+//     HTTPMessageParser c;
+//     if (!c.parseHeader("Host: 127.0.0.1"))
+//       return 1;
+//     if (!c.parseHeader("Host: 127.0.0.1"))
+//       return 1;
+//     if (!c.parseHeader("Accept: */*"))
+//       return 1;
+//     if (!c.parseHeader("Accept: */*"))
+//       return 1;
+//     if (!c.parseHeader("User-Agent: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1)"))
+//       return 1;
+//     std::map<std::string, std::string> headers = c.getHeaders();
+//     for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
+//     {
+//       std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
+//     }
+//   }
+//   std::cout << "--end----------------------------" << std::endl;
+// }

@@ -100,3 +100,56 @@ TEST(HTTPMessageParserEvenTest, getAfterParseRequestTarget) {
     EXPECT_EQ("name=hkamiya", c.getQuery());
   }
 }
+
+TEST(HTTPMessageParserEvenTest, parseHeader) {
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.parseHeader("Host: 127.0.0.1"));
+    EXPECT_TRUE(c.parseHeader("User-Agent: curl/7.58.0"));
+    EXPECT_TRUE(c.parseHeader("Accept: */*"));
+
+    std::map<std::string, std::string> headers = c.getHeaders();
+    EXPECT_EQ("127.0.0.1", headers["host"]);
+    EXPECT_EQ("curl/7.58.0", headers["user-agent"]);
+    EXPECT_EQ("*/*", headers["accept"]);
+  }
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.parseHeader("Host:\t 127.0.0.1\t "));
+
+    std::map<std::string, std::string> headers = c.getHeaders();
+    EXPECT_EQ("127.0.0.1", headers["host"]);
+  }
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.parseHeader("User-Agent: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1)"));
+
+    std::map<std::string, std::string> headers = c.getHeaders();
+    EXPECT_EQ("Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1)", headers["user-agent"]);
+  }
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.parseHeader("User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.99 Safari/537.36"));
+  }
+
+  {
+    HTTPMessageParser c;
+    EXPECT_FALSE(c.parseHeader("Host : 127.0.0.1"));
+  }
+  {
+    HTTPMessageParser c;
+    EXPECT_FALSE(c.parseHeader(" Host: 127.0.0.1"));
+  }
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.parseHeader("Host: 127.0.0.1"));
+    EXPECT_FALSE(c.parseHeader("Host: 127.0.0.1"));
+  }
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.parseHeader("Accept: */*"));
+    EXPECT_TRUE(c.parseHeader("Accept: */*"));
+    std::map<std::string, std::string> headers = c.getHeaders();
+    EXPECT_EQ("*/*,*/*", headers["accept"]);
+  }
+}

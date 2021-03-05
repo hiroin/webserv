@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <map>
+#include <algorithm>
 #include "ft.hpp"
 
 namespace httpMessageParser {
@@ -24,6 +25,7 @@ class HTTPMessageParser {
   std::string getQuery() const;
   std::string getAuthority() const;
   bool parseHeader(std::string header);
+  std::map<std::string, std::string> getHeaders() const;
 
  public:
   HTTPMessageParser();
@@ -44,8 +46,13 @@ class HTTPMessageParser {
   std::string authority_; // CONNECTの場合の接続先
 
   // headerを格納
-  std::multimap<std::string, std::string> header_;
+  bool validationHeader(std::string header);
+  bool pushFieldNameAndValue(std::string fieldName, std::string fieldValue);
+  std::map<std::string, std::string> headers_;
 
+  //
+ public:
+  friend class HTTPMessageParserTest;
 };
 
 /*

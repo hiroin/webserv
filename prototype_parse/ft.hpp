@@ -7,6 +7,9 @@
 #define SUCCESS 1
 #define FAILURE 0
 
+bool ft_isspase_and_htab(char c);
+bool ft_isvchar(char c);
+bool ft_istchar(char c);
 void *ft_memset(void *s, int c, size_t n);
 void *ft_memcpy(void *dest, const void *src, size_t n);
 std::string ReplaceString
