@@ -5,6 +5,7 @@
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
 #include <map>
 #include <algorithm>
 #include "ft.hpp"
@@ -24,6 +25,7 @@ class HTTPMessageParser {
   std::string getAbsolutePath() const;
   std::string getQuery() const;
   std::string getAuthority() const;
+  std::string getPathinfo() const;
   bool parseHeader(std::string header);
   std::map<std::string, std::string> getHeaders() const;
   void clearData();
@@ -34,6 +36,8 @@ class HTTPMessageParser {
 
  private:
   std::string requestLine_;
+  std::vector<std::string> filenameExtensions_;
+
   // requestLine_をparseした結果を格納
   enum httpMessageParser::method method_;
   std::string requestTarget_;
@@ -45,6 +49,7 @@ class HTTPMessageParser {
   std::string absolutePath_; // OPTIONSの*の場合のここにいれる
   std::string query_;
   std::string authority_; // CONNECTの場合の接続先
+  std::string pathinfo_;
 
   // headerを格納
   bool validationHeader(std::string header);

@@ -88,10 +88,6 @@ bool HTTPMessageParser::parseRequestTarget(std::string requestTarget)
       return false;        
     requestTarget = requestTarget.substr(pos);
   }
-  // #があった場合、#の手前だけを抽出
-  // http://www.yahoo.co.jp/index.html#status の場合、#より右を削除する
-
-
   // origin-form
   // /insex.htmlのように/ではじまる場合
   if (requestTarget[0] != '/')
@@ -107,6 +103,19 @@ bool HTTPMessageParser::parseRequestTarget(std::string requestTarget)
     absolutePath_ = requestTarget;
   // std::cout << "[DEBUG]absolutePath_ : " << absolutePath_ << std::endl;
   // std::cout << "[DEBUG]query_ : " << query_ << std::endl;
+  // pathinfoを抽出
+  for (std::vector<std::string>::const_iterator itr = filenameExtensions_.begin(); itr != filenameExtensions_.end(); ++itr)
+  {
+    std::string::size_type pos = absolutePath_.rfind(*itr);
+    if (pos != std::string::npos)
+    {
+      pathinfo_ = absolutePath_.substr(pos + itr->size());
+      absolutePath_ = absolutePath_.substr(0, pos + itr->size() - 1);
+      // std::cout << "[DEBUG]absolutePath_ : " << absolutePath_ << std::endl;
+      // std::cout << "[DEBUG]pathinfo_ : " << pathinfo_ << std::endl;
+      break;
+    }
+  }
   return SUCCESS;
 }
 
@@ -123,6 +132,11 @@ std::string HTTPMessageParser::getQuery() const
 std::string HTTPMessageParser::getAuthority() const
 {
   return authority_;
+}
+
+std::string HTTPMessageParser::getPathinfo() const
+{
+  return pathinfo_;
 }
 
 bool HTTPMessageParser::parseHeader(std::string header)
@@ -279,7 +293,10 @@ bool HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string
 HTTPMessageParser::HTTPMessageParser() :
   method_(httpMessageParser::OTHER)
 {
-//  (void)method_;
+  filenameExtensions_.push_back(".htm/");  
+  filenameExtensions_.push_back(".html/");  
+  filenameExtensions_.push_back(".php/");  
+  filenameExtensions_.push_back(".cgi/");  
 }
 
 HTTPMessageParser::~HTTPMessageParser()

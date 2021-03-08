@@ -98,6 +98,15 @@ TEST(HTTPMessageParserEvenTest, getAfterParseRequestTarget) {
     c.parseRequestTarget(c.getRequestTarget());
     EXPECT_EQ("/www/index.php", c.getAbsolutePath());
     EXPECT_EQ("name=hkamiya", c.getQuery());
+    EXPECT_EQ("", c.getPathinfo());
+  }
+  {
+    HTTPMessageParser c;
+    c.parseRequestLine("GET /www/index.php/id/ap2c9w?name=hkamiya HTTP/1.1");
+    c.parseRequestTarget(c.getRequestTarget());
+    EXPECT_EQ("/www/index.php", c.getAbsolutePath());
+    EXPECT_EQ("name=hkamiya", c.getQuery());
+    EXPECT_EQ("id/ap2c9w", c.getPathinfo());
   }
 }
 
