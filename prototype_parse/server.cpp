@@ -21,6 +21,13 @@
 #include "recvData.hpp"
 #include "HTTPMessageParser.hpp"
 
+struct client
+{
+  bool getStartline;
+  bool getHeader;
+};
+
+
 int http1()
 {
   std::string executive_file = HTML_FILE;
@@ -32,7 +39,12 @@ int http1()
 
   int accfd[MAX_SESSION];
   recvData recvData[MAX_SESSION];
+  HTTPMessageParser hmp[MAX_SESSION];
+  client clients[MAX_SESSION];
+
   for (int i = 0; i < MAX_SESSION; i++) {
+    clients[i].getStartline = false;
+    clients[i].getHeader = false;
     accfd[i] = -1;
   }
 
@@ -121,27 +133,42 @@ int http1()
           std::cout << "------------------------" << std::endl;
         }
         if (1) {
-          if (recvData[i].cutOutRecvDataToEol()) {
+          while (recvData[i].cutOutRecvDataToEol()) {
             std::cout << "------------------------" << std::endl;
-            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << "]]]" << std::endl;
+            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << std::endl;
             std::cout << "------------------------" << std::endl;
-            HTTPMessageParser *hmp = new HTTPMessageParser();
-            if (hmp->parseRequestLine(recvData[i].getExtractedData()))
+            if (clients[i].getStartline == false && hmp[i].parseRequestLine(recvData[i].getExtractedData()))
             {
-              std::cout << "method = " << hmp->getMethod() << std::endl;
-              std::cout << "request-target = " << hmp->getRequestTarget() << std::endl;
-              std::cout << "HTTP-version = " << hmp->getHTTPVersion() << std::endl;
-              if (hmp->parseRequestTarget(hmp->getRequestTarget()))
+              std::cout << "method = " << hmp[i].getMethod() << std::endl;
+              std::cout << "request-target = " << hmp[i].getRequestTarget() << std::endl;
+              std::cout << "HTTP-version = " << hmp[i].getHTTPVersion() << std::endl;
+              clients[i].getStartline = true;
+            }
+            // \r\nのみが来た場合、MessageHeaderが終了
+            else if (clients[i].getHeader == false && recvData[i].getExtractedData() == "")
+            {
+              clients[i].getHeader = true;
+
+              // 初期化
+              recvData[i].clearData();
+              hmp[i].clearData();
+              clients[i].getHeader = false;
+              clients[i].getHeader = false;
+              close(accfd[i]);
+              accfd[i] = -1;
+            }
+            else if (clients[i].getHeader == false && hmp[i].parseHeader(recvData[i].getExtractedData()))
+            {
+              std::map<std::string, std::string> headers = hmp[i].getHeaders();
+              for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
               {
-                std::cout << "absolute-path = " << hmp->getAbsolutePath() << std::endl;
-                std::cout << "query = " << hmp->getQuery() << std::endl;
+                std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
               }
             }
-            delete hmp;
           }
-          recvData[i].clearData();
-          close(accfd[i]);
-          accfd[i] = -1;
+          // recvData[i].clearData();
+          // close(accfd[i]);
+          // accfd[i] = -1;
         }
       }
     }

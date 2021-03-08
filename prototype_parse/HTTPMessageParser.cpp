@@ -2,6 +2,7 @@
 
 bool HTTPMessageParser::parseRequestLine(const std::string requestLine)
 {
+  // std::cout << "[DEBUG]requestLine = " << requestLine << std::endl;
   requestLine_ = requestLine;
   std::string::size_type firstSpPos = requestLine.find(std::string(" "));
   if (firstSpPos == std::string::npos)
@@ -87,6 +88,10 @@ bool HTTPMessageParser::parseRequestTarget(std::string requestTarget)
       return false;        
     requestTarget = requestTarget.substr(pos);
   }
+  // #があった場合、#の手前だけを抽出
+  // http://www.yahoo.co.jp/index.html#status の場合、#より右を削除する
+
+
   // origin-form
   // /insex.htmlのように/ではじまる場合
   if (requestTarget[0] != '/')
@@ -138,6 +143,18 @@ bool HTTPMessageParser::parseHeader(std::string header)
 std::map<std::string, std::string> HTTPMessageParser::getHeaders() const
 {
   return headers_;
+}
+
+void HTTPMessageParser::clearData()
+{
+  requestLine_.clear();
+  method_ = httpMessageParser::OTHER;
+  requestTarget_.clear();
+  HTTPVersion_.clear();
+  absolutePath_.clear();
+  query_.clear();
+  authority_.clear();
+  headers_.clear();
 }
 
 bool HTTPMessageParser::isAuthority(std::string requestTarget)

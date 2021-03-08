@@ -26,6 +26,7 @@ class HTTPMessageParser {
   std::string getAuthority() const;
   bool parseHeader(std::string header);
   std::map<std::string, std::string> getHeaders() const;
+  void clearData();
 
  public:
   HTTPMessageParser();
