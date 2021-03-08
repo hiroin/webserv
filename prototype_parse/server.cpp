@@ -79,14 +79,21 @@ int http1()
       int connfd = accept(sock->get_listenfd(), (struct sockaddr*)NULL, NULL);
 
       // ノンブロッキングのソケットに変更
-      int flags = fcntl(connfd, F_GETFL);
-      if(-1 == flags)
-      {
-        std::cout << "fcntl() failed." << std::endl;
-        close(connfd);
-        break;
-      }
-      int result = fcntl(connfd, F_SETFL, flags | O_NONBLOCK);
+      // int flags = fcntl(connfd, F_GETFL);
+      // if(-1 == flags)
+      // {
+      //   std::cout << "fcntl() failed." << std::endl;
+      //   close(connfd);
+      //   break;
+      // }
+      // int result = fcntl(connfd, F_SETFL, flags | O_NONBLOCK);
+      // if(-1 == result)
+      // {
+      //   std::cout << "fcntl() failed." << std::endl;
+      //   close(connfd);
+      //   break;
+      // }
+      int result = fcntl(connfd, F_SETFL, O_NONBLOCK);
       if(-1 == result)
       {
         std::cout << "fcntl() failed." << std::endl;
@@ -152,7 +159,7 @@ int http1()
               // 初期化
               recvData[i].clearData();
               hmp[i].clearData();
-              clients[i].getHeader = false;
+              clients[i].getStartline = false;
               clients[i].getHeader = false;
               close(accfd[i]);
               accfd[i] = -1;
