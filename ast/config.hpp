@@ -14,7 +14,9 @@ class configBase
 
 class configLocation : public configBase
 {
+ public:
   // std::string allow_method;
+  std::string path;
 };
 
 class configServer : public configBase
@@ -22,7 +24,7 @@ class configServer : public configBase
  public:
   // std::string listen;
   // std::string root;
-  std::map<std::string, configLocation> locations;
+  std::vector<configLocation> locations;
 };
 
 class configHttp : public configBase

@@ -325,16 +325,17 @@ bool pushModuleToServer(std::vector<TOKEN> vtoken, unsigned int& idx, configServ
     }
     if (vtoken.at(idx).type == CHAR && vtoken.at(idx + 1).type == CHAR && vtoken.at(idx + 2).type == LB)
     {
-      std::string key = vtoken.at(idx + 1).token;
-      std::map<std::string, configLocation>::iterator itr =
-          configServer.locations.find(key);
-      if (itr == configServer.locations.end())
-      {
-        configLocation tmp;
-        configServer.locations[vtoken.at(idx + 1).token] = tmp;
+      std::string path = vtoken.at(idx + 1).token;
+      for(std::vector<configLocation>::iterator itr = 
+          configServer.locations.begin(); itr != configServer.locations.end(); ++itr) {
+        if (itr->path == path)
+          return false;
       }
+      configLocation tmp;
+      tmp.path = vtoken.at(idx + 1).token;
+      configServer.locations.push_back(tmp);
       idx += 3;
-      if (!pushModuleToLocation(vtoken, idx, configServer.locations[key]))
+      if (!pushModuleToLocation(vtoken, idx, configServer.locations[configServer.locations.size() - 1]))
         return false;
       locations++;
       continue;
@@ -395,39 +396,54 @@ int main(int argc, char* argv[])
 
   lexer2(cmd, vtoken);
   print_token2(vtoken);
+  std::cout << std::endl;
 
   configHttp config;
   unsigned int idx = 0;
-  std::cout << isModule(vtoken, idx) << std::endl;
+  std::cout << "設定ファイルの文法チェック" << std::endl;
+  std::cout << "実行結果(1:OK, 0:NG) : " << isModule(vtoken, idx) << std::endl;
   std::cout << std::endl;
 
-  configHttp configHttp_001;
-  idx = 0;
-  std::cout << pushModule(vtoken, idx, configHttp_001) << std::endl;
-  for(std::map<std::string, std::vector<std::string> >::iterator itr = 
-      configHttp_001.contexts.begin(); itr != configHttp_001.contexts.end(); ++itr) {
-    std::cout << "key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
-  }
-  std::cout << std::endl;
+  // configHttp configHttp_001;
+  // idx = 0;
+  // std::cout << pushModule(vtoken, idx, configHttp_001) << std::endl;
+  // for(std::map<std::string, std::vector<std::string> >::iterator itr = 
+  //     configHttp_001.contexts.begin(); itr != configHttp_001.contexts.end(); ++itr) {
+  //   std::cout << "key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+  // }
+  // std::cout << std::endl;
 
   configHttp configHttp_002;
   idx = 0;
-  std::cout << pushModuleToHttp(vtoken, idx, configHttp_002) << std::endl;
+  std::cout << "設定ファイルの内容をclassに格納" << std::endl;
+  std::cout << "実行結果(1:OK, 0:NG) : " << pushModuleToHttp(vtoken, idx, configHttp_002) << std::endl;
+  std::cout << std::endl;
+
+  std::cout << "設定内容" << std::endl;
+  std::cout << "グローバル設定" << std::endl;
   for(std::map<std::string, std::vector<std::string> >::iterator itr = 
       configHttp_002.contexts.begin(); itr != configHttp_002.contexts.end(); ++itr) {
-    std::cout << "key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+    std::cout << "  key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
   }
-  for(std::map<std::string, std::vector<std::string> >::iterator itr = 
-      configHttp_002.servers.at(0).contexts.begin(); itr != configHttp_002.servers.at(0).contexts.end(); ++itr) {
-    std::cout << "key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+  std::cout << std::endl;
+  unsigned int i = 1;
+  for(std::vector<configServer>::iterator itrServer = 
+      configHttp_002.servers.begin(); itrServer != configHttp_002.servers.end(); ++itrServer) {
+    std::cout << "サーバー設定(" << i++ << ")" << std::endl;
+    for(std::map<std::string, std::vector<std::string> >::iterator itr =
+        itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr) {
+      std::cout << "  key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+    }
+    std::cout << std::endl;
+    for(std::vector<configLocation>::iterator itrConfig =
+        itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig) {
+      std::cout << "  ロケーション設定(" << itrConfig->path << ")" << std::endl;
+      for(std::map<std::string, std::vector<std::string> >::iterator itr = 
+          itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr) {
+        std::cout << "    key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+      }
+    }
   }
-  for(std::map<std::string, std::vector<std::string> >::iterator itr = 
-      configHttp_002.servers.at(0).locations["/"].contexts.begin();
-      itr != configHttp_002.servers.at(0).locations["/"].contexts.end(); ++itr) {
-    std::cout << "key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
-  }
-
-  // token = o_token;
 
 	return EXIT_SUCCESS;
 }
