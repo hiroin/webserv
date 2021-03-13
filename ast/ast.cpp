@@ -1,113 +1,6 @@
 #include "ast.hpp"
 #include "config.hpp"
 
-typedef enum _token_type {
-	INITIAL,
-	CHAR,     /* 文字 */
-	SEMICOLON,/* ; */
-	LB,       /* { */
-	RB,       /* } */
-  UNAUTHORIZED,
-	END
-} TOKEN_TYPE;
-
-class TOKEN {
- public:
-	TOKEN_TYPE    type;
-	std::string   token;
-	TOKEN *next;
-	TOKEN *prev;
-} ;
-
-void lexer(std::string s, TOKEN *token)
-{
-	unsigned int idx = 0;
-	unsigned int bgn = 0;
-	TOKEN *t;
-	TOKEN_TYPE tt;
-
-  while (idx < s.size())
-  {
-		/* 空白文字の処理 */
-		if(s[idx] <= ' '){
-			idx++;
-			continue;
-		}
-
-		/* Token */
-		bgn = idx;
-		/* [a-zA-Z0-9/.]* */
-		if(isalpha(s[idx]) || isdigit(s[idx]) || s[idx] == '/' || s[idx] == '.' || s[idx] == '_' || s[idx] == '*' || s[idx] == ':'){
-			while(isalpha(s[idx]) || isdigit(s[idx]) || s[idx] == '/' || s[idx] == '.' || s[idx] == '_' || s[idx] == '*' || s[idx] == ':'){
-				idx++;
-			}
-			tt = CHAR;
-		}
-		/* それ以外 */
-		else {
-			switch(s[idx]){
-			case ';':
-				tt = SEMICOLON;
-				break;
-			case '{':
-				tt = LB;
-				break;
-			case '}':
-				tt = RB;
-				break;
-			default:
-				tt = UNAUTHORIZED;
-				break;
-			}	
-			idx++;
-		}
-		
-		t = new TOKEN();
-    t->token = s.substr(bgn, idx - bgn);
-		t->type = tt;
-		t->next = NULL;
-		token->next = t;
-		t->prev = token;
-		token = t;
-	}
-	return ;
-}
-
-void print_token(TOKEN* token)
-{
-	while(1) {
-		if(token->type == END){
-			break;
-		}
-		if(token->type != INITIAL){
-			printf("TOKEN TYPE: ");
-			switch(token->type){
-			case CHAR:
-				printf("CHAR         ");
-				break;
-			case SEMICOLON:
-				printf("SEMICOLON    ");
-				break;
-			case LB:
-				printf("LB           ");
-				break;
-			case RB:
-				printf("RB           ");
-				break;
-			default:
-				printf("UNAUTHORIZED ");
-			}
-			printf("TOKEN: %s", token->token.c_str());
-		}
-
-		printf("\n");
-		if(token->next == NULL){
-			break;
-		}
-		token  = token->next;
-	}
-}
-
 void lexer2(std::string s, std::vector<TOKEN>& vtoken)
 {
 	unsigned int idx = 0;
@@ -211,7 +104,6 @@ bool isModule(std::vector<TOKEN> vtoken, unsigned int& idx)
   {
     if (unsigned int r = isContext(vtoken, idx))
     {
-      // std::cout << vtoken.at(idx).token << std::endl;
       idx += r;
       continue;
     }
@@ -247,14 +139,30 @@ bool isModule(std::vector<TOKEN> vtoken, unsigned int& idx)
 void pushContext(std::vector<TOKEN>& vtoken, unsigned int idx, configBase& config)
 {
   std::string key = vtoken.at(idx++).token;
-
-  std::vector<std::string> values;
+  for(std::vector<context>::iterator itr = 
+     config.contexts.begin(); itr != config.contexts.end(); ++itr) {
+    if (key == itr->key)
+    {
+      values values;
+      while (vtoken.at(idx).type == CHAR)
+      {
+        values.value.push_back(vtoken.at(idx).token);
+        idx++;
+      }
+      itr->values.push_back(values);
+      return ;
+    }
+  }
+  context context;
+  context.key = key;
+  values values;
   while (vtoken.at(idx).type == CHAR)
   {
-    values.push_back(vtoken.at(idx).token);
+    values.value.push_back(vtoken.at(idx).token);
     idx++;
   }
-  config.contexts.insert(std::make_pair(key, values));
+  context.values.push_back(values);
+  config.contexts.push_back(context);
 }
 
 bool pushModule(std::vector<TOKEN> vtoken, unsigned int& idx, configBase& config)
@@ -379,20 +287,57 @@ bool pushModuleToHttp(std::vector<TOKEN> vtoken, unsigned int& idx, configHttp& 
 
 int main(int argc, char* argv[])
 {
-	// TOKEN *o_token;
-  // TOKEN *token;
-  // std::string cmd = "client_max_body_size 104876;  error_page           400 403 404 /40x.html;  server {    listen  *:8080;    root    /home/user42/www8080/;  }";
-  std::string cmd = "client_max_body_size 1048576;error_page 400 403 404 /40x.html;server {  listen *:80;  error_page 400 403 404 /40x.html;  root /home/user42/www;    location / {    allow_methods GET POST PUT DELETE;    autoindex on;    index index.html;    cgi-script .cgi .php;  }    }";
-  std::vector<TOKEN> vtoken;
+  int i_for_buf;
+  int r;
+  int fd;
+  std::string cmd;
 
-  // token = (TOKEN*)malloc(sizeof(TOKEN));
-  // o_token = token;
-  // token->type = INITIAL;
-  // token->prev = NULL;
-  // token->next = NULL;
-  
-  // lexer(cmd, token);
-  // print_token(o_token);
+  if (argc == 2)
+  {
+    fd = open(argv[1], O_RDONLY);
+    if (fd == -1)
+    {
+      std::cerr << "Failed to open the file." << std::endl;
+      std::cerr << strerror(errno) << std::endl; 
+      exit(1);
+    }
+    char buf[1024];
+    i_for_buf = 0;
+    while (i_for_buf < 1024)
+      buf[i_for_buf++] = 0;
+    while ((r = read(fd, buf, 1024)) > 0)
+    {
+      cmd.append(buf);
+      i_for_buf = 0;
+      while (i_for_buf < 1024)
+        buf[i_for_buf++] = 0;
+    }
+    if (r == -1)
+    {
+      std::cerr << "Failed to load the file." << std::endl;
+      std::cerr << strerror(errno) << std::endl; 
+      exit(1);
+    }
+    r = close(fd);
+    if (r == -1)
+    {
+      std::cerr << "Failed to close the file." << std::endl;
+      std::cerr << strerror(errno) << std::endl; 
+      exit(1);
+    }
+  }
+  else if (argc == 1)
+  {
+    cmd = "client_max_body_size 1048576;error_page 400 403 404 /40x.html;server {  listen *:80;  error_page 400 403 404 /40x.html;  root /home/user42/www;    location / {    allow_methods GET POST PUT DELETE;    autoindex on;    index index.html;    cgi-script .cgi .php;  }    }";
+  }
+  else
+  {
+    std::cerr << "There are a large number of arguments." << std::endl;
+    exit(1);
+  }
+  std::cout << "[" << cmd << "]" << std::endl;
+
+  std::vector<TOKEN> vtoken;
 
   lexer2(cmd, vtoken);
   print_token2(vtoken);
@@ -401,47 +346,80 @@ int main(int argc, char* argv[])
   configHttp config;
   unsigned int idx = 0;
   std::cout << "設定ファイルの文法チェック" << std::endl;
-  std::cout << "実行結果(1:OK, 0:NG) : " << isModule(vtoken, idx) << std::endl;
+  r = isModule(vtoken, idx);
+  if (r == 0)
+  {
+    std::cerr << "NG" << std::endl;
+    exit(1);
+  }
+  else
+    std::cerr << "OK" << std::endl;
   std::cout << std::endl;
-
-  // configHttp configHttp_001;
-  // idx = 0;
-  // std::cout << pushModule(vtoken, idx, configHttp_001) << std::endl;
-  // for(std::map<std::string, std::vector<std::string> >::iterator itr = 
-  //     configHttp_001.contexts.begin(); itr != configHttp_001.contexts.end(); ++itr) {
-  //   std::cout << "key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
-  // }
-  // std::cout << std::endl;
 
   configHttp configHttp_002;
   idx = 0;
   std::cout << "設定ファイルの内容をclassに格納" << std::endl;
-  std::cout << "実行結果(1:OK, 0:NG) : " << pushModuleToHttp(vtoken, idx, configHttp_002) << std::endl;
+  r = pushModuleToHttp(vtoken, idx, configHttp_002);
+  if (r == 0)
+  {
+    std::cerr << "NG" << std::endl;
+    exit(1);
+  }
+  else
+    std::cerr << "OK" << std::endl;
   std::cout << std::endl;
 
   std::cout << "設定内容" << std::endl;
   std::cout << "グローバル設定" << std::endl;
-  for(std::map<std::string, std::vector<std::string> >::iterator itr = 
+  for(std::vector<context>::iterator itr = 
       configHttp_002.contexts.begin(); itr != configHttp_002.contexts.end(); ++itr) {
-    std::cout << "  key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+    std::cout << "  key = " << itr->key << std::endl;
+    for(std::vector<values>::iterator itrValues = 
+        itr->values.begin(); itrValues != itr->values.end(); ++itrValues) {
+      std::cout << "    value = ";
+      for(std::vector<std::string>::iterator itrValue = 
+          itrValues->value.begin(); itrValue != itrValues->value.end(); ++itrValue) {
+        std::cout << *itrValue << " ";
+      }
+      std::cout << std::endl;
+    }
   }
   std::cout << std::endl;
   unsigned int i = 1;
   for(std::vector<configServer>::iterator itrServer = 
       configHttp_002.servers.begin(); itrServer != configHttp_002.servers.end(); ++itrServer) {
     std::cout << "サーバー設定(" << i++ << ")" << std::endl;
-    for(std::map<std::string, std::vector<std::string> >::iterator itr =
+    for(std::vector<context>::iterator itr =
         itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr) {
-      std::cout << "  key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+      std::cout << "  key = " << itr->key << std::endl;
+      for(std::vector<values>::iterator itrValues = 
+          itr->values.begin(); itrValues != itr->values.end(); ++itrValues) {
+        std::cout << "    value = ";
+        for(std::vector<std::string>::iterator itrValue = 
+            itrValues->value.begin(); itrValue != itrValues->value.end(); ++itrValue) {
+          std::cout << *itrValue << " ";
+        }
+        std::cout << std::endl;
+      }
     }
     std::cout << std::endl;
     for(std::vector<configLocation>::iterator itrConfig =
         itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig) {
       std::cout << "  ロケーション設定(" << itrConfig->path << ")" << std::endl;
-      for(std::map<std::string, std::vector<std::string> >::iterator itr = 
+      for(std::vector<context>::iterator itr = 
           itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr) {
-        std::cout << "    key = " << itr->first << ", value = " << itr->second.at(0) << std::endl;
+        std::cout << "    key = " << itr->key << std::endl;
+        for(std::vector<values>::iterator itrValues = 
+            itr->values.begin(); itrValues != itr->values.end(); ++itrValues) {
+          std::cout << "      value = ";
+          for(std::vector<std::string>::iterator itrValue = 
+              itrValues->value.begin(); itrValue != itrValues->value.end(); ++itrValue) {
+            std::cout << *itrValue << " ";
+          }
+          std::cout << std::endl;
+        }
       }
+      std::cout << std::endl;
     }
   }
 
