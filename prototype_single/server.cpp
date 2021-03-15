@@ -63,12 +63,14 @@ int http1()
       if (read_size > 0) {
           recv_str.append(buf);
       }
-      if ((recv_str[recv_str.length() - 4] == 0x0d) &&
-          (recv_str[recv_str.length() - 3] == 0x0a) &&
-          (recv_str[recv_str.length() - 2] == 0x0d) &&
-          (recv_str[recv_str.length() - 1] == 0x0a)) {
-          break;
-      }
+      // if ((recv_str[recv_str.length() - 4] == 0x0d) &&
+      //     (recv_str[recv_str.length() - 3] == 0x0a) &&
+      //     (recv_str[recv_str.length() - 2] == 0x0d) &&
+      //     (recv_str[recv_str.length() - 1] == 0x0a)) {
+      //     break;
+      // }
+      if (recv_str.find(std::string("\r\n\r\n")) != std::string::npos)
+          break;      
     } while (read_size > 0); 
 
     //リクエストされたパスを取得する

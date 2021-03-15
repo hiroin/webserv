@@ -31,7 +31,7 @@ class configBase
 class configLocation : public configBase
 {
  public:
-  // bool allow_method[config::NUM];
+  // std::string allow_method[config::NUM];
   // bool autoindex;
   // std::string index;
   // std::vector<std::string> cgi-script;
@@ -41,6 +41,7 @@ class configLocation : public configBase
   // std::auth_basic_password;
   std::string path;
 };
+
 
 class configServer : public configBase
 {
