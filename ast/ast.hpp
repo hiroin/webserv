@@ -32,4 +32,8 @@ class TOKEN {
 	std::string   token;
 } ;
 
+namespace httpMessageParser {
+  enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, NUM};
+}
+
 #endif
