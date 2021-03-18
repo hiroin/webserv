@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-typedef enum _token_type {
+enum TOKEN_TYPE {
 	INITIAL,
 	CHAR,      /* 文字 */
 	SEMICOLON, /* ; */
@@ -24,7 +24,7 @@ typedef enum _token_type {
 	RB,        /* } */
   UNAUTHORIZED,
 	END
-} TOKEN_TYPE;
+};
 
 class TOKEN {
  public:
@@ -32,8 +32,43 @@ class TOKEN {
 	std::string   token;
 } ;
 
-namespace httpMessageParser {
+namespace config {
   enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, NUM};
 }
+
+struct values
+{
+  std::vector<std::string> value;
+};
+
+struct context
+{
+  std::string key;
+  std::vector<values> values;
+};
+
+class configBase
+{
+ public:
+  std::vector<context> contexts;
+};
+
+class configLocation : public configBase
+{
+ public:
+  std::string path;
+};
+
+class configServer : public configBase
+{
+ public:
+  std::vector<configLocation> locations;
+};
+
+class configHttp : public configBase
+{
+ public:
+  std::vector<configServer> servers;
+};
 
 #endif

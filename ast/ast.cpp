@@ -1,5 +1,4 @@
 #include "ast.hpp"
-#include "config.hpp"
 
 void lexer2(std::string s, std::vector<TOKEN>& vtoken)
 {

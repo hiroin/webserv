@@ -9,7 +9,7 @@ enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, METHO
 
 struct s_ConfigCommon
 {
-  unsigned int clientMaxBodySize;
+  int clientMaxBodySize;
   std::map<std::string, std::string> errorPages;
   bool allowMethods[METHOD_NUM];
   bool autoindex;
@@ -45,11 +45,13 @@ struct s_ConfigGlobal
 class Config
 {
  public:
-  s_ConfigGlobal c;
+  s_ConfigGlobal configGlobal;
   Config();
   ~Config();
-	Config(const Config&);
-	Config& operator=(const Config&);  
+
+ private:
+  Config(const Config&);
+  Config& operator=(const Config&);  
 
  private:
 };
