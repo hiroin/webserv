@@ -6,17 +6,18 @@
 #include <map>
 
 enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, METHOD_NUM};
+#define CLIENTMAXBODYSIZE 1048576;
 
 struct s_ConfigCommon
 {
-  int clientMaxBodySize;
-  std::map<std::string, std::string> errorPages;
-  bool allowMethods[METHOD_NUM];
   bool autoindex;
-  std::string index;
+  bool allowMethods[METHOD_NUM];
   std::string authBasicUid;
   std::string authBasicPassword;
   std::vector<std::string> cgiScripts;
+  int clientMaxBodySize;
+  std::map<std::string, std::string> errorPages;
+  std::string index;
 };
 
 struct s_ConfigLocation

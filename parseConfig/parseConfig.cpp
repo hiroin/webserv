@@ -372,7 +372,13 @@ void parseConfig::printConfigHttp()
 }
 
 bool parseConfig::insertToConfigClass(Config& c)
-{
+{ 
+  // c.configGlobal.configCommonの初期化
+  c.configGlobal.configCommon.autoindex = false;
+  for (int i = 0; i < METHOD_NUM; ++i)
+    c.configGlobal.configCommon.allowMethods[i] = true;
+  c.configGlobal.configCommon.clientMaxBodySize = CLIENTMAXBODYSIZE;
+
   for(std::vector<parseconfig::context>::iterator itr = 
       configHttp_.contexts.begin(); itr != configHttp_.contexts.end(); ++itr)
   {
@@ -383,6 +389,7 @@ bool parseConfig::insertToConfigClass(Config& c)
       c.configGlobal.phpCgiPath = itr->values.at(0).value.at(0);
       std::cout << "php-cgi-path : " << c.configGlobal.phpCgiPath << std::endl;
     }
+    // これと同じ感じで作る
     insertClientMaxBodySize(itr, c.configGlobal.configCommon.clientMaxBodySize);
     if (itr->key == "error_page")
     {
@@ -402,12 +409,11 @@ bool parseConfig::insertToConfigClass(Config& c)
     }
   }
   std::cout << std::endl;
-  int i = 0;
   for(std::vector<parseconfig::configServer>::iterator itrServer = 
       configHttp_.servers.begin(); itrServer != configHttp_.servers.end(); ++itrServer) {
-    std::cout << "サーバー設定(" << i << ")" << std::endl;
-    s_ConfigServer tmp;
-    c.configGlobal.servers.push_back(tmp);
+    std::cout << "サーバー設定(" << itrServer - configHttp_.servers.begin() << ")" << std::endl;
+    s_ConfigServer tmpConfigServer;
+    c.configGlobal.servers.push_back(tmpConfigServer);
     for(std::vector<parseconfig::context>::iterator itr =
         itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr)
     {
@@ -415,9 +421,10 @@ bool parseConfig::insertToConfigClass(Config& c)
       {
         if (itr->values.at(0).value.size() >= 2)
           throw std::runtime_error("Config Error : server { root }");
-        c.configGlobal.servers.at(i).root = itr->values.at(0).value.at(0);
-        std::cout << "  root : " << c.configGlobal.servers.at(i).root << std::endl;
+        c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).root = itr->values.at(0).value.at(0);
+        std::cout << "  root : " << c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).root << std::endl;
       }
+      insertClientMaxBodySize(itr, c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).configCommon.clientMaxBodySize);
       // for(std::vector<parseconfig::values>::iterator itrValues = 
       //     itr->values.begin(); itrValues != itr->values.end(); ++itrValues)
       // {
@@ -431,9 +438,20 @@ bool parseConfig::insertToConfigClass(Config& c)
       // }
     }
     std::cout << std::endl;
-    // for(std::vector<parseconfig::configLocation>::iterator itrConfig =
-    //     itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig) {
-    //   std::cout << "  ロケーション設定(" << itrConfig->path << ")" << std::endl;
+    for(std::vector<parseconfig::configLocation>::iterator itrConfig =
+        itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig) {
+      std::cout << "  ロケーション設定(" << itrConfig->path << ")" << std::endl;
+      s_ConfigLocation tmpConfigLocation;
+      tmpConfigLocation.path = itrConfig->path;
+      int i = 0;
+      while (i < c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.size())
+      {
+        if (c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.at(i).path.size() < tmpConfigLocation.path.size())
+          break;
+        i++;
+      }
+      std::cout << "  ロケーション設定挿入位置 : " << i << std::endl;
+      c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.insert(c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.begin() + i, tmpConfigLocation);
     //   for(std::vector<parseconfig::context>::iterator itr = 
     //       itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr) {
     //     std::cout << "    key = " << itr->key << std::endl;
@@ -447,9 +465,8 @@ bool parseConfig::insertToConfigClass(Config& c)
     //       std::cout << std::endl;
     //     }
     //   }
-    //   std::cout << std::endl;
-    // }
-    i++;
+      std::cout << std::endl;
+    }
   }
 
 
@@ -505,6 +522,10 @@ void parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::ite
 {
   if (itr->key == "client_max_body_size")
   {
+    // 重複して設定された場合はエラー
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplication client_max_body_size");
+    // client_max_body_size 1000 100;のような場合はエラー
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid client_max_body_size");
     clientMaxBodySize = parseConfig::stoi(itr->values.at(0).value.at(0).c_str());
