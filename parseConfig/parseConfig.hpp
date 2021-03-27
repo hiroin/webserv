@@ -98,6 +98,7 @@ class parseConfig
   int stoi(std::string s);
   bool isCode(std::string s);
   void insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize);
+  void insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages);
 
   parseConfig(const parseConfig&);
   parseConfig& operator=(const parseConfig&);  

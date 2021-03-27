@@ -96,8 +96,9 @@ int main(int argc, char* argv[])
 
   // デバッグ用出力
   pc.printConfigHttp();
-  std::cout << std::endl;
+  std::cout << "-------------------------------------" << std::endl;
 
+  // Configクラスにデータの挿入
   Config c;
   try
   {

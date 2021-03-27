@@ -389,82 +389,59 @@ bool parseConfig::insertToConfigClass(Config& c)
       c.configGlobal.phpCgiPath = itr->values.at(0).value.at(0);
       std::cout << "php-cgi-path : " << c.configGlobal.phpCgiPath << std::endl;
     }
-    // これと同じ感じで作る
     insertClientMaxBodySize(itr, c.configGlobal.configCommon.clientMaxBodySize);
-    if (itr->key == "error_page")
-    {
-      for (std::vector<parseconfig::values>::iterator itrValues = 
-          itr->values.begin(); itrValues != itr->values.end(); ++itrValues)
-      {
-        std::vector<std::string>::iterator itrValue = itrValues->value.end();
-        std::string value = *--itrValue;
-        for (itrValue = itrValues->value.begin(); itrValue != itrValues->value.end() - 1; ++itrValue)
-        {
-          if (!isCode(*itrValue))
-            throw std::runtime_error("Config Error : invalid error_page");
-          c.configGlobal.configCommon.errorPages.insert(std::make_pair(*itrValue, value));
-          std::cout << "error_page : " << *itrValue << " " << value << std::endl;
-        }
-      }
-    }
+    insertErrorPages(itr, c.configGlobal.configCommon.errorPages);
   }
   std::cout << std::endl;
   for(std::vector<parseconfig::configServer>::iterator itrServer = 
-      configHttp_.servers.begin(); itrServer != configHttp_.servers.end(); ++itrServer) {
-    std::cout << "サーバー設定(" << itrServer - configHttp_.servers.begin() << ")" << std::endl;
+      configHttp_.servers.begin(); itrServer != configHttp_.servers.end(); ++itrServer)
+  {
+    size_t serverNumber = itrServer - configHttp_.servers.begin();
+    std::cout << "サーバー設定(" << serverNumber << ")" << std::endl;
     s_ConfigServer tmpConfigServer;
     c.configGlobal.servers.push_back(tmpConfigServer);
     for(std::vector<parseconfig::context>::iterator itr =
         itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr)
     {
+      if (itr->key == "listen")
+      {
+
+      }
+      if (itr->key == "server_name")
+      {
+
+      }
       if (itr->key == "root")
       {
         if (itr->values.at(0).value.size() >= 2)
           throw std::runtime_error("Config Error : server { root }");
-        c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).root = itr->values.at(0).value.at(0);
-        std::cout << "  root : " << c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).root << std::endl;
+        c.configGlobal.servers.at(serverNumber).root = itr->values.at(0).value.at(0);
+        std::cout << "  root : " << c.configGlobal.servers.at(serverNumber).root << std::endl;
       }
-      insertClientMaxBodySize(itr, c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).configCommon.clientMaxBodySize);
-      // for(std::vector<parseconfig::values>::iterator itrValues = 
-      //     itr->values.begin(); itrValues != itr->values.end(); ++itrValues)
-      // {
-      //   std::cout << "    value = ";
-      //   for(std::vector<std::string>::iterator itrValue = 
-      //       itrValues->value.begin(); itrValue != itrValues->value.end(); ++itrValue)
-      //   {
-      //     std::cout << *itrValue << " ";
-      //   }
-      //   std::cout << std::endl;
-      // }
+      insertClientMaxBodySize(itr, c.configGlobal.servers.at(serverNumber).configCommon.clientMaxBodySize);
+      insertErrorPages(itr, c.configGlobal.servers.at(serverNumber).configCommon.errorPages);
     }
     std::cout << std::endl;
     for(std::vector<parseconfig::configLocation>::iterator itrConfig =
-        itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig) {
+        itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig)
+    {
       std::cout << "  ロケーション設定(" << itrConfig->path << ")" << std::endl;
       s_ConfigLocation tmpConfigLocation;
       tmpConfigLocation.path = itrConfig->path;
-      int i = 0;
-      while (i < c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.size())
+      size_t i = 0;
+      while (i < c.configGlobal.servers.at(serverNumber).locations.size())
       {
-        if (c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.at(i).path.size() < tmpConfigLocation.path.size())
+        if (c.configGlobal.servers.at(serverNumber).locations.at(i).path.size() < tmpConfigLocation.path.size())
           break;
         i++;
       }
       std::cout << "  ロケーション設定挿入位置 : " << i << std::endl;
-      c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.insert(c.configGlobal.servers.at(itrServer - configHttp_.servers.begin()).locations.begin() + i, tmpConfigLocation);
-    //   for(std::vector<parseconfig::context>::iterator itr = 
-    //       itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr) {
-    //     std::cout << "    key = " << itr->key << std::endl;
-    //     for(std::vector<parseconfig::values>::iterator itrValues = 
-    //         itr->values.begin(); itrValues != itr->values.end(); ++itrValues) {
-    //       std::cout << "      value = ";
-    //       for(std::vector<std::string>::iterator itrValue = 
-    //           itrValues->value.begin(); itrValue != itrValues->value.end(); ++itrValue) {
-    //         std::cout << *itrValue << " ";
-    //       }
-    //       std::cout << std::endl;
-    //     }
-    //   }
+      c.configGlobal.servers.at(serverNumber).locations.insert(c.configGlobal.servers.at(serverNumber).locations.begin() + i, tmpConfigLocation);
+      for(std::vector<parseconfig::context>::iterator itr =
+          itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
+      {
+        insertErrorPages(itr, c.configGlobal.servers.at(serverNumber).locations.at(i).configCommon.errorPages);
+      }
       std::cout << std::endl;
     }
   }
@@ -533,6 +510,26 @@ void parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::ite
       throw std::runtime_error("Config Error : invalid client_max_body_size");
     std::cout << "client_max_body_size : " << clientMaxBodySize << std::endl;
   } 
+}
+
+void parseConfig::insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages)
+{
+  if (itr->key == "error_page")
+  {
+    for (std::vector<parseconfig::values>::iterator itrValues = 
+        itr->values.begin(); itrValues != itr->values.end(); ++itrValues)
+    {
+      std::vector<std::string>::iterator itrValue = itrValues->value.end();
+      std::string relativePath = *--itrValue;
+      for (itrValue = itrValues->value.begin(); itrValue != itrValues->value.end() - 1; ++itrValue)
+      {
+        if (!isCode(*itrValue))
+          throw std::runtime_error("Config Error : invalid error_page");
+        errorPages.insert(std::make_pair(*itrValue, relativePath));
+        std::cout << "[DEBUG]error_page : " << *itrValue << " " << relativePath << std::endl;
+      }
+    }
+  }
 }
 
 parseConfig::parseConfig()
