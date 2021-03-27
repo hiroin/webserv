@@ -373,12 +373,7 @@ void parseConfig::printConfigHttp()
 
 bool parseConfig::insertToConfigClass(Config& c)
 { 
-  // c.configGlobal.configCommonの初期化
-  c.configGlobal.configCommon.autoindex = false;
-  for (int i = 0; i < METHOD_NUM; ++i)
-    c.configGlobal.configCommon.allowMethods[i] = true;
-  c.configGlobal.configCommon.clientMaxBodySize = CLIENTMAXBODYSIZE;
-
+  initCommonConfig(c.configGlobal.configCommon);
   for(std::vector<parseconfig::context>::iterator itr = 
       configHttp_.contexts.begin(); itr != configHttp_.contexts.end(); ++itr)
   {
@@ -389,6 +384,7 @@ bool parseConfig::insertToConfigClass(Config& c)
       c.configGlobal.phpCgiPath = itr->values.at(0).value.at(0);
       std::cout << "php-cgi-path : " << c.configGlobal.phpCgiPath << std::endl;
     }
+    insertAutoindex(itr, c.configGlobal.configCommon.autoindex);
     insertClientMaxBodySize(itr, c.configGlobal.configCommon.clientMaxBodySize);
     insertErrorPages(itr, c.configGlobal.configCommon.errorPages);
   }
@@ -399,6 +395,7 @@ bool parseConfig::insertToConfigClass(Config& c)
     size_t serverNumber = itrServer - configHttp_.servers.begin();
     std::cout << "サーバー設定(" << serverNumber << ")" << std::endl;
     s_ConfigServer tmpConfigServer;
+    initCommonConfig(tmpConfigServer.configCommon);
     c.configGlobal.servers.push_back(tmpConfigServer);
     for(std::vector<parseconfig::context>::iterator itr =
         itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr)
@@ -427,6 +424,7 @@ bool parseConfig::insertToConfigClass(Config& c)
     {
       std::cout << "  ロケーション設定(" << itrConfig->path << ")" << std::endl;
       s_ConfigLocation tmpConfigLocation;
+      initCommonConfig(tmpConfigLocation.configCommon);
       tmpConfigLocation.path = itrConfig->path;
       size_t i = 0;
       while (i < c.configGlobal.servers.at(serverNumber).locations.size())
@@ -495,6 +493,29 @@ bool parseConfig::isCode(std::string s)
   return false;
 }
 
+void parseConfig::initCommonConfig(s_ConfigCommon &c)
+{
+  c.autoindex = false;
+  for (int i = 0; i < METHOD_NUM; ++i)
+    c.allowMethods[i] = true;
+  c.clientMaxBodySize = CLIENTMAXBODYSIZE;
+}
+
+void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator itr, bool& autoindex)
+{
+  if (itr->key == "autoindex")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplication autoindex");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid autoindex");
+    std::string autoindexValue = itr->values.at(0).value.at(0);
+    if (!(autoindexValue == "off" || autoindexValue == "on"))
+      throw std::runtime_error("Config Error : invalid autoindex");
+    std::cout << "[DEBUG]autoindex : " << autoindexValue << std::endl;
+  } 
+}
+
 void parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize)
 {
   if (itr->key == "client_max_body_size")
@@ -508,7 +529,7 @@ void parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::ite
     clientMaxBodySize = parseConfig::stoi(itr->values.at(0).value.at(0).c_str());
     if (clientMaxBodySize == -1)
       throw std::runtime_error("Config Error : invalid client_max_body_size");
-    std::cout << "client_max_body_size : " << clientMaxBodySize << std::endl;
+    std::cout << "[DEBUG]client_max_body_size : " << clientMaxBodySize << std::endl;
   } 
 }
 
