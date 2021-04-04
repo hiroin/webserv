@@ -48,7 +48,6 @@ class Config
 {
  public:
   s_ConfigGlobal configGlobal;
-  void printConfig(); // Output for debugging
   Config();
   Config(int testPattern);
   ~Config();
