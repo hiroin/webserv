@@ -438,17 +438,12 @@ bool parseConfig::insertToConfigClass(Config& c)
       for(std::vector<parseconfig::context>::iterator itr =
           itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
       {
+        insertClientMaxBodySize(itr, c.configGlobal.servers.at(serverNumber).locations.at(i).configCommon.clientMaxBodySize);
         insertErrorPages(itr, c.configGlobal.servers.at(serverNumber).locations.at(i).configCommon.errorPages);
       }
       std::cout << std::endl;
     }
   }
-
-
-
-
-
-
   return true;
 }
 
@@ -506,7 +501,7 @@ void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator it
   if (itr->key == "autoindex")
   {
     if (itr->values.size() > 1)
-      throw std::runtime_error("Config Error : duplication autoindex");
+      throw std::runtime_error("Config Error : duplicatie autoindex");
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid autoindex");
     std::string autoindexValue = itr->values.at(0).value.at(0);
@@ -522,7 +517,7 @@ void parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::ite
   {
     // 重複して設定された場合はエラー
     if (itr->values.size() > 1)
-      throw std::runtime_error("Config Error : duplication client_max_body_size");
+      throw std::runtime_error("Config Error : duplicatie client_max_body_size");
     // client_max_body_size 1000 100;のような場合はエラー
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid client_max_body_size");

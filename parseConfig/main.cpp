@@ -109,5 +109,6 @@ int main(int argc, char* argv[])
     std::cerr << e.what() << '\n';
     exit(1);
   }
+  c.printConfig();
 	return EXIT_SUCCESS;
 }

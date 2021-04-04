@@ -166,31 +166,23 @@ int http1(char *envp[])
       count = read(p[0], buf, 1024);
       std::cout << "count : " << count << std::endl;
 
+      // 実験1
       // send(accfd, "7\r\n", 3, 0);
       // send(accfd, "Mozilla\r\n", 9, 0);
       // send(accfd, "0\r\n", 3, 0);
       // send(accfd, "\r\n", 2, 0);
 
+      // 実験2
       // send(accfd, "9\r\n", 3, 0);
       // send(accfd, "Mozilla\r\n", 9, 0);
       // send(accfd, "\r\n0\r\n", 5, 0);
       // send(accfd, "\r\n", 2, 0);
 
+      // 実験3
       const char *tmp = int10ToChar16(count).c_str();
       send(accfd, tmp, ft_strlen(tmp), 0);
       send(accfd, "\r\n", 2, 0);
-
-      // char *tmp = int10ToChar16(count);
-      // std::cout << tmp << std::endl;
-      // send(accfd, tmp, ft_strlen(tmp), 0);
-      // // free(tmp);
-      // send(accfd, "\r\n", 2, 0);
-
-      // send(accfd, "68\r\n", 4, 0);
-      //ソケットディスクリプタにレスポンス内容を書き込む
-      if(send(accfd, buf, count, 0) == -1){
-          std::cout << "write() failed." << std::endl;
-      }
+      send(accfd, buf, count, 0);
       send(accfd, "\r\n0\r\n", 5, 0);
       send(accfd, "\r\n", 2, 0);
     }
