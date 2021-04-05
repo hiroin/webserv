@@ -17,7 +17,7 @@ struct s_ConfigCommon
   std::vector<std::string> cgiScripts;
   int clientMaxBodySize;
   std::map<std::string, std::string> errorPages;
-  std::string index;
+  std::vector<std::string> indexs;
 };
 
 struct s_ConfigLocation
