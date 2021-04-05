@@ -114,6 +114,13 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     absolutePath_ = "/www/bb/index.html";
     break;
 
+  case 11:
+    method_ = httpMessageParser::GET;
+    requestTarget_ = "/1.jpg";
+    HTTPVersion_ = "HTTP/1.1";
+    absolutePath_ = "/1.jpg";
+    break;
+
   default:
     break;
   }
