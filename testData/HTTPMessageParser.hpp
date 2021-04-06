@@ -23,12 +23,12 @@ class HTTPMessageParser {
   std::string getAuthority() const;
   std::string getPathinfo() const;
   std::map<std::string, std::string> getHeaders() const;
+  HTTPMessageParser();
   HTTPMessageParser(int testPattern);
   HTTPMessageParser(std::string conf, int testPattern);
   ~HTTPMessageParser();
 
  private:
-  HTTPMessageParser();
 
  private:
   std::string requestLine_;

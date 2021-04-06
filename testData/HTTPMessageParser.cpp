@@ -40,6 +40,11 @@ std::map<std::string, std::string> HTTPMessageParser::getHeaders() const
   return headers_;
 }
 
+HTTPMessageParser::HTTPMessageParser()
+{
+
+}
+
 HTTPMessageParser::HTTPMessageParser(int testPattern)
 {
   switch (testPattern)
