@@ -24,6 +24,7 @@ class HTTPMessageParser {
   std::string getPathinfo() const;
   std::map<std::string, std::string> getHeaders() const;
   HTTPMessageParser(int testPattern);
+  HTTPMessageParser(std::string conf, int testPattern);
   ~HTTPMessageParser();
 
  private:

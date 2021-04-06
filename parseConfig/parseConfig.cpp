@@ -490,13 +490,12 @@ bool parseConfig::isCode(std::string s)
 
 void parseConfig::initCommonConfig(s_ConfigCommon &c)
 {
-  c.autoindex = false;
   for (int i = 0; i < METHOD_NUM; ++i)
     c.allowMethods[i] = true;
   c.clientMaxBodySize = CLIENTMAXBODYSIZE;
 }
 
-void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator itr, bool& autoindex)
+void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex)
 {
   if (itr->key == "autoindex")
   {
@@ -508,6 +507,7 @@ void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator it
     if (!(autoindexValue == "off" || autoindexValue == "on"))
       throw std::runtime_error("Config Error : invalid autoindex");
     std::cout << "[DEBUG]autoindex : " << autoindexValue << std::endl;
+    autoindex = autoindexValue;
   } 
 }
 

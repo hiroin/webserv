@@ -10,7 +10,7 @@ enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, METHO
 
 struct s_ConfigCommon
 {
-  bool autoindex;
+  std::string autoindex;
   bool allowMethods[METHOD_NUM];
   std::string authBasicUid;
   std::string authBasicPassword;
@@ -18,6 +18,7 @@ struct s_ConfigCommon
   int clientMaxBodySize;
   std::map<std::string, std::string> errorPages;
   std::vector<std::string> indexs;
+  s_ConfigCommon();
 };
 
 struct s_ConfigLocation

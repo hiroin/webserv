@@ -98,7 +98,7 @@ class parseConfig
   int stoi(std::string s);
   bool isCode(std::string s);
   void initCommonConfig(s_ConfigCommon &c);
-  void insertAutoindex(std::vector<parseconfig::context>::iterator itr, bool& autoindex);
+  void insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex);
   void insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize);
   void insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages);
 

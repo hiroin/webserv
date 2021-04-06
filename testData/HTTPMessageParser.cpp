@@ -126,6 +126,58 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
   }
 }
 
+HTTPMessageParser::HTTPMessageParser(std::string conf, int testPattern)
+{
+  if (conf == "serverNames")
+  {
+    switch (testPattern)
+    {
+    case 1:
+      method_ = httpMessageParser::GET;
+      requestTarget_ = "/index.html";
+      HTTPVersion_ = "HTTP/1.1";
+      absolutePath_ = "/index.html";
+      headers_["host"] = "127.0.0.1";
+      break;
+
+    case 2:
+      method_ = httpMessageParser::GET;
+      requestTarget_ = "/index.html";
+      HTTPVersion_ = "HTTP/1.1";
+      absolutePath_ = "/index.html";
+      headers_["host"] = "server10";
+      break;
+
+    case 3:
+      method_ = httpMessageParser::GET;
+      requestTarget_ = "/index.html";
+      HTTPVersion_ = "HTTP/1.1";
+      absolutePath_ = "/index.html";
+      headers_["host"] = "server11";
+      break;
+
+    case 4:
+      method_ = httpMessageParser::GET;
+      requestTarget_ = "/index.html";
+      HTTPVersion_ = "HTTP/1.1";
+      absolutePath_ = "/index.html";
+      headers_["host"] = "server20";
+      break;
+
+    case 5:
+      method_ = httpMessageParser::GET;
+      requestTarget_ = "/index.html";
+      HTTPVersion_ = "HTTP/1.1";
+      absolutePath_ = "/index.html";
+      headers_["host"] = "server";
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
 HTTPMessageParser::  ~HTTPMessageParser()
 {
 

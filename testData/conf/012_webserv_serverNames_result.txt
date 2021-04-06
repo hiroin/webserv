@@ -1,0 +1,51 @@
+http://127.0.0.1:5000/index.html
+GET /index.html HTTP/1.1
+Host: 127.0.0.1
+/tmp/webserv/serverNames/5000/default/index.html
+
+http://127.0.0.1:5000/index.html
+GET /index.html HTTP/1.1
+Host: server10
+/tmp/webserv/serverNames/5000/server1x/index.html
+
+http://127.0.0.1:5000/index.html
+GET /index.html HTTP/1.1
+Host: server11
+/tmp/webserv/serverNames/5000/server1x/index.html
+
+http://127.0.0.1:5000/index.html
+GET /index.html HTTP/1.1
+Host: server20
+/tmp/webserv/serverNames/5000/default/index.html
+
+http://127.0.0.1:5000/index.html
+GET /index.html HTTP/1.1
+Host: server
+/tmp/webserv/serverNames/5000/default/index.html
+
+--------------------------------------------------
+
+http://127.0.0.1:5001/index.html
+GET /index.html HTTP/1.1
+Host: 127.0.0.1
+/tmp/webserv/serverNames/5001/server1x/index.html
+
+http://127.0.0.1:5001/index.html
+GET /index.html HTTP/1.1
+Host: server10
+/tmp/webserv/serverNames/5001/server1x/index.html
+
+http://127.0.0.1:5001/index.html
+GET /index.html HTTP/1.1
+Host: server11
+/tmp/webserv/serverNames/5001/server1x/index.html
+
+http://127.0.0.1:5001/index.html
+GET /index.html HTTP/1.1
+Host: server20
+/tmp/webserv/serverNames/5001/server2x/index.html
+
+http://127.0.0.1:5001/index.html
+GET /index.html HTTP/1.1
+Host: server
+/tmp/webserv/serverNames/5000/server1x/index.html
