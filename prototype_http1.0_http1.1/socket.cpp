@@ -1,5 +1,32 @@
 #include "socket.hpp"
 
+unsigned int ft_htonl(unsigned int x)
+{
+  if (__BYTE_ORDER == __BIG_ENDIAN)
+  {
+    return x;
+  }
+  else
+  {
+    return (
+    ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) | \
+    (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24)) \
+    );
+  }
+}
+
+unsigned int ft_htons(unsigned short x)
+{
+  if (__BYTE_ORDER == __BIG_ENDIAN)
+  {
+    return x;
+  }
+  else
+  {
+    return(((unsigned short int) ((((x) >> 8) & 0xff) | (((x) & 0xff) << 8))));
+  }
+}
+
 void Socket::set_listenfd() {
   this->listenfd = socket(AF_INET, SOCK_STREAM, 0);
   if (this->listenfd == -1) {
@@ -12,8 +39,8 @@ void Socket::set_sockaddr_in() {
   memset(&this->serv_addr, 0, sizeof(this->serv_addr));
 
   this->serv_addr.sin_family = AF_INET;
-  this->serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  this->serv_addr.sin_port = htons(this->port);
+  this->serv_addr.sin_addr.s_addr = ft_htonl(INADDR_ANY);
+  this->serv_addr.sin_port = ft_htons(this->port);
 }
 
 int Socket::set_socket() {
