@@ -2,8 +2,8 @@
 
 Client::Client()
 {
-  // HTTPMessageParser hmp(1);
-  // hmp_ = hmp;
+  HTTPMessageParser hmp(1);
+  hmp_ = hmp;
 }
 
 Client::~Client()

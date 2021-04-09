@@ -11,7 +11,7 @@ class Client
   int socketFd_;
   int port_;
   std::string host_;
-  // HTTPMessageParser hmp_;
+  HTTPMessageParser hmp_;
   Client();
   ~Client();
 

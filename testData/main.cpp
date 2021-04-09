@@ -8,5 +8,5 @@ int main(int argc, char* argv[])
   Config c(1);
   HTTPMessageParser hmp(1);
   // HTTPMessageParser hmp("serverNames", 1);
-
+  std::cout << client.hmp_.getHTTPVersion() << std::endl;
 }
