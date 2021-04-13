@@ -490,9 +490,7 @@ bool parseConfig::isCode(std::string s)
 
 void parseConfig::initCommonConfig(s_ConfigCommon &c)
 {
-  for (int i = 0; i < METHOD_NUM; ++i)
-    c.allowMethods[i] = true;
-  c.clientMaxBodySize = CLIENTMAXBODYSIZE;
+  c.clientMaxBodySize = -1;
 }
 
 void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex)

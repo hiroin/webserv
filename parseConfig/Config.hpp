@@ -5,13 +5,12 @@
 #include <string>
 #include <map>
 
-enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, METHOD_NUM};
 #define CLIENTMAXBODYSIZE 1048576;
 
 struct s_ConfigCommon
 {
   std::string autoindex;
-  bool allowMethods[METHOD_NUM];
+  std::vector<std::string> allowMethods;
   std::string authBasicUid;
   std::string authBasicPassword;
   std::vector<std::string> cgiScripts;
@@ -56,7 +55,10 @@ class Config
 
  private:
   Config(const Config&);
-  Config& operator=(const Config&);  
+  Config& operator=(const Config&);
+  void printCommonConfig(s_ConfigCommon& c) const;
+  void printLocationConfig(s_ConfigLocation& c) const;
+  void printServerConfig(s_ConfigServer& c) const;
 
  private:
 };
