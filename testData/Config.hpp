@@ -11,7 +11,7 @@ enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, METHO
 struct s_ConfigCommon
 {
   std::string autoindex;
-  bool allowMethods[METHOD_NUM];
+  std::vector<std::string> allowMethods;
   std::string authBasicUid;
   std::string authBasicPassword;
   std::vector<std::string> cgiScripts;

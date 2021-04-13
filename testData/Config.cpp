@@ -57,14 +57,8 @@ Config::Config(int testPattern)
     s_ConfigLocation tmpConfigLocation;
 
     configGlobal.phpCgiPath = "/usr/bin/php-cgi";
-    configGlobal.configCommon.allowMethods[GET] = true;
-    configGlobal.configCommon.allowMethods[HEAD] = true;
-    configGlobal.configCommon.allowMethods[POST] = true;
-    configGlobal.configCommon.allowMethods[PUT] = true;
-    configGlobal.configCommon.allowMethods[DELETE] = true;
-    configGlobal.configCommon.allowMethods[CONNECT] = true;
-    configGlobal.configCommon.allowMethods[OPTIONS] = true;
-    configGlobal.configCommon.allowMethods[TRACE] = true;
+    configGlobal.configCommon.allowMethods.push_back("GET");
+    configGlobal.configCommon.allowMethods.push_back("POST");
     configGlobal.configCommon.authBasicUid  = "user";
     configGlobal.configCommon.authBasicPassword  = "pasword";
     configGlobal.configCommon.cgiScripts.push_back(".cgi");

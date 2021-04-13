@@ -11,7 +11,7 @@ struct s_ConfigCommon
 {
   unsigned int clientMaxBodySize;
   std::map<std::string, std::string> errorPages;
-  bool allowMethods[METHOD_NUM];
+  std::vector<std::string> allowMethods;
   bool autoindex;
   std::string index;
   std::string authBasicUid;
