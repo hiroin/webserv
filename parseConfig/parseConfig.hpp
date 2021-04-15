@@ -89,7 +89,7 @@ class parseConfig
  private:
   bool isUsableChar(char c);
   unsigned int isContext(std::vector<parseconfig::token>& vtoken, unsigned int idx);
-  bool isModule(std::vector<parseconfig::token> vtoken, unsigned int& idx); 
+  bool isModule(std::vector<parseconfig::token> vtoken, unsigned int& idx);
   void pushContext(std::vector<parseconfig::token>& vtoken, unsigned int idx, parseconfig::configBase& config);
   bool pushModule(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configBase& config);
   bool pushModuleToLocation(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configLocation& configLocation);
@@ -97,10 +97,12 @@ class parseConfig
   bool pushModuleToHttp(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configHttp& configHttp);
   int stoi(std::string s);
   bool isCode(std::string s);
+  bool isMethod(std::string s);
   void initCommonConfig(s_ConfigCommon &c);
-  void insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex);
-  void insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize);
-  void insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages);
+  bool insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex);
+  bool insertAllowMethods(std::vector<parseconfig::context>::iterator itr, std::vector<std::string>& allowMethods);
+  bool insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize);
+  bool insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages);
 
   parseConfig(const parseConfig&);
   parseConfig& operator=(const parseConfig&);  

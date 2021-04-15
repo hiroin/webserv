@@ -384,9 +384,14 @@ bool parseConfig::insertToConfigClass(Config& c)
       c.configGlobal.phpCgiPath = itr->values.at(0).value.at(0);
       std::cout << "php-cgi-path : " << c.configGlobal.phpCgiPath << std::endl;
     }
-    insertAutoindex(itr, c.configGlobal.configCommon.autoindex);
-    insertClientMaxBodySize(itr, c.configGlobal.configCommon.clientMaxBodySize);
-    insertErrorPages(itr, c.configGlobal.configCommon.errorPages);
+    if(insertAutoindex(itr, c.configGlobal.configCommon.autoindex))
+      continue;
+    if(insertAllowMethods(itr, c.configGlobal.configCommon.allowMethods))
+      continue;
+    if(insertClientMaxBodySize(itr, c.configGlobal.configCommon.clientMaxBodySize))
+      continue;
+    if(insertErrorPages(itr, c.configGlobal.configCommon.errorPages))
+      continue;
   }
   std::cout << std::endl;
   for(std::vector<parseconfig::configServer>::iterator itrServer = 
@@ -488,12 +493,27 @@ bool parseConfig::isCode(std::string s)
   return false;
 }
 
+bool parseConfig::isMethod(std::string s)
+{
+  if (s == "GET" ||
+    s == "HEAD" ||
+    s == "POST" ||
+    s == "PUT" ||
+    s == "DELETE" ||
+    s == "CONNECT" ||
+    s == "OPTIONS" ||
+    s == "TRACE"
+  )
+    return true;
+  return false;
+}
+
 void parseConfig::initCommonConfig(s_ConfigCommon &c)
 {
   c.clientMaxBodySize = -1;
 }
 
-void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex)
+bool parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex)
 {
   if (itr->key == "autoindex")
   {
@@ -506,10 +526,41 @@ void parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator it
       throw std::runtime_error("Config Error : invalid autoindex");
     std::cout << "[DEBUG]autoindex : " << autoindexValue << std::endl;
     autoindex = autoindexValue;
-  } 
+    return true;
+  }
+  return false;
 }
 
-void parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize)
+bool parseConfig::insertAllowMethods(std::vector<parseconfig::context>::iterator itr, std::vector<std::string>& allowMethods)
+{
+  if (itr->key == "allow_methods")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie allow_methods");
+    if (itr->values.at(0).value.size() == 1)
+      throw std::runtime_error("Config Error : invalid allow_methods");
+    for (std::vector<std::string>::iterator itrValues = 
+        itr->values.at(0).value.begin(); itrValues != itr->values.at(0).value.end(); ++itrValues)
+    {
+      for (std::vector<std::string>::iterator itrAllowMethods = allowMethods.begin();
+        itrAllowMethods != allowMethods.end();
+        itrAllowMethods++
+      )
+      {
+        if (*itrAllowMethods == *itrValues)
+          throw std::runtime_error("Config Error : duplicatie method of allow_methods");
+      }
+      if (!isMethod(*itrValues))
+        throw std::runtime_error("Config Error : Invalid method in allow_methods");
+      allowMethods.push_back(*itrValues);
+      std::cout << "[DEBUG]allow_methods : " << *itrValues << std::endl;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize)
 {
   if (itr->key == "client_max_body_size")
   {
@@ -523,10 +574,12 @@ void parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::ite
     if (clientMaxBodySize == -1)
       throw std::runtime_error("Config Error : invalid client_max_body_size");
     std::cout << "[DEBUG]client_max_body_size : " << clientMaxBodySize << std::endl;
-  } 
+    return true;
+  }
+  return false;
 }
 
-void parseConfig::insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages)
+bool parseConfig::insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages)
 {
   if (itr->key == "error_page")
   {
@@ -543,7 +596,9 @@ void parseConfig::insertErrorPages(std::vector<parseconfig::context>::iterator i
         std::cout << "[DEBUG]error_page : " << *itrValue << " " << relativePath << std::endl;
       }
     }
+    return true;
   }
+  return false;
 }
 
 parseConfig::parseConfig()

@@ -79,7 +79,7 @@ void Config::printConfig()
       itrServer != configGlobal.servers.end();
       ++itrServer)
   {
-    std::cout << "サーバー設定(" << i++ << ")" << std::endl;
+    std::cout << "サーバー設定(" << i << ")" << std::endl;
     printServerConfig(*itrServer);
     std::cout << std::endl;
     for(std::vector<s_ConfigLocation>::iterator itrLocation = itrServer->locations.begin();
@@ -90,6 +90,7 @@ void Config::printConfig()
       printLocationConfig(*itrLocation);
       std::cout << std::endl;
     }
+    i++;
     std::cout << std::endl;
   }
 }
