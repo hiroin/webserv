@@ -58,7 +58,13 @@ Config::Config(int testPattern)
 
     configGlobal.phpCgiPath = "/usr/bin/php-cgi";
     configGlobal.configCommon.allowMethods.push_back("GET");
+    configGlobal.configCommon.allowMethods.push_back("HEAD");
     configGlobal.configCommon.allowMethods.push_back("POST");
+    configGlobal.configCommon.allowMethods.push_back("PUT");
+    configGlobal.configCommon.allowMethods.push_back("DELETE");
+    configGlobal.configCommon.allowMethods.push_back("CONNECT");
+    configGlobal.configCommon.allowMethods.push_back("OPTIONS");
+    configGlobal.configCommon.allowMethods.push_back("TRACE");
     configGlobal.configCommon.authBasicUid  = "user";
     configGlobal.configCommon.authBasicPassword  = "pasword";
     configGlobal.configCommon.cgiScripts.push_back(".cgi");
@@ -92,14 +98,19 @@ Config::Config(int testPattern)
     configGlobal.servers[1].root = "/tmp/webserv/serverNames/5000/server1x";
     configGlobal.servers[1].host = "*";
     configGlobal.servers[1].port = 5000;
+    configGlobal.servers[1].serverNames.push_back("server10");
+    configGlobal.servers[1].serverNames.push_back("server11");
     configGlobal.servers.push_back(tmpConfigServer);
-    configGlobal.servers[1].root = "/tmp/webserv/serverNames/5001/server1x";
-    configGlobal.servers[1].host = "*";
-    configGlobal.servers[1].port = 5001;
+    configGlobal.servers[2].root = "/tmp/webserv/serverNames/5001/server1x";
+    configGlobal.servers[2].host = "*";
+    configGlobal.servers[2].port = 5001;
+    configGlobal.servers[2].serverNames.push_back("server10");
+    configGlobal.servers[2].serverNames.push_back("server11");
     configGlobal.servers.push_back(tmpConfigServer);
-    configGlobal.servers[1].root = "/tmp/webserv/serverNames/5001/server2x";
-    configGlobal.servers[1].host = "*";
-    configGlobal.servers[1].port = 5001;
+    configGlobal.servers[3].root = "/tmp/webserv/serverNames/5001/server2x";
+    configGlobal.servers[3].host = "*";
+    configGlobal.servers[3].port = 5001;
+    configGlobal.servers[2].serverNames.push_back("server20");
   }
 }
 
