@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <climits>
 #include "Config.hpp"
+#include "ft.hpp"
 
 namespace parseconfig
 {
@@ -99,10 +100,12 @@ class parseConfig
   bool isCode(std::string s);
   bool isMethod(std::string s);
   void initCommonConfig(s_ConfigCommon &c);
-  bool insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex);
-  bool insertAllowMethods(std::vector<parseconfig::context>::iterator itr, std::vector<std::string>& allowMethods);
-  bool insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize);
-  bool insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages);
+  typedef std::vector<parseconfig::context>::iterator contextIterator;
+  bool insertAutoindex(contextIterator itr, std::string& autoindex);
+  bool insertAllowMethods(contextIterator itr, std::vector<std::string>& allowMethods);
+  bool insertAuthBasic(contextIterator itr, std::string& authBasicUid, std::string& authBasicPassword);
+  bool insertClientMaxBodySize(contextIterator itr, int& clientMaxBodySize);
+  bool insertErrorPages(contextIterator itr, std::map<std::string, std::string>& errorPages);
 
   parseConfig(const parseConfig&);
   parseConfig& operator=(const parseConfig&);  

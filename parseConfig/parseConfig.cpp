@@ -55,6 +55,7 @@ bool parseConfig::isUsableChar(char c)
 {
   if (std::isalpha(c) || \
       std::isdigit(c) || \
+      c == '@' || \
       c == '/' || \
       c == '.' || \
       c == '_' || \
@@ -388,6 +389,8 @@ bool parseConfig::insertToConfigClass(Config& c)
       continue;
     if(insertAllowMethods(itr, c.configGlobal.configCommon.allowMethods))
       continue;
+    if(insertAuthBasic(itr, c.configGlobal.configCommon.authBasicUid, c.configGlobal.configCommon.authBasicPassword))
+      continue;
     if(insertClientMaxBodySize(itr, c.configGlobal.configCommon.clientMaxBodySize))
       continue;
     if(insertErrorPages(itr, c.configGlobal.configCommon.errorPages))
@@ -513,7 +516,7 @@ void parseConfig::initCommonConfig(s_ConfigCommon &c)
   c.clientMaxBodySize = -1;
 }
 
-bool parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator itr, std::string& autoindex)
+bool parseConfig::insertAutoindex(contextIterator itr, std::string& autoindex)
 {
   if (itr->key == "autoindex")
   {
@@ -531,7 +534,7 @@ bool parseConfig::insertAutoindex(std::vector<parseconfig::context>::iterator it
   return false;
 }
 
-bool parseConfig::insertAllowMethods(std::vector<parseconfig::context>::iterator itr, std::vector<std::string>& allowMethods)
+bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::string>& allowMethods)
 {
   if (itr->key == "allow_methods")
   {
@@ -560,7 +563,29 @@ bool parseConfig::insertAllowMethods(std::vector<parseconfig::context>::iterator
   return false;
 }
 
-bool parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::iterator itr, int& clientMaxBodySize)
+bool parseConfig::insertAuthBasic(contextIterator itr, std::string& authBasicUid, std::string& authBasicPassword)
+{
+  if (itr->key == "auth_basic")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie auth_basic");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid auth_basic");
+    size_t pos = itr->values.at(0).value.at(0).find(":");
+    if (pos == std::string::npos || pos == 0)
+      throw std::runtime_error("Config Error : invalid auth_basic");
+    authBasicUid = itr->values.at(0).value.at(0).substr(0, pos);
+    authBasicPassword = itr->values.at(0).value.at(0).substr(pos + 1);
+    if (!ft_istoken(authBasicUid))
+      throw std::runtime_error("Config Error : invalid auth_basic Using characters that cannot be used in the user ID.");
+    std::cout << "[DEBUG]authBasicUid : " << authBasicUid << std::endl;
+    std::cout << "[DEBUG]authBasicPassword : " << authBasicPassword << std::endl;
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertClientMaxBodySize(contextIterator itr, int& clientMaxBodySize)
 {
   if (itr->key == "client_max_body_size")
   {
@@ -579,7 +604,7 @@ bool parseConfig::insertClientMaxBodySize(std::vector<parseconfig::context>::ite
   return false;
 }
 
-bool parseConfig::insertErrorPages(std::vector<parseconfig::context>::iterator itr, std::map<std::string, std::string>& errorPages)
+bool parseConfig::insertErrorPages(contextIterator itr, std::map<std::string, std::string>& errorPages)
 {
   if (itr->key == "error_page")
   {
