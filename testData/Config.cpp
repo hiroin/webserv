@@ -110,7 +110,7 @@ Config::Config(int testPattern)
     configGlobal.servers[3].root = "/tmp/webserv/serverNames/5001/server2x";
     configGlobal.servers[3].host = "*";
     configGlobal.servers[3].port = 5001;
-    configGlobal.servers[2].serverNames.push_back("server20");
+    configGlobal.servers[3].serverNames.push_back("server20");
   }
 }
 
