@@ -11,6 +11,7 @@ struct s_ConfigCommon
 {
   std::string autoindex;
   std::vector<std::string> allowMethods;
+  std::string authBasicRealm;
   std::string authBasicUid;
   std::string authBasicPassword;
   std::vector<std::string> cgiScripts;

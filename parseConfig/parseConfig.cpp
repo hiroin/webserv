@@ -53,17 +53,13 @@ void parseConfig::lexer(std::string s)
 
 bool parseConfig::isUsableChar(char c)
 {
-  if (std::isalpha(c) || \
-      std::isdigit(c) || \
-      c == '@' || \
-      c == '/' || \
-      c == '.' || \
-      c == '_' || \
-      c == '*' || \
-      c == ':' || \
-      c == '-')
-    return true;
-  return false;
+  if (c <= 32 || \
+      c == 127 || \
+      c == ';' || \
+      c == '{' || \
+      c == '}')
+    return false;
+  return true;
 }
 
 void parseConfig::printToken()
@@ -96,7 +92,7 @@ void parseConfig::printToken()
   }
 }
 
-unsigned int parseConfig::isContext(std::vector<parseconfig::token>& vtoken, unsigned int idx)
+unsigned int parseConfig::isContext(token& vtoken, unsigned int idx)
 {
   unsigned int i = 0;
 
@@ -115,7 +111,7 @@ unsigned int parseConfig::isContext(std::vector<parseconfig::token>& vtoken, uns
   return 0;
 }
 
-bool parseConfig::isModule(std::vector<parseconfig::token> vtoken, unsigned int& idx)
+bool parseConfig::isModule(token vtoken, unsigned int& idx)
 {
   static int brackets = 0;
   while (idx < vtoken.size())
@@ -160,7 +156,7 @@ bool parseConfig::checkFormat()
   return (parseConfig::isModule(vtoken_, idx));
 }
 
-void parseConfig::pushContext(std::vector<parseconfig::token>& vtoken, unsigned int idx, parseconfig::configBase& config)
+void parseConfig::pushContext(token& vtoken, unsigned int idx, parseconfig::configBase& config)
 {
   std::string key = vtoken.at(idx++).token;
   for(std::vector<parseconfig::context>::iterator itr = 
@@ -189,7 +185,7 @@ void parseConfig::pushContext(std::vector<parseconfig::token>& vtoken, unsigned 
   config.contexts.push_back(context);
 }
 
-bool parseConfig::pushModule(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configBase& config)
+bool parseConfig::pushModule(token vtoken, unsigned int& idx, parseconfig::configBase& config)
 {
   while (idx < vtoken.size())
   {
@@ -223,7 +219,7 @@ bool parseConfig::pushModule(std::vector<parseconfig::token> vtoken, unsigned in
   return true;
 }
 
-bool parseConfig::pushModuleToLocation(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configLocation& configLocation)
+bool parseConfig::pushModuleToLocation(token vtoken, unsigned int& idx, parseconfig::configLocation& configLocation)
 {
   while (idx < vtoken.size())
   {
@@ -243,7 +239,7 @@ bool parseConfig::pushModuleToLocation(std::vector<parseconfig::token> vtoken, u
   return true;
 }
 
-bool parseConfig::pushModuleToServer(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configServer& configServer)
+bool parseConfig::pushModuleToServer(token vtoken, unsigned int& idx, parseconfig::configServer& configServer)
 {
   unsigned int locations = 0;
 
@@ -282,7 +278,7 @@ bool parseConfig::pushModuleToServer(std::vector<parseconfig::token> vtoken, uns
   return true;
 }
 
-bool parseConfig::pushModuleToHttp(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configHttp& configHttp)
+bool parseConfig::pushModuleToHttp(token vtoken, unsigned int& idx, parseconfig::configHttp& configHttp)
 {
   unsigned int servers = 0;
 
@@ -374,7 +370,8 @@ void parseConfig::printConfigHttp()
 
 bool parseConfig::insertToConfigClass(Config& c)
 { 
-  initCommonConfig(c.configGlobal.configCommon);
+  s_ConfigCommon& tmpConfigCommon = c.configGlobal.configCommon;
+  initCommonConfig(tmpConfigCommon);
   for(std::vector<parseconfig::context>::iterator itr = 
       configHttp_.contexts.begin(); itr != configHttp_.contexts.end(); ++itr)
   {
@@ -385,16 +382,21 @@ bool parseConfig::insertToConfigClass(Config& c)
       c.configGlobal.phpCgiPath = itr->values.at(0).value.at(0);
       std::cout << "php-cgi-path : " << c.configGlobal.phpCgiPath << std::endl;
     }
-    if(insertAutoindex(itr, c.configGlobal.configCommon.autoindex))
+    if (insertAutoindex(itr, tmpConfigCommon.autoindex))
       continue;
-    if(insertAllowMethods(itr, c.configGlobal.configCommon.allowMethods))
+    if (insertAllowMethods(itr, tmpConfigCommon.allowMethods))
       continue;
-    if(insertAuthBasic(itr, c.configGlobal.configCommon.authBasicUid, c.configGlobal.configCommon.authBasicPassword))
+    if (insertAuthBasic(itr, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
       continue;
-    if(insertClientMaxBodySize(itr, c.configGlobal.configCommon.clientMaxBodySize))
+    if (insertCgiScript(itr, tmpConfigCommon.cgiScripts))
       continue;
-    if(insertErrorPages(itr, c.configGlobal.configCommon.errorPages))
+    if (insertClientMaxBodySize(itr, tmpConfigCommon.clientMaxBodySize))
       continue;
+    if (insertErrorPages(itr, tmpConfigCommon.errorPages))
+      continue;
+    if (insertIndexs(itr, tmpConfigCommon.indexs))
+      continue;
+    throw std::runtime_error("Config Error : invalid directive");
   }
   std::cout << std::endl;
   for(std::vector<parseconfig::configServer>::iterator itrServer = 
@@ -404,27 +406,32 @@ bool parseConfig::insertToConfigClass(Config& c)
     std::cout << "サーバー設定(" << serverNumber << ")" << std::endl;
     s_ConfigServer tmpConfigServer;
     initCommonConfig(tmpConfigServer.configCommon);
-    c.configGlobal.servers.push_back(tmpConfigServer);
     for(std::vector<parseconfig::context>::iterator itr =
         itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr)
     {
-      if (itr->key == "listen")
-      {
-
-      }
-      if (itr->key == "server_name")
-      {
-
-      }
-      if (itr->key == "root")
-      {
-        if (itr->values.at(0).value.size() >= 2)
-          throw std::runtime_error("Config Error : server { root }");
-        c.configGlobal.servers.at(serverNumber).root = itr->values.at(0).value.at(0);
-        std::cout << "  root : " << c.configGlobal.servers.at(serverNumber).root << std::endl;
-      }
-      insertClientMaxBodySize(itr, c.configGlobal.servers.at(serverNumber).configCommon.clientMaxBodySize);
-      insertErrorPages(itr, c.configGlobal.servers.at(serverNumber).configCommon.errorPages);
+      if (insertListen(itr, tmpConfigServer.host, tmpConfigServer.port))
+        continue;
+      if (insertServerNames(itr, tmpConfigServer.serverNames))
+        continue;
+      if (insertRoot(itr, tmpConfigServer.root))
+        continue;
+      if (insertAutoindex(itr, tmpConfigServer.configCommon.autoindex))
+        continue;
+      if (insertAllowMethods(itr, tmpConfigServer.configCommon.allowMethods))
+        continue;
+      if (insertAuthBasic(itr, tmpConfigServer.configCommon.authBasicUid, tmpConfigServer.configCommon.authBasicPassword))
+        continue;
+      if (insertCgiScript(itr, tmpConfigServer.configCommon.cgiScripts))
+        continue;
+      if (insertClientMaxBodySize(itr, tmpConfigServer.configCommon.clientMaxBodySize))
+        continue;
+      if (insertErrorPages(itr, tmpConfigServer.configCommon.errorPages))
+        continue;
+      if (insertIndexs(itr, tmpConfigServer.configCommon.indexs))
+        continue;
+      std::string errorMessage = "Config Error : invalid directive ";
+      errorMessage +=  itr->key ;
+      throw std::runtime_error(errorMessage);
     }
     std::cout << std::endl;
     for(std::vector<parseconfig::configLocation>::iterator itrConfig =
@@ -434,24 +441,38 @@ bool parseConfig::insertToConfigClass(Config& c)
       s_ConfigLocation tmpConfigLocation;
       initCommonConfig(tmpConfigLocation.configCommon);
       tmpConfigLocation.path = itrConfig->path;
-      size_t i = 0;
-      while (i < c.configGlobal.servers.at(serverNumber).locations.size())
+      for(std::vector<parseconfig::context>::iterator itr =
+          itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
       {
-        if (c.configGlobal.servers.at(serverNumber).locations.at(i).path.size() < tmpConfigLocation.path.size())
+        if (insertAutoindex(itr, tmpConfigLocation.configCommon.autoindex))
+          continue;
+        if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods))
+          continue;
+        if (insertAuthBasic(itr, tmpConfigLocation.configCommon.authBasicUid, tmpConfigLocation.configCommon.authBasicPassword))
+          continue;
+        if (insertCgiScript(itr, tmpConfigLocation.configCommon.cgiScripts))
+          continue;
+        if (insertClientMaxBodySize(itr, tmpConfigLocation.configCommon.clientMaxBodySize))
+          continue;
+        if (insertErrorPages(itr, tmpConfigLocation.configCommon.errorPages))
+          continue;
+        if (insertIndexs(itr, tmpConfigLocation.configCommon.indexs))
+          continue;        
+      }
+      size_t i = 0;
+      while (i < tmpConfigServer.locations.size())
+      {
+        if (tmpConfigServer.locations.at(i).path.size() < tmpConfigLocation.path.size())
           break;
         i++;
       }
       std::cout << "  ロケーション設定挿入位置 : " << i << std::endl;
-      c.configGlobal.servers.at(serverNumber).locations.insert(c.configGlobal.servers.at(serverNumber).locations.begin() + i, tmpConfigLocation);
-      for(std::vector<parseconfig::context>::iterator itr =
-          itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
-      {
-        insertClientMaxBodySize(itr, c.configGlobal.servers.at(serverNumber).locations.at(i).configCommon.clientMaxBodySize);
-        insertErrorPages(itr, c.configGlobal.servers.at(serverNumber).locations.at(i).configCommon.errorPages);
-      }
+      tmpConfigServer.locations.insert(tmpConfigServer.locations.begin() + i, tmpConfigLocation);
       std::cout << std::endl;
     }
+    c.configGlobal.servers.push_back(tmpConfigServer);
   }
+  inheritedFromHigherlevelDirectives(c);
   return true;
 }
 
@@ -511,6 +532,15 @@ bool parseConfig::isMethod(std::string s)
   return false;
 }
 
+bool parseConfig::isFilenameExtension(std::string s)
+{
+  if (s[0] != '.')
+    return false;
+  if (s.find(".", 1) != std::string::npos)
+    return false;
+  return true;
+}
+
 void parseConfig::initCommonConfig(s_ConfigCommon &c)
 {
   c.clientMaxBodySize = -1;
@@ -534,13 +564,29 @@ bool parseConfig::insertAutoindex(contextIterator itr, std::string& autoindex)
   return false;
 }
 
+bool parseConfig::insertAlias(contextIterator itr, std::string& alias)
+{
+  if (itr->key == "alias")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie alias");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid alias");
+    std::string aliasValue = itr->values.at(0).value.at(0);
+    std::cout << "[DEBUG]alias : " << aliasValue << std::endl;
+    alias = aliasValue;
+    return true;
+  }
+  return false;
+}
+
 bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::string>& allowMethods)
 {
   if (itr->key == "allow_methods")
   {
     if (itr->values.size() > 1)
       throw std::runtime_error("Config Error : duplicatie allow_methods");
-    if (itr->values.at(0).value.size() == 1)
+    if (itr->values.at(0).value.size() == 0)
       throw std::runtime_error("Config Error : invalid allow_methods");
     for (std::vector<std::string>::iterator itrValues = 
         itr->values.at(0).value.begin(); itrValues != itr->values.at(0).value.end(); ++itrValues)
@@ -585,6 +631,36 @@ bool parseConfig::insertAuthBasic(contextIterator itr, std::string& authBasicUid
   return false;
 }
 
+bool parseConfig::insertCgiScript(contextIterator itr, std::vector<std::string>& cgiScripts)
+{
+  if (itr->key == "cgi_script")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie cgi_script");
+    if (itr->values.at(0).value.size() == 0)
+      throw std::runtime_error("Config Error : invalid cgi_script");
+    for (std::vector<std::string>::iterator itrValues = itr->values.at(0).value.begin();
+      itrValues != itr->values.at(0).value.end();
+      ++itrValues)
+    {
+      for (std::vector<std::string>::iterator itrCgiScripts = cgiScripts.begin();
+        itrCgiScripts != cgiScripts.end();
+        itrCgiScripts++
+      )
+      {
+        if (*itrCgiScripts == *itrValues)
+          throw std::runtime_error("Config Error : duplicatie filename extension of cgi_script");
+      }
+      if (!isFilenameExtension(*itrValues))
+        throw std::runtime_error("Config Error : Invalid filename extension in cgi_script");
+      cgiScripts.push_back(*itrValues);
+      std::cout << "[DEBUG]cgi_script : " << *itrValues << std::endl;
+    }
+    return true;
+  }
+  return false;
+}
+
 bool parseConfig::insertClientMaxBodySize(contextIterator itr, int& clientMaxBodySize)
 {
   if (itr->key == "client_max_body_size")
@@ -611,6 +687,8 @@ bool parseConfig::insertErrorPages(contextIterator itr, std::map<std::string, st
     for (std::vector<parseconfig::values>::iterator itrValues = 
         itr->values.begin(); itrValues != itr->values.end(); ++itrValues)
     {
+      if (itrValues->value.size() < 2)
+        throw std::runtime_error("Config Error : invalid error_page");
       std::vector<std::string>::iterator itrValue = itrValues->value.end();
       std::string relativePath = *--itrValue;
       for (itrValue = itrValues->value.begin(); itrValue != itrValues->value.end() - 1; ++itrValue)
@@ -624,6 +702,141 @@ bool parseConfig::insertErrorPages(contextIterator itr, std::map<std::string, st
     return true;
   }
   return false;
+}
+
+bool parseConfig::insertIndexs(contextIterator itr, std::vector<std::string>& indexs)
+{
+  if (itr->key == "index")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie index");
+    if (itr->values.at(0).value.size() == 0)
+      throw std::runtime_error("Config Error : invalid index");
+    for (std::vector<std::string>::iterator itrValues = itr->values.at(0).value.begin();
+      itrValues != itr->values.at(0).value.end();
+      ++itrValues)
+    {
+      for (std::vector<std::string>::iterator itrIndexs = indexs.begin();
+        itrIndexs != indexs.end();
+        itrIndexs++
+      )
+      {
+        if (*itrIndexs == *itrValues)
+          throw std::runtime_error("Config Error : duplicatie index");
+      }
+      indexs.push_back(*itrValues);
+      std::cout << "[DEBUG]index : " << *itrValues << std::endl;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertListen(contextIterator itr, std::string& host, int& port)
+{
+  if (itr->key == "listen")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie listen");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid listen");
+    size_t pos = itr->values.at(0).value.at(0).find(":");
+    if (pos == std::string::npos || pos == 0)
+      throw std::runtime_error("Config Error : invalid listen");
+    host = itr->values.at(0).value.at(0).substr(0, pos);
+    std::string tmpPort = itr->values.at(0).value.at(0).substr(pos + 1);
+    if ((port = stoi(tmpPort)) == -1 || port <=0 || port > 65535)
+      throw std::runtime_error("Config Error : invalid listen");
+    std::cout << "[DEBUG]host : " << host << std::endl;
+    std::cout << "[DEBUG]port : " << port << std::endl;
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertRoot(contextIterator itr, std::string& root)
+{
+  if (itr->key == "root")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie root");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid root");
+    root = itr->values.at(0).value.at(0);
+    std::cout << "[DEBUG]root : " << root << std::endl;
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertServerNames(contextIterator itr, std::vector<std::string>& serverNames)
+{
+  if (itr->key == "server_name")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie server_name");
+    for (std::vector<std::string>::iterator itrValues = itr->values.at(0).value.begin();
+      itrValues != itr->values.at(0).value.end();
+      ++itrValues)
+    {
+      for (std::vector<std::string>::iterator itrServerNames = serverNames.begin();
+        itrServerNames != serverNames.end();
+        itrServerNames++
+      )
+      {
+        if (*itrServerNames == *itrValues)
+          throw std::runtime_error("Config Error : duplicatie server_name");
+      }
+      serverNames.push_back(*itrValues);
+      std::cout << "[DEBUG]server_name : " << *itrValues << std::endl;
+    }
+    return true;
+  }
+  return false;
+}
+
+void parseConfig::inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& lower)
+{
+  if (lower.autoindex.empty())
+    lower.autoindex = higher.autoindex;
+  if (lower.allowMethods.empty())
+    lower.allowMethods = higher.allowMethods;
+  if (lower.authBasicRealm.empty())
+    lower.authBasicRealm = higher.authBasicRealm;
+  if (lower.authBasicUid.empty())
+    lower.authBasicUid = higher.authBasicUid;
+  if (lower.authBasicPassword.empty())
+    lower.authBasicPassword = higher.authBasicPassword;
+  if (lower.cgiScripts.empty())
+    lower.cgiScripts = higher.cgiScripts;
+  if (lower.clientMaxBodySize == -1)
+    lower.clientMaxBodySize = higher.clientMaxBodySize;
+  if (lower.indexs.empty())
+    lower.cgiScripts = higher.indexs;
+  for (std::map<std::string, std::string>::iterator itr = higher.errorPages.begin();
+      itr != higher.errorPages.end();
+      itr++
+  )
+  {
+    if (lower.errorPages.find(itr->first) == lower.errorPages.end())
+      lower.errorPages[itr->first] = itr->second;
+  }
+}
+
+void parseConfig::inheritedFromHigherlevelDirectives(Config& c)
+{
+  for(std::vector<s_ConfigServer>::iterator itrServer = c.configGlobal.servers.begin();
+      itrServer != c.configGlobal.servers.end();
+      ++itrServer)
+  {
+    inheritedCommonConfig(c.configGlobal.configCommon, itrServer->configCommon);
+    for(std::vector<s_ConfigLocation>::iterator itrLocation = itrServer->locations.begin();
+        itrLocation != itrServer->locations.end();
+        ++itrLocation)
+    {
+      inheritedCommonConfig(itrServer->configCommon, itrLocation->configCommon);
+    }
+  }
 }
 
 parseConfig::parseConfig()

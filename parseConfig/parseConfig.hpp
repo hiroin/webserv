@@ -89,23 +89,35 @@ class parseConfig
  
  private:
   bool isUsableChar(char c);
-  unsigned int isContext(std::vector<parseconfig::token>& vtoken, unsigned int idx);
-  bool isModule(std::vector<parseconfig::token> vtoken, unsigned int& idx);
-  void pushContext(std::vector<parseconfig::token>& vtoken, unsigned int idx, parseconfig::configBase& config);
-  bool pushModule(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configBase& config);
-  bool pushModuleToLocation(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configLocation& configLocation);
-  bool pushModuleToServer(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configServer& configServer);
-  bool pushModuleToHttp(std::vector<parseconfig::token> vtoken, unsigned int& idx, parseconfig::configHttp& configHttp);
+  typedef std::vector<parseconfig::token> token;
+  unsigned int isContext(token& vtoken, unsigned int idx);
+  bool isModule(token vtoken, unsigned int& idx);
+  void pushContext(token& vtoken, unsigned int idx, parseconfig::configBase& config);
+  bool pushModule(token vtoken, unsigned int& idx, parseconfig::configBase& config);
+  bool pushModuleToLocation(token vtoken, unsigned int& idx, parseconfig::configLocation& configLocation);
+  bool pushModuleToServer(token vtoken, unsigned int& idx, parseconfig::configServer& configServer);
+  bool pushModuleToHttp(token vtoken, unsigned int& idx, parseconfig::configHttp& configHttp);
+
   int stoi(std::string s);
   bool isCode(std::string s);
   bool isMethod(std::string s);
+  bool isFilenameExtension(std::string s);
   void initCommonConfig(s_ConfigCommon &c);
+  void inheritedFromHigherlevelDirectives(Config& c);
+  void inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& lower);
+
   typedef std::vector<parseconfig::context>::iterator contextIterator;
   bool insertAutoindex(contextIterator itr, std::string& autoindex);
+  bool insertAlias(contextIterator itr, std::string& alias);
   bool insertAllowMethods(contextIterator itr, std::vector<std::string>& allowMethods);
   bool insertAuthBasic(contextIterator itr, std::string& authBasicUid, std::string& authBasicPassword);
+  bool insertCgiScript(contextIterator itr, std::vector<std::string>& cgiScripts);
   bool insertClientMaxBodySize(contextIterator itr, int& clientMaxBodySize);
   bool insertErrorPages(contextIterator itr, std::map<std::string, std::string>& errorPages);
+  bool insertIndexs(contextIterator itr, std::vector<std::string>& indexs);
+  bool insertListen(contextIterator itr, std::string& host, int& port);
+  bool insertRoot(contextIterator itr, std::string& root);
+  bool insertServerNames(contextIterator itr, std::vector<std::string>& serverNames);
 
   parseConfig(const parseConfig&);
   parseConfig& operator=(const parseConfig&);  
