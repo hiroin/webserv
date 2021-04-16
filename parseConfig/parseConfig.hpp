@@ -85,6 +85,7 @@ class parseConfig
   parseconfig::configHttp configHttp_;
 
   parseConfig();
+  parseConfig(char *configFile, Config& c);
   ~parseConfig();
  
  private:

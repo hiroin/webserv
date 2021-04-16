@@ -392,12 +392,12 @@ bool parseConfig::insertToConfigClass(Config& c)
   for(std::vector<parseconfig::context>::iterator itr = 
       configHttp_.contexts.begin(); itr != configHttp_.contexts.end(); ++itr)
   {
-    if (itr->key == "php-cgi-path")
+    if (itr->key == "php-cgi_path")
     {
       if (itr->values.at(0).value.size() >= 2)
-        throw std::runtime_error("Config Error : invalid php-cgi-path");
+        throw std::runtime_error("Config Error : invalid php-cgi_path");
       c.configGlobal.phpCgiPath = itr->values.at(0).value.at(0);
-      std::cout << "php-cgi-path : " << c.configGlobal.phpCgiPath << std::endl;
+      continue;
     }
     if (insertAutoindex(itr, tmpConfigCommon.autoindex))
       continue;
@@ -415,14 +415,16 @@ bool parseConfig::insertToConfigClass(Config& c)
       continue;
     if (insertIndexs(itr, tmpConfigCommon.indexs))
       continue;
-    throw std::runtime_error("Config Error : invalid directive");
+    std::string errorMessage = "Config Error : invalid directive ";
+    errorMessage +=  itr->key ;
+    throw std::runtime_error(errorMessage);
   }
-  std::cout << std::endl;
+  // std::cout << std::endl;
   for(std::vector<parseconfig::configServer>::iterator itrServer = 
       configHttp_.servers.begin(); itrServer != configHttp_.servers.end(); ++itrServer)
   {
     size_t serverNumber = itrServer - configHttp_.servers.begin();
-    std::cout << "サーバー設定(" << serverNumber << ")" << std::endl;
+    // std::cout << "[DEBUG]サーバー設定(" << serverNumber << ")" << std::endl;
     s_ConfigServer tmpConfigServer;
     initCommonConfig(tmpConfigServer.configCommon);
     for(std::vector<parseconfig::context>::iterator itr =
@@ -458,7 +460,7 @@ bool parseConfig::insertToConfigClass(Config& c)
     for(std::vector<parseconfig::configLocation>::iterator itrConfig =
         itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig)
     {
-      std::cout << "  ロケーション設定(" << itrConfig->path << ")" << std::endl;
+      // std::cout << "[DEBUG]  ロケーション設定(" << itrConfig->path << ")" << std::endl;
       s_ConfigLocation tmpConfigLocation;
       initCommonConfig(tmpConfigLocation.configCommon);
       tmpConfigLocation.path = itrConfig->path;
@@ -480,7 +482,10 @@ bool parseConfig::insertToConfigClass(Config& c)
         if (insertErrorPages(itr, tmpConfigLocation.configCommon.errorPages))
           continue;
         if (insertIndexs(itr, tmpConfigLocation.configCommon.indexs))
-          continue;        
+          continue;
+        std::string errorMessage = "Config Error : invalid directive ";
+        errorMessage +=  itr->key ;
+        throw std::runtime_error(errorMessage);          
       }
       size_t i = 0;
       while (i < tmpConfigServer.locations.size())
@@ -489,9 +494,9 @@ bool parseConfig::insertToConfigClass(Config& c)
           break;
         i++;
       }
-      std::cout << "  ロケーション設定挿入位置 : " << i << std::endl;
+      // std::cout << "[DEBUG]  ロケーション設定挿入位置 : " << i << std::endl;
       tmpConfigServer.locations.insert(tmpConfigServer.locations.begin() + i, tmpConfigLocation);
-      std::cout << std::endl;
+      // std::cout << std::endl;
     }
     c.configGlobal.servers.push_back(tmpConfigServer);
   }
@@ -580,7 +585,7 @@ bool parseConfig::insertAutoindex(contextIterator itr, std::string& autoindex)
     std::string autoindexValue = itr->values.at(0).value.at(0);
     if (!(autoindexValue == "off" || autoindexValue == "on"))
       throw std::runtime_error("Config Error : invalid autoindex");
-    std::cout << "[DEBUG]autoindex : " << autoindexValue << std::endl;
+    // std::cout << "[DEBUG]autoindex : " << autoindexValue << std::endl;
     autoindex = autoindexValue;
     return true;
   }
@@ -596,7 +601,7 @@ bool parseConfig::insertAlias(contextIterator itr, std::string& alias)
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid alias");
     std::string aliasValue = itr->values.at(0).value.at(0);
-    std::cout << "[DEBUG]alias : " << aliasValue << std::endl;
+    // std::cout << "[DEBUG]alias : " << aliasValue << std::endl;
     alias = aliasValue;
     return true;
   }
@@ -643,7 +648,7 @@ bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::strin
         allowMethodsBool[OPTIONS] = true;
       if (*itrValues == "TRACE")
         allowMethodsBool[TRACE] = true;
-      std::cout << "[DEBUG]allow_methods : " << *itrValues << std::endl;
+      // std::cout << "[DEBUG]allow_methods : " << *itrValues << std::endl;
     }
     return true;
   }
@@ -659,7 +664,7 @@ bool parseConfig::insertAuthBasicRealm(contextIterator itr, std::string& authBas
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid auth_basic");
     authBasicRealm = itr->values.at(0).value.at(0);
-    std::cout << "[DEBUG]auth_basic : " << authBasicRealm << std::endl;
+    // std::cout << "[DEBUG]auth_basic : " << authBasicRealm << std::endl;
     return true;
   }
   return false;
@@ -680,8 +685,8 @@ bool parseConfig::insertAuthBasicInfo(contextIterator itr, std::string& authBasi
     authBasicPassword = itr->values.at(0).value.at(0).substr(pos + 1);
     if (!ft_istoken(authBasicUid))
       throw std::runtime_error("Config Error : invalid auth_basic Using characters that cannot be used in the user ID.");
-    std::cout << "[DEBUG]authBasicUid : " << authBasicUid << std::endl;
-    std::cout << "[DEBUG]authBasicPassword : " << authBasicPassword << std::endl;
+    // std::cout << "[DEBUG]authBasicUid : " << authBasicUid << std::endl;
+    // std::cout << "[DEBUG]authBasicPassword : " << authBasicPassword << std::endl;
     return true;
   }
   return false;
@@ -710,7 +715,7 @@ bool parseConfig::insertCgiScript(contextIterator itr, std::vector<std::string>&
       if (!isFilenameExtension(*itrValues))
         throw std::runtime_error("Config Error : Invalid filename extension in cgi_script");
       cgiScripts.push_back(*itrValues);
-      std::cout << "[DEBUG]cgi_script : " << *itrValues << std::endl;
+      // std::cout << "[DEBUG]cgi_script : " << *itrValues << std::endl;
     }
     return true;
   }
@@ -730,7 +735,7 @@ bool parseConfig::insertClientMaxBodySize(contextIterator itr, int& clientMaxBod
     clientMaxBodySize = parseConfig::stoi(itr->values.at(0).value.at(0).c_str());
     if (clientMaxBodySize == -1)
       throw std::runtime_error("Config Error : invalid client_max_body_size");
-    std::cout << "[DEBUG]client_max_body_size : " << clientMaxBodySize << std::endl;
+    // std::cout << "[DEBUG]client_max_body_size : " << clientMaxBodySize << std::endl;
     return true;
   }
   return false;
@@ -752,7 +757,7 @@ bool parseConfig::insertErrorPages(contextIterator itr, std::map<std::string, st
         if (!isCode(*itrValue))
           throw std::runtime_error("Config Error : invalid error_page");
         errorPages.insert(std::make_pair(*itrValue, relativePath));
-        std::cout << "[DEBUG]error_page : " << *itrValue << " " << relativePath << std::endl;
+        // std::cout << "[DEBUG]error_page : " << *itrValue << " " << relativePath << std::endl;
       }
     }
     return true;
@@ -781,7 +786,7 @@ bool parseConfig::insertIndexs(contextIterator itr, std::vector<std::string>& in
           throw std::runtime_error("Config Error : duplicatie index");
       }
       indexs.push_back(*itrValues);
-      std::cout << "[DEBUG]index : " << *itrValues << std::endl;
+      // std::cout << "[DEBUG]index : " << *itrValues << std::endl;
     }
     return true;
   }
@@ -803,8 +808,8 @@ bool parseConfig::insertListen(contextIterator itr, std::string& host, int& port
     std::string tmpPort = itr->values.at(0).value.at(0).substr(pos + 1);
     if ((port = stoi(tmpPort)) == -1 || port <=0 || port > 65535)
       throw std::runtime_error("Config Error : invalid listen");
-    std::cout << "[DEBUG]host : " << host << std::endl;
-    std::cout << "[DEBUG]port : " << port << std::endl;
+    // std::cout << "[DEBUG]host : " << host << std::endl;
+    // std::cout << "[DEBUG]port : " << port << std::endl;
     return true;
   }
   return false;
@@ -819,7 +824,7 @@ bool parseConfig::insertRoot(contextIterator itr, std::string& root)
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid root");
     root = itr->values.at(0).value.at(0);
-    std::cout << "[DEBUG]root : " << root << std::endl;
+    // std::cout << "[DEBUG]root : " << root << std::endl;
     return true;
   }
   return false;
@@ -844,7 +849,7 @@ bool parseConfig::insertServerNames(contextIterator itr, std::vector<std::string
           throw std::runtime_error("Config Error : duplicatie server_name");
       }
       serverNames.push_back(*itrValues);
-      std::cout << "[DEBUG]server_name : " << *itrValues << std::endl;
+      // std::cout << "[DEBUG]server_name : " << *itrValues << std::endl;
     }
     return true;
   }
@@ -900,6 +905,96 @@ void parseConfig::inheritedFromHigherlevelDirectives(Config& c)
     {
       inheritedCommonConfig(itrServer->configCommon, itrLocation->configCommon);
     }
+  }
+}
+
+parseConfig::parseConfig(char *configFile, Config& c)
+{
+  int fd = open(configFile, O_RDONLY);
+  if (fd == -1)
+  {
+    std::cerr << "Failed to open the config file." << std::endl;
+    std::cerr << strerror(errno) << std::endl; 
+    exit(1);
+  }
+  int r;
+  std::string cmd;
+  char buf[1024];
+  int i_for_buf = 0;
+  while (i_for_buf < 1024)
+    buf[i_for_buf++] = 0;
+  while ((r = read(fd, buf, 1023)) > 0)
+  {
+    cmd.append(buf);
+    i_for_buf = 0;
+    while (i_for_buf < 1024)
+      buf[i_for_buf++] = 0;
+  }
+  if (r == -1)
+  {
+    std::cerr << "Failed to load the config file." << std::endl;
+    std::cerr << strerror(errno) << std::endl; 
+    exit(1);
+  }
+  r = close(fd);
+  if (r == -1)
+  {
+    std::cerr << "Failed to close the config file." << std::endl;
+    std::cerr << strerror(errno) << std::endl; 
+    exit(1);
+  }
+
+  try
+  {
+    lexer(cmd);
+    {
+      // デバッグ用出力
+      // printToken();
+      // std::cout << std::endl;
+    }
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+    exit(1);
+  }
+  {
+    std::cout << "設定ファイルの文法チェック : ";
+    if (checkFormat() == 0)
+    {
+      std::cout << "NG" << std::endl;
+      exit(1);
+    }
+    else
+      std::cout << "OK" << std::endl;
+  }
+  {
+    std::cout << "設定ファイルの内容を一時作業領域に格納 : ";
+    if (r == insertConfigToTmpMemory())
+    {
+      std::cerr << "NG" << std::endl;
+      exit(1);
+    }
+    else
+      std::cerr << "OK" << std::endl;
+    {
+      // デバッグ用出力
+      // printConfigHttp();
+      // std::cout << std::endl;
+    }
+  }
+  try
+  {
+    insertToConfigClass(c);
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+    exit(1);
+  }
+  {
+    // デバッグ用出力
+    c.printConfig();
   }
 }
 

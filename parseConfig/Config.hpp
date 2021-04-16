@@ -54,9 +54,11 @@ class Config
   void printConfig(); // Output for debugging
   Config();
   Config(int testPattern);
+  Config(char *configFile);
   ~Config();
 
  private:
+  char *configFile_;
   Config(const Config&);
   Config& operator=(const Config&);
   void printCommonConfig(s_ConfigCommon& c) const;
