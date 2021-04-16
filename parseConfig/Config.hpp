@@ -6,11 +6,13 @@
 #include <map>
 
 #define CLIENTMAXBODYSIZE 1048576;
+enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, METHOD_NUM};
 
 struct s_ConfigCommon
 {
   std::string autoindex;
   std::vector<std::string> allowMethods;
+  bool allowMethodsBool[METHOD_NUM];
   std::string authBasicRealm;
   std::string authBasicUid;
   std::string authBasicPassword;

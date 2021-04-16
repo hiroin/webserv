@@ -17,15 +17,15 @@ int main(int argc, char* argv[])
       std::cerr << strerror(errno) << std::endl; 
       exit(1);
     }
-    char buf[1024];
+    char buf[2048];
     i_for_buf = 0;
-    while (i_for_buf < 1024)
+    while (i_for_buf < 2048)
       buf[i_for_buf++] = 0;
-    while ((r = read(fd, buf, 1024)) > 0)
+    while ((r = read(fd, buf, 2048)) > 0)
     {
       cmd.append(buf);
       i_for_buf = 0;
-      while (i_for_buf < 1024)
+      while (i_for_buf < 2048)
         buf[i_for_buf++] = 0;
     }
     if (r == -1)
@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
   // デバッグ用出力
   // pc.printToken();
   // std::cout << std::endl;
+  // return 0;
 
   {
     std::cout << "設定ファイルの文法チェック : ";

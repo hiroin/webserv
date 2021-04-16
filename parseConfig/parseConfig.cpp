@@ -4,6 +4,7 @@
 void parseConfig::lexer(std::string s)
 {
   unsigned int idx = 0;
+  unsigned int lastIdx = 0;
   unsigned int startIdx = 0;
   parseconfig::tokenType tt;
 
@@ -15,12 +16,27 @@ void parseConfig::lexer(std::string s)
       continue;
     }
     startIdx = idx;
-    if (isUsableChar(s[idx]))
+    if (s[idx] == '"')
+    {
+      idx++;
+      startIdx = idx;
+      while (s[idx] != '"')
+      {
+        if (idx == s.size())
+          throw std::runtime_error("Double quotation marks are not closed.");
+        idx++;
+      }
+      lastIdx = idx;
+      idx++;
+      tt = parseconfig::CHAR;
+    }
+    else if (isUsableChar(s[idx]))
     {
       while (isUsableChar(s[idx]))
       {
         idx++;
       }
+      lastIdx = idx;
       tt = parseconfig::CHAR;
     }
     else
@@ -42,9 +58,10 @@ void parseConfig::lexer(std::string s)
         break;
       }  
       idx++;
+      lastIdx = idx;
     }
     parseconfig::token t;
-    t.token = s.substr(startIdx, idx - startIdx);
+    t.token = s.substr(startIdx, lastIdx - startIdx);
     t.type = tt;
     vtoken_.push_back(t);
   }
@@ -384,9 +401,11 @@ bool parseConfig::insertToConfigClass(Config& c)
     }
     if (insertAutoindex(itr, tmpConfigCommon.autoindex))
       continue;
-    if (insertAllowMethods(itr, tmpConfigCommon.allowMethods))
+    if (insertAllowMethods(itr, tmpConfigCommon.allowMethods, tmpConfigCommon.allowMethodsBool))
       continue;
-    if (insertAuthBasic(itr, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
+    if (insertAuthBasicInfo(itr, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
+      continue;
+    if (insertAuthBasicRealm(itr, tmpConfigCommon.authBasicRealm))
       continue;
     if (insertCgiScript(itr, tmpConfigCommon.cgiScripts))
       continue;
@@ -417,9 +436,11 @@ bool parseConfig::insertToConfigClass(Config& c)
         continue;
       if (insertAutoindex(itr, tmpConfigServer.configCommon.autoindex))
         continue;
-      if (insertAllowMethods(itr, tmpConfigServer.configCommon.allowMethods))
+      if (insertAllowMethods(itr, tmpConfigServer.configCommon.allowMethods, tmpConfigServer.configCommon.allowMethodsBool))
         continue;
-      if (insertAuthBasic(itr, tmpConfigServer.configCommon.authBasicUid, tmpConfigServer.configCommon.authBasicPassword))
+      if (insertAuthBasicInfo(itr, tmpConfigServer.configCommon.authBasicUid, tmpConfigServer.configCommon.authBasicPassword))
+        continue;
+      if (insertAuthBasicRealm(itr, tmpConfigServer.configCommon.authBasicRealm))
         continue;
       if (insertCgiScript(itr, tmpConfigServer.configCommon.cgiScripts))
         continue;
@@ -446,10 +467,12 @@ bool parseConfig::insertToConfigClass(Config& c)
       {
         if (insertAutoindex(itr, tmpConfigLocation.configCommon.autoindex))
           continue;
-        if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods))
+        if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods, tmpConfigLocation.configCommon.allowMethodsBool))
           continue;
-        if (insertAuthBasic(itr, tmpConfigLocation.configCommon.authBasicUid, tmpConfigLocation.configCommon.authBasicPassword))
+        if (insertAuthBasicInfo(itr, tmpConfigLocation.configCommon.authBasicUid, tmpConfigLocation.configCommon.authBasicPassword))
           continue;
+        if (insertAuthBasicRealm(itr, tmpConfigLocation.configCommon.authBasicRealm))
+          continue;          
         if (insertCgiScript(itr, tmpConfigLocation.configCommon.cgiScripts))
           continue;
         if (insertClientMaxBodySize(itr, tmpConfigLocation.configCommon.clientMaxBodySize))
@@ -580,7 +603,7 @@ bool parseConfig::insertAlias(contextIterator itr, std::string& alias)
   return false;
 }
 
-bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::string>& allowMethods)
+bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::string>& allowMethods, bool* allowMethodsBool)
 {
   if (itr->key == "allow_methods")
   {
@@ -588,6 +611,8 @@ bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::strin
       throw std::runtime_error("Config Error : duplicatie allow_methods");
     if (itr->values.at(0).value.size() == 0)
       throw std::runtime_error("Config Error : invalid allow_methods");
+    for (int i = 0; i < METHOD_NUM; i++)
+      allowMethodsBool[i] = false;
     for (std::vector<std::string>::iterator itrValues = 
         itr->values.at(0).value.begin(); itrValues != itr->values.at(0).value.end(); ++itrValues)
     {
@@ -602,6 +627,22 @@ bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::strin
       if (!isMethod(*itrValues))
         throw std::runtime_error("Config Error : Invalid method in allow_methods");
       allowMethods.push_back(*itrValues);
+      if (*itrValues == "GET")
+        allowMethodsBool[GET] = true;
+      if (*itrValues == "HEAD")
+        allowMethodsBool[HEAD] = true;
+      if (*itrValues == "POST")
+        allowMethodsBool[POST] = true;
+      if (*itrValues == "PUT")
+        allowMethodsBool[PUT] = true;
+      if (*itrValues == "DELETE")
+        allowMethodsBool[DELETE] = true;
+      if (*itrValues == "CONNECT")
+        allowMethodsBool[CONNECT] = true;
+      if (*itrValues == "OPTIONS")
+        allowMethodsBool[OPTIONS] = true;
+      if (*itrValues == "TRACE")
+        allowMethodsBool[TRACE] = true;
       std::cout << "[DEBUG]allow_methods : " << *itrValues << std::endl;
     }
     return true;
@@ -609,9 +650,24 @@ bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::strin
   return false;
 }
 
-bool parseConfig::insertAuthBasic(contextIterator itr, std::string& authBasicUid, std::string& authBasicPassword)
+bool parseConfig::insertAuthBasicRealm(contextIterator itr, std::string& authBasicRealm)
 {
   if (itr->key == "auth_basic")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie auth_basic");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid auth_basic");
+    authBasicRealm = itr->values.at(0).value.at(0);
+    std::cout << "[DEBUG]auth_basic : " << authBasicRealm << std::endl;
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertAuthBasicInfo(contextIterator itr, std::string& authBasicUid, std::string& authBasicPassword)
+{
+  if (itr->key == "auth_basic_info")
   {
     if (itr->values.size() > 1)
       throw std::runtime_error("Config Error : duplicatie auth_basic");
@@ -800,9 +856,17 @@ void parseConfig::inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& 
   if (lower.autoindex.empty())
     lower.autoindex = higher.autoindex;
   if (lower.allowMethods.empty())
+  {
     lower.allowMethods = higher.allowMethods;
+    for (int i = 0; i < METHOD_NUM; i++)
+    {
+      lower.allowMethodsBool[i] = higher.allowMethodsBool[i];
+    }
+  }
   if (lower.authBasicRealm.empty())
     lower.authBasicRealm = higher.authBasicRealm;
+  else if(lower.authBasicRealm == "off")
+    lower.authBasicRealm.clear();
   if (lower.authBasicUid.empty())
     lower.authBasicUid = higher.authBasicUid;
   if (lower.authBasicPassword.empty())
@@ -812,7 +876,7 @@ void parseConfig::inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& 
   if (lower.clientMaxBodySize == -1)
     lower.clientMaxBodySize = higher.clientMaxBodySize;
   if (lower.indexs.empty())
-    lower.cgiScripts = higher.indexs;
+    lower.indexs = higher.indexs;
   for (std::map<std::string, std::string>::iterator itr = higher.errorPages.begin();
       itr != higher.errorPages.end();
       itr++

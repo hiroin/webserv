@@ -4,6 +4,10 @@
 s_ConfigCommon::s_ConfigCommon()
 {
   clientMaxBodySize = -1;
+  for (int i = 0; i < METHOD_NUM; i++)
+  {
+    allowMethodsBool[i] = true;
+  }
 }
 
 void Config::printCommonConfig(s_ConfigCommon& c) const
@@ -17,6 +21,13 @@ void Config::printCommonConfig(s_ConfigCommon& c) const
     std::cout << *itr << " " ;
   }
   std::cout << std::endl;
+  std::cout << " allowMethodsBool  : " ;
+  for(int i = 0; i < METHOD_NUM; i++)
+  {
+    std::cout << c.allowMethodsBool[i] << " " ;
+  }
+  std::cout << std::endl;
+  std::cout << " authBasicRealm    : " << c.authBasicRealm << std::endl;
   std::cout << " authBasicUid      : " << c.authBasicUid << std::endl;
   std::cout << " authBasicPassword : " << c.authBasicPassword << std::endl;
   std::cout << " cgiScripts        : " ;
