@@ -467,6 +467,8 @@ bool parseConfig::insertToConfigClass(Config& c)
       for(std::vector<parseconfig::context>::iterator itr =
           itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
       {
+        if (insertAlias(itr, tmpConfigLocation.alias))
+          continue;
         if (insertAutoindex(itr, tmpConfigLocation.configCommon.autoindex))
           continue;
         if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods, tmpConfigLocation.configCommon.allowMethodsBool))
