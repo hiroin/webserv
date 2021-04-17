@@ -395,12 +395,12 @@ int main()
 //     HTTPMessageParser c;
 //     if (!c.parseHeader("Host: 127.0.0.1"))
 //       return 1;
-//     if (!c.parseHeader("Host: 127.0.0.1"))
-//       return 1;
+//     // if (!c.parseHeader("Host: 127.0.0.1"))
+//     //   return 1;
 //     if (!c.parseHeader("Accept: */*"))
 //       return 1;
-//     if (!c.parseHeader("Accept: */*"))
-//       return 1;
+//     // if (!c.parseHeader("Accept: */*"))
+//     //   return 1;
 //     if (!c.parseHeader("User-Agent: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1)"))
 //       return 1;
 //     std::map<std::string, std::string> headers = c.getHeaders();
