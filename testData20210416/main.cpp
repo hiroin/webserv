@@ -18,14 +18,35 @@ clang++ -fsanitize=address -g parseConfig.cpp Config.cpp HTTPMessageParser.cpp C
 
 */
 
-int main(int argc, char* argv[])
+// int main(int argc, char* argv[])
+// {
+//   if (argc == 1)
+//     return 1;
+//   Client client;
+//   Config c;
+//   parseConfig(argv[1], c);
+//   HTTPMessageParser hmp(1);
+//   // HTTPMessageParser hmp("serverNames", 1);
+//   return 0;
+// }
+
+#ifdef TEST_CLIENT_EQUAL
+int main()
 {
-  if (argc == 1)
-    return 1;
-  Client client;
-  Config c;
-  parseConfig(argv[1], c);
-  HTTPMessageParser hmp(1);
-  // HTTPMessageParser hmp("serverNames", 1);
+  Client client1;
+  Client client2;
+
+  if (client1 == client1)
+    std::cout << "client1 == client1" << std::endl;
+  if (client1 == client2)
+    std::cout << "client1 == client2" << std::endl;
+  else
+    std::cout << "client1 != client2" << std::endl;
+  if (client1 != client2)
+    std::cout << "client1 != client2" << std::endl;
+  else
+    std::cout << "client1 == client2" << std::endl;
+  
   return 0;
 }
+#endif

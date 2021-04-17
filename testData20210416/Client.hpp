@@ -14,10 +14,16 @@ class Client
   HTTPMessageParser hmp_;
   Client();
   ~Client();
+  bool operator==(const Client&);
+  bool operator!=(const Client&);  
 
  private:
   Client(const Client&);
   Client& operator=(const Client&);  
+
+  //テスト用
+  static int dummyFd;
 };
+
 
 #endif

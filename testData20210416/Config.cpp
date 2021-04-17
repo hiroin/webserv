@@ -115,3 +115,79 @@ Config::~Config()
 {
 
 };
+
+bool s_ConfigCommon::operator==(const s_ConfigCommon& other)
+{
+  if (autoindex == other.autoindex
+    && allowMethods == other.allowMethods
+    && authBasicRealm == other.authBasicRealm
+    && authBasicUid == other.authBasicUid
+    && authBasicPassword == other.authBasicPassword
+    && cgiScripts == other.cgiScripts
+    && clientMaxBodySize == other.clientMaxBodySize
+    && errorPages == other.errorPages
+    && indexs == other.indexs
+  )
+  {
+    return true;
+  }
+  return false;
+}
+
+bool s_ConfigCommon::operator!=(const s_ConfigCommon& other)
+{
+  if (*this == other)
+    return false;
+  return true;
+}
+
+bool s_ConfigLocation::operator==(const s_ConfigLocation& other)
+{
+  if (path == other.path
+    && alias == other.alias
+    && configCommon == other.configCommon
+  )
+  {
+    return true;
+  }
+  return false;
+}
+
+bool s_ConfigLocation::operator!=(const s_ConfigLocation& other)
+{
+  if (*this == other)
+    return false;
+  return true;
+}
+
+bool s_ConfigServer::operator==(const s_ConfigServer& other)
+{
+  if (host == other.host
+    && port == other.port
+    && root == other.root
+    && serverNames == other.serverNames
+    && configCommon == other.configCommon
+  )
+  {
+    if (locations.size() != other.locations.size())
+      return false;
+    size_t i = 0;
+    for (std::vector<s_ConfigLocation>::iterator itr = locations.begin();
+      itr != locations.end();
+      itr++)
+    {
+      if (!(*itr == other.locations.at(i)))
+        return false;
+      i++;
+    }
+    return true;
+  }
+  return false;
+}
+
+bool s_ConfigServer::operator!=(const s_ConfigServer& other)
+{
+  if (*this == other)
+    return false;
+  return true;
+}
