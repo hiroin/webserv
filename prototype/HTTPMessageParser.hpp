@@ -1,48 +1,45 @@
-#ifndef _CLIENT_H_
-#define _CLIENT_H_
+#ifndef _HTTPMESSAGEPARSER_H_
+#define _HTTPMESSAGEPARSER_H_
 
 #include <iostream>
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
 #include <map>
+#include <algorithm>
 #include "ft.hpp"
 
-#define SUCCESS 1
-#define FAILURE 0
-namespace client {
+namespace httpMessageParser {
   enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER};
 }
 
-class Client {
+class HTTPMessageParser {
  public:
-  bool setData(const char *data, size_t size);
-  void getRequestLineFromRecvData();
-  bool parseRequestLine();
+  bool parseRequestLine(const std::string requestLine);
   std::string getMessageHeader() const;
-  enum client::method getMethod() const;
+  enum httpMessageParser::method getMethod() const;
+  std::string getRequestTarget() const;
   std::string getHTTPVersion() const;
-  void getHeaderFromRecvData();
-  bool parseRequestTarget();
+  bool parseRequestTarget(std::string requestTarget);
   std::string getAbsolutePath() const;
   std::string getQuery() const;
   std::string getAuthority() const;
-  bool parseHeader();
-  char *getMessageBody() const;
+  std::string getPathinfo() const;
+  bool parseHeader(std::string header);
+  std::map<std::string, std::string> getHeaders() const;
+  void clearData();
 
  public:
-  Client();
-  ~Client();
+  HTTPMessageParser();
+  ~HTTPMessageParser();
 
  private:
-  char *recvData_;
-  size_t recvDataSize_;
-  std::string messageHeader_;
-  size_t messageBodyStartPosition_;
   std::string requestLine_;
+  std::vector<std::string> filenameExtensions_;
 
   // requestLine_をparseした結果を格納
-  enum client::method method_;
+  enum httpMessageParser::method method_;
   std::string requestTarget_;
   std::string HTTPVersion_;
 
@@ -52,11 +49,16 @@ class Client {
   std::string absolutePath_; // OPTIONSの*の場合のここにいれる
   std::string query_;
   std::string authority_; // CONNECTの場合の接続先
+  std::string pathinfo_;
 
   // headerを格納
-  std::multimap<std::string, std::string> header_;
+  bool validationHeader(std::string header);
+  bool pushFieldNameAndValue(std::string fieldName, std::string fieldValue);
+  std::map<std::string, std::string> headers_;
 
-  char *messageBody_;
+  //
+ public:
+  friend class HTTPMessageParserTest;
 };
 
 /*

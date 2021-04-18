@@ -21,8 +21,8 @@ struct s_ConfigCommon
   std::map<std::string, std::string> errorPages;
   std::vector<std::string> indexs;
   s_ConfigCommon();
-  bool operator==(const s_ConfigCommon&);
-  bool operator!=(const s_ConfigCommon&);
+  bool operator==(const s_ConfigCommon&) const;
+  bool operator!=(const s_ConfigCommon&) const;
 };
 
 struct s_ConfigLocation
@@ -30,8 +30,8 @@ struct s_ConfigLocation
   std::string path;
   std::string alias;
   s_ConfigCommon configCommon;
-  bool operator==(const s_ConfigLocation&);
-  bool operator!=(const s_ConfigLocation&);
+  bool operator==(const s_ConfigLocation&) const;
+  bool operator!=(const s_ConfigLocation&) const;
 };
 
 struct s_ConfigServer
@@ -42,8 +42,8 @@ struct s_ConfigServer
   std::vector<std::string> serverNames;
   std::vector<s_ConfigLocation> locations;
   s_ConfigCommon configCommon;
-  bool operator==(const s_ConfigServer&);
-  bool operator!=(const s_ConfigServer&);
+  bool operator==(const s_ConfigServer&) const;
+  bool operator!=(const s_ConfigServer&) const;
 };
 
 struct s_ConfigGlobal

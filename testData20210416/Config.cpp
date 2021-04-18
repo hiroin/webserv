@@ -116,7 +116,7 @@ Config::~Config()
 
 };
 
-bool s_ConfigCommon::operator==(const s_ConfigCommon& other)
+bool s_ConfigCommon::operator==(const s_ConfigCommon& other) const
 {
   if (autoindex == other.autoindex
     && allowMethods == other.allowMethods
@@ -134,14 +134,14 @@ bool s_ConfigCommon::operator==(const s_ConfigCommon& other)
   return false;
 }
 
-bool s_ConfigCommon::operator!=(const s_ConfigCommon& other)
+bool s_ConfigCommon::operator!=(const s_ConfigCommon& other) const
 {
   if (*this == other)
     return false;
   return true;
 }
 
-bool s_ConfigLocation::operator==(const s_ConfigLocation& other)
+bool s_ConfigLocation::operator==(const s_ConfigLocation& other) const
 {
   if (path == other.path
     && alias == other.alias
@@ -153,39 +153,29 @@ bool s_ConfigLocation::operator==(const s_ConfigLocation& other)
   return false;
 }
 
-bool s_ConfigLocation::operator!=(const s_ConfigLocation& other)
+bool s_ConfigLocation::operator!=(const s_ConfigLocation& other) const
 {
   if (*this == other)
     return false;
   return true;
 }
 
-bool s_ConfigServer::operator==(const s_ConfigServer& other)
+bool s_ConfigServer::operator==(const s_ConfigServer& other) const
 {
   if (host == other.host
     && port == other.port
     && root == other.root
     && serverNames == other.serverNames
     && configCommon == other.configCommon
+    && locations == other.locations
   )
   {
-    if (locations.size() != other.locations.size())
-      return false;
-    size_t i = 0;
-    for (std::vector<s_ConfigLocation>::iterator itr = locations.begin();
-      itr != locations.end();
-      itr++)
-    {
-      if (!(*itr == other.locations.at(i)))
-        return false;
-      i++;
-    }
     return true;
   }
   return false;
 }
 
-bool s_ConfigServer::operator!=(const s_ConfigServer& other)
+bool s_ConfigServer::operator!=(const s_ConfigServer& other) const
 {
   if (*this == other)
     return false;
