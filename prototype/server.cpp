@@ -34,15 +34,14 @@ int http1()
   std::vector<Socket> servers;
   try
   {
-    // Socket *sock = new Socket(HTTP1_PORT, "*");
-    servers.push_back(Socket(HTTP1_PORT, "*"));
+    // servers.push_back(Socket(HTTP1_PORT, "*"));
+    servers.push_back(Socket(HTTP1_PORT, "127.0.0.1"));
   }
   catch(const std::exception& e)
   {
     std::cerr << e.what() << '\n';
     exit(1);
   }
-  // sock->set_socket();
 
   int body_length = 0;
   int is_file_exist;

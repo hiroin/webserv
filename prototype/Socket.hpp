@@ -13,12 +13,11 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <errno.h>
+#include "ft.hpp"
 
 class Socket {
  public:
   Socket(int port_, std::string host_);
-  void set_listenfd();
-  void set_sockaddr_in();
   int get_listenfd() const { return this->listenfd; }
 
  private:
@@ -26,7 +25,8 @@ class Socket {
   int port;
   std::string host; 
   struct sockaddr_in serv_addr;
-  int set_socket();
+  void set_socket();
+  void set_sockaddr_in();
 };
 
 #endif
