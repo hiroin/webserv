@@ -21,12 +21,12 @@
 #include "recvData.hpp"
 #include "HTTPMessageParser.hpp"
 
+enum clientStatus {PARSE_STARTLINE, PARSE_HEADER, RESV_BODY, READ, WRITE, SEND, NUM_OF_CLIENTSTATUS};
 struct client
 {
-  bool getStartline;
-  bool getHeader;
+  enum clientStatus status;
+  client(){status = PARSE_STARTLINE;};
 };
-
 
 int http1()
 {
@@ -34,8 +34,8 @@ int http1()
   std::vector<Socket> servers;
   try
   {
-    // servers.push_back(Socket(HTTP1_PORT, "*"));
-    servers.push_back(Socket(HTTP1_PORT, "control-plane.minikube.internal"));
+    servers.push_back(Socket(6000, "*"));
+    servers.push_back(Socket(6100, "localhost"));
   }
   catch(const std::exception& e)
   {
@@ -50,14 +50,9 @@ int http1()
   recvData recvData[MAX_SESSION];
   HTTPMessageParser hmp[MAX_SESSION];
   client clients[MAX_SESSION];
-
-  for (int i = 0; i < MAX_SESSION; i++) {
-    clients[i].getStartline = false;
-    clients[i].getHeader = false;
-    accfd[i] = -1;
-  }
-
   fd_set fds;
+  for (int i = 0; i < MAX_SESSION; i++)
+    accfd[i] = -1;
 
   int j = 0; // 動作確認用
   while (1) {
@@ -86,22 +81,6 @@ int http1()
 
     if (FD_ISSET(servers[0].get_listenfd(), &fds)) {
       int connfd = accept(servers[0].get_listenfd(), (struct sockaddr*)NULL, NULL);
-
-      // ノンブロッキングのソケットに変更
-      // int flags = fcntl(connfd, F_GETFL);
-      // if(-1 == flags)
-      // {
-      //   std::cout << "fcntl() failed." << std::endl;
-      //   close(connfd);
-      //   break;
-      // }
-      // int result = fcntl(connfd, F_SETFL, flags | O_NONBLOCK);
-      // if(-1 == result)
-      // {
-      //   std::cout << "fcntl() failed." << std::endl;
-      //   close(connfd);
-      //   break;
-      // }
       int result = fcntl(connfd, F_SETFL, O_NONBLOCK);
       if(-1 == result)
       {
@@ -125,71 +104,93 @@ int http1()
       }
     }
 
-    // accept
-    // https://linuxjm.osdn.jp/html/LDP_man-pages/man2/accept.2.html
-    // addr 引き数は sockaddr 構造体へのポインターである。
-    // この構造体には接続相手のソケットのアドレスが入っている。
-    // addr が NULL の場合、 addr には何も入らない。
-    // この場合、 addrlen は使用されず、この引き数は NULL にしておくべきである。
-    //accfd = accept(sock->get_listenfd(), (struct sockaddr*)NULL, NULL);
     for (int i = 0; i < MAX_SESSION; i++) {
-      if(accfd[i] == -1) {
+      if(accfd[i] == -1)
+      {
           continue;
       }
-      if (FD_ISSET(accfd[i], &fds)) {
-        if (!recvData[i].recvFromSocket()) {
+      if (FD_ISSET(accfd[i], &fds))
+      {
+        if (!recvData[i].recvFromSocket())
+        {
           close(accfd[i]);
           accfd[i] = -1;
           continue;
         }
-        if (1)
         {
-          std::cout << "------------------------" << std::endl;
-          std::cout << "// recvData\n" << recvData[i].getRecvData() << "]]]" << std::endl;
-          std::cout << "------------------------" << std::endl;
-        }
-        if (1) {
-          while (recvData[i].cutOutRecvDataToEol()) {
-            std::cout << "------------------------" << std::endl;
-            std::cout << "// extractedData_\n" << recvData[i].getExtractedData() << std::endl;
-            std::cout << "------------------------" << std::endl;
-            if (clients[i].getStartline == false && hmp[i].parseRequestLine(recvData[i].getExtractedData()))
+          // デバッグ
+          std::cout << "--recvData-----------------------------" << std::endl;
+          std::cout << recvData[i].getRecvData();
+          std::cout << "---------------------------------------" << std::endl;
+        }        
+      }
+      if (clients[i].status == PARSE_STARTLINE)
+      {
+        if (recvData[i].cutOutRecvDataToEol() \
+          && recvData[i].getExtractedData() != "")
+        {
+          // デバッグ
+          std::cout << "--extractedData_----------------------" << std::endl;
+          std::cout << recvData[i].getExtractedData() << std::endl;
+          std::cout << "--------------------------------------" << std::endl;
+          if (hmp[i].parseRequestLine(recvData[i].getExtractedData())
+            && hmp[i].parseRequestTarget(hmp[i].getRequestTarget()))
+          {
             {
+              // デバッグ
+              std::cout << "--startLine-----------------------" << std::endl;
               std::cout << "method = " << hmp[i].getMethod() << std::endl;
               std::cout << "request-target = " << hmp[i].getRequestTarget() << std::endl;
               std::cout << "HTTP-version = " << hmp[i].getHTTPVersion() << std::endl;
-              clients[i].getStartline = true;
+              std::cout << "absolute-path = " << hmp[i].getAbsolutePath() << std::endl;
+              std::cout << "query = " << hmp[i].getQuery() << std::endl;
+              std::cout << "----------------------------------" << std::endl;
             }
-            // \r\nのみが来た場合、MessageHeaderが終了
-            else if (clients[i].getHeader == false && recvData[i].getExtractedData() == "")
+            clients[i].status = PARSE_HEADER;
+          }
+          else
+          {
+            // 400を返す
+            close(accfd[i]);
+            recvData[i].clearData();
+            hmp[i].clearData();
+            accfd[i] = -1;
+            continue;
+          }
+        }
+      }
+      if (clients[i].status == PARSE_HEADER)
+      {
+        while (recvData[i].cutOutRecvDataToEol())
+        {
+          // \r\nのみが来た場合、MessageHeaderが終了
+          if (recvData[i].getExtractedData() == "")
+          {
+            // デバッグ
             {
-              clients[i].getHeader = true;
-
-              // 初期化
-              recvData[i].clearData();
-              hmp[i].clearData();
-              clients[i].getStartline = false;
-              clients[i].getHeader = false;
-              close(accfd[i]);
-              accfd[i] = -1;
-            }
-            else if (clients[i].getHeader == false && hmp[i].parseHeader(recvData[i].getExtractedData()))
-            {
+              std::cout << "--headers  -----------------------" << std::endl;
               std::map<std::string, std::string> headers = hmp[i].getHeaders();
               for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
               {
                 std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
               }
+              std::cout << "----------------------------------" << std::endl;
             }
+            // 状態を最初に戻す
+            clients[i].status = PARSE_STARTLINE;
+            hmp[i].clearData();
+            break;
           }
-          // recvData[i].clearData();
-          // close(accfd[i]);
-          // accfd[i] = -1;
+          else
+          {
+            hmp[i].parseHeader(recvData[i].getExtractedData());
+          }
         }
       }
     }
   }
   close(servers[0].get_listenfd());
+  close(servers[1].get_listenfd());
   return 0;
 }
 
