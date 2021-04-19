@@ -11,8 +11,9 @@ HTTP1_SOURCE = server.cpp \
                ft_trim.cpp \
                ft_istchar.cpp \
                ft_isspase_and_htab.cpp \
-               ft_isvchar.cpp
-
+               ft_isvchar.cpp \
+               ft_split_use_find_first_of.cpp \
+							 ft_print_vector_string.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

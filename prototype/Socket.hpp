@@ -27,6 +27,8 @@ class Socket {
   struct sockaddr_in serv_addr;
   void set_socket();
   void set_sockaddr_in();
+  bool resolve_hostname(); // host_を/etc/hostsから探してIPアドレスがあれば、IPアドレスをhost_にセットする
+  bool search_hostname_from_hostsfile(std::string hosts); // host_を/etc/hostsから探してIPアドレスがあれば、IPアドレスをhost_にセットする
 };
 
 #endif

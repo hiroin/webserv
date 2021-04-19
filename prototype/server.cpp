@@ -35,7 +35,7 @@ int http1()
   try
   {
     // servers.push_back(Socket(HTTP1_PORT, "*"));
-    servers.push_back(Socket(HTTP1_PORT, "127.0.0.1"));
+    servers.push_back(Socket(HTTP1_PORT, "control-plane.minikube.internal"));
   }
   catch(const std::exception& e)
   {
