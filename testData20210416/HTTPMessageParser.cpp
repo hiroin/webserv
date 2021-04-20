@@ -54,6 +54,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 2:
@@ -61,6 +62,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/index.html";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/index.html";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 3:
@@ -68,6 +70,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/aaa/index.html";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/aaa/index.html";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 4:
@@ -75,6 +78,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/aaa/";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/aaa/";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 5:
@@ -82,6 +86,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/aa/";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/aa/";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 6:
@@ -89,6 +94,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/aa/index.html";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/aa/index.html";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 7:
@@ -96,6 +102,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/www/aaa/index.html";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/www/aaa/index.html";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 8:
@@ -103,6 +110,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/bbb/index.html";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/bbb/index.html";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 9:
@@ -110,6 +118,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/bb/index.html";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/bb/index.html";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 10:
@@ -117,6 +126,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/www/bb/index.html";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/www/bb/index.html";
+    headers_["host"] = "127.0.0.1";
     break;
 
   case 11:
@@ -124,6 +134,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     requestTarget_ = "/1.jpg";
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/1.jpg";
+    headers_["host"] = "127.0.0.1";
     break;
 
   default:
@@ -175,6 +186,14 @@ HTTPMessageParser::HTTPMessageParser(std::string conf, int testPattern)
       HTTPVersion_ = "HTTP/1.1";
       absolutePath_ = "/index.html";
       headers_["host"] = "server";
+      break;
+
+    case 6:
+      method_ = httpMessageParser::GET;
+      requestTarget_ = "/index.html";
+      HTTPVersion_ = "HTTP/1.1";
+      absolutePath_ = "/index.html";
+      headers_["host"] = "127.0.0.1:5000";
       break;
 
     default:

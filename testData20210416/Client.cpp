@@ -1,5 +1,46 @@
 #include "Client.hpp"
 
+void Client::generateTestValue(int testPatternOfClient)
+{
+  switch (testPatternOfClient)
+  {
+  case 1:
+    port_ = 6000;
+    host_ = "*";
+    break;
+
+  case 2:
+    port_ = 6100;
+    host_ = "*";
+    break;
+
+  case 3:
+    port_ = 6200;
+    host_ = "127.0.0.1";
+    break;
+
+  case 4:
+    port_ = 6300;
+    host_ = "127.0.0.1";
+    break;
+
+  default:
+    break;
+  }
+}
+
+Client::Client(int testPatternOfClient, int testPatternOfHTTPMessageParser)
+{
+  this->generateTestValue(testPatternOfClient);
+  this->hmp_ = HTTPMessageParser(testPatternOfHTTPMessageParser);
+}
+
+Client::Client(int testPatternOfClient, std::string testPatternOfHTTPMessageParserConf, int testPatternOfHTTPMessageParser)
+{
+  this->generateTestValue(testPatternOfClient); 
+  this->hmp_ = HTTPMessageParser("serverNames", testPatternOfHTTPMessageParser);
+}
+
 Client::Client()
 {
   HTTPMessageParser hmp(1);

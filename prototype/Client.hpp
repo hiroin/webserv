@@ -1,5 +1,5 @@
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef _CLIENT_H_
+#define _CLIENT_H_
 
 #include <vector>
 #include <string>
@@ -45,6 +45,8 @@ class Client
   Client(const Client&);
   Client& operator=(const Client&);
 
+  //テスト用
+  static int dummyFd;
 };
 
 #endif

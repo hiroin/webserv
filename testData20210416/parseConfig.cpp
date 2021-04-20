@@ -456,7 +456,7 @@ bool parseConfig::insertToConfigClass(Config& c)
       errorMessage +=  itr->key ;
       throw std::runtime_error(errorMessage);
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
     for(std::vector<parseconfig::configLocation>::iterator itrConfig =
         itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig)
     {
@@ -961,25 +961,28 @@ parseConfig::parseConfig(char *configFile, Config& c)
     exit(1);
   }
   {
-    std::cout << "設定ファイルの文法チェック : ";
-    if (checkFormat() == 0)
-    {
-      std::cout << "NG" << std::endl;
-      exit(1);
-    }
-    else
-      std::cout << "OK" << std::endl;
+    // デバッグ用出力
+    // std::cout << "設定ファイルの文法チェック : ";
+    // if (checkFormat() == 0)
+    // {
+    //   std::cout << "NG" << std::endl;
+    //   exit(1);
+    // }
+    // else
+    //   std::cout << "OK" << std::endl;
   }
+  r = insertConfigToTmpMemory();
   {
-    std::cout << "設定ファイルの内容を一時作業領域に格納 : ";
-    if (r == insertConfigToTmpMemory())
+    if (r == 0)
     {
+      std::cout << "設定ファイルの内容を一時作業領域に格納 : ";
       std::cerr << "NG" << std::endl;
       exit(1);
     }
     else
-      std::cerr << "OK" << std::endl;
     {
+      // std::cout << "設定ファイルの内容を一時作業領域に格納 : ";
+      // std::cerr << "OK" << std::endl;
       // デバッグ用出力
       // printConfigHttp();
       // std::cout << std::endl;
@@ -996,7 +999,7 @@ parseConfig::parseConfig(char *configFile, Config& c)
   }
   {
     // デバッグ用出力
-    c.printConfig();
+    // c.printConfig();
   }
 }
 

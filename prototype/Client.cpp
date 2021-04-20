@@ -25,3 +25,6 @@ bool Client::operator!=(const Client& other)
     return false;
   return true;
 }
+
+// テスト用
+int Client::dummyFd = 4;
