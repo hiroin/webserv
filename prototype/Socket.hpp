@@ -19,6 +19,8 @@ class Socket {
  public:
   Socket(int port_, std::string host_);
   int get_listenfd() const { return this->listenfd; }
+  int get_port() const { return this->port; }
+  std::string get_host() const { return this->host; }
 
  private:
   int listenfd;

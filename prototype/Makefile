@@ -2,12 +2,13 @@ CC = clang++
 HTTP1 = server
 HTTP1_SOURCE = server.cpp \
                Socket.cpp \
+               recvData.cpp \
+               HTTPMessageParser.cpp \
+               Client.cpp \
                http1header.cpp \
                http1parser.cpp \
                http1response.cpp \
                ft_memset.cpp \
-               recvData.cpp \
-               HTTPMessageParser.cpp \
                ft_trim.cpp \
                ft_istchar.cpp \
                ft_isspase_and_htab.cpp \
