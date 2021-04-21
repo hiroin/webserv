@@ -10,9 +10,11 @@
 
 bool ft_isctl(char c);
 bool ft_isspase_and_htab(char c);
+bool ft_issubdelims(char c);
 bool ft_istchar(char c);
 bool ft_istoken(std::string s);
 bool ft_istspecials(char c);
+bool ft_isunreserved(char c);
 bool ft_isvchar(char c);
 bool ft_istchar(char c);
 void *ft_memcpy(void *dest, const void *src, size_t n);

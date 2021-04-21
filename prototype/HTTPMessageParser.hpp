@@ -29,6 +29,9 @@ class HTTPMessageParser {
   bool parseHeader(std::string header);
   std::map<std::string, std::string> getHeaders() const;
   void clearData();
+  bool isIllegalValueOfHostHeader(std::string headerField ) const;
+  bool correctHostValue(std::string hostValue) const; // private
+  bool correctUrihost(std::string uriHost) const; // private
 
  public:
   HTTPMessageParser();

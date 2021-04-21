@@ -171,6 +171,45 @@ void HTTPMessageParser::clearData()
   headers_.clear();
 }
 
+bool HTTPMessageParser::isIllegalValueOfHostHeader(std::string headerField) const
+{
+  std::string s = headerField;
+  std::transform(s.begin(), s.end(), s.begin(), tolower);
+  std::string::size_type pos = s.find(std::string("host:"));
+  if (pos == std::string::npos)
+    return false;
+  std::string fieldValue  = headerField.substr(pos + 5);
+  fieldValue = ft_trim(fieldValue, " \t");
+  if (correctHostValue(fieldValue))
+    return false;
+  return true;
+}
+
+bool HTTPMessageParser::correctHostValue(std::string hostValue) const
+{
+  std::string::size_type pos = hostValue.find(std::string(":"));
+  if (pos != std::string::npos)
+    hostValue = hostValue.substr(0, pos);
+  if (correctUrihost(hostValue))
+    return true;
+  return false;
+}
+
+bool HTTPMessageParser::correctUrihost(std::string uriHost) const
+{
+  if (uriHost.size() == 0)
+    return false;
+  for (std::string::iterator itr = uriHost.begin();
+    itr != uriHost.end();
+    itr++
+  )
+  {
+    if (!(ft_isunreserved(*itr) || *itr == '%' || ft_issubdelims(*itr)))
+      return false;
+  }
+  return true;
+}
+
 bool HTTPMessageParser::isAuthority(std::string requestTarget)
 {
   // 正しいケース

@@ -162,3 +162,55 @@ TEST(HTTPMessageParserEvenTest, parseHeader) {
     EXPECT_EQ("*/*,*/*", headers["accept"]);
   }
 }
+
+TEST(HTTPMessageParserEvenTest, isIllegalValueOfHostHeader) {
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host::"));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("host::"));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host:"));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host: "));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host:   "));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host: /"));
+    EXPECT_FALSE(c.isIllegalValueOfHostHeader("Host: 127.0.0.1:5000"));
+    EXPECT_FALSE(c.isIllegalValueOfHostHeader("host: 127.0.0.1:5000"));
+    EXPECT_FALSE(c.isIllegalValueOfHostHeader("host: 127.0.0.1:5000:5000"));
+  }
+}
+
+TEST(HTTPMessageParserEvenTest, correctHostValue) {
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.correctHostValue("127.0.0.1:5000"));
+    EXPECT_TRUE(c.correctHostValue("127.0.0.1::"));
+    EXPECT_TRUE(c.correctHostValue("www.yahoo.co.jp:5000"));
+    EXPECT_TRUE(c.correctHostValue("www.yahoo.co.jp::"));
+    EXPECT_FALSE(c.correctHostValue(":5000"));
+    EXPECT_FALSE(c.correctHostValue(":"));
+  }
+}
+
+TEST(HTTPMessageParserEvenTest, correctUrihost) {
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.correctUrihost("127.0.0.1"));
+    EXPECT_TRUE(c.correctUrihost("www.yahoo.co.jp"));
+    EXPECT_TRUE(c.correctUrihost("-._~!$&'()*+,;="));
+    EXPECT_FALSE(c.correctUrihost("\""));
+    EXPECT_FALSE(c.correctUrihost("#"));
+    EXPECT_FALSE(c.correctUrihost("/"));
+    EXPECT_FALSE(c.correctUrihost(":"));
+    EXPECT_FALSE(c.correctUrihost(":"));
+    EXPECT_FALSE(c.correctUrihost("<"));
+    EXPECT_FALSE(c.correctUrihost(">"));
+    EXPECT_FALSE(c.correctUrihost("?"));
+    EXPECT_FALSE(c.correctUrihost("@"));
+    EXPECT_FALSE(c.correctUrihost("["));
+    EXPECT_FALSE(c.correctUrihost("]"));
+    EXPECT_FALSE(c.correctUrihost("^"));
+    EXPECT_FALSE(c.correctUrihost("`"));
+    EXPECT_FALSE(c.correctUrihost("{"));
+    EXPECT_FALSE(c.correctUrihost("|"));
+    EXPECT_FALSE(c.correctUrihost("}"));
+  }
+}
