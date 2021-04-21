@@ -5,22 +5,22 @@ void Client::generateTestValue(int testPatternOfClient)
   switch (testPatternOfClient)
   {
   case 1:
-    port_ = 6000;
+    port_ = 5000;
     host_ = "*";
     break;
 
   case 2:
-    port_ = 6100;
+    port_ = 5001;
     host_ = "*";
     break;
 
   case 3:
-    port_ = 6200;
+    port_ = 5000;
     host_ = "127.0.0.1";
     break;
 
   case 4:
-    port_ = 6300;
+    port_ = 5001;
     host_ = "127.0.0.1";
     break;
 

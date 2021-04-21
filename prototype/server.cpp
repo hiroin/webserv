@@ -15,8 +15,10 @@
 #include "recvData.hpp"
 #include "HTTPMessageParser.hpp"
 #include "Client.hpp"
+#include "Config.hpp"
+#include "parseConfig.hpp"
 
-int http1()
+int http1(Config& c)
 {
   std::vector<Socket> servers;
   try
@@ -236,6 +238,22 @@ int http1()
 
 int main(int argc, char *argv[])
 {
-    http1();
-    return 0;
+  if (argc != 2)
+  {
+    std::cout << "Usage: ./server [configfile]" << std::endl;
+    return 1;
+  }
+  Config c;
+  // c.printConfig(); // Config内容の出力
+  try
+  {
+    parseConfig(argv[1], c);
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+    return 1;
+  }
+  http1(c);
+  return 0;
 }
