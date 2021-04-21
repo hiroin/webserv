@@ -155,7 +155,16 @@ int http1()
           }
           else
           {
-            // 400を返す
+            std::string response400;
+            response400 += "HTTP/1.1 400 Bad Request\r\n";
+            response400 += "Content-Type: text/html\r\n";
+            response400 += "Content-Length: 16\r\n";
+            response400 += "Connection: close\r\n";
+            response400 += "\r\n";
+            response400 += "400 Bad Request\n\r\n";
+            std::cout << response400 << std::endl;
+            if (send(clients[i].socketFd, response400.c_str(), response400.length(), 0) == -1)
+              std::cout << "send() failed." << std::endl;
             close(clients[i].socketFd);
             clients[i].recvData.clearData();
             clients[i].hmp.clearData();
@@ -181,6 +190,15 @@ int http1()
               }
               std::cout << "----------------------------------" << std::endl;
             }
+            std::string response200;
+            response200 += "HTTP/1.1 200 OK\r\n";
+            response200 += "Content-Type: text/html\r\n";
+            response200 += "Content-Length: 7\r\n";
+            response200 += "\r\n";
+            response200 += "200 OK\n\r\n";
+            std::cout << response200 << std::endl;
+            if (send(clients[i].socketFd, response200.c_str(), response200.length(), 0) == -1)
+              std::cout << "send() failed." << std::endl;
             // 状態を最初に戻す
             clients[i].status = PARSE_STARTLINE;
             clients[i].hmp.clearData();
@@ -189,6 +207,7 @@ int http1()
           else
           {
             clients[i].hmp.parseHeader(clients[i].recvData.getExtractedData());
+            // ヘッダのHostの値をチェックするロジックを追加
           }
         }
       }

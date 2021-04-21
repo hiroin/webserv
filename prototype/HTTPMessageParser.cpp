@@ -139,6 +139,7 @@ std::string HTTPMessageParser::getPathinfo() const
   return pathinfo_;
 }
 
+// Host:の値が不正な場合にFAILUREを返す
 bool HTTPMessageParser::parseHeader(std::string header)
 {
   if (!validationHeader(header))
