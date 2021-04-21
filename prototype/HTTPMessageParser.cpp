@@ -171,20 +171,17 @@ void HTTPMessageParser::clearData()
   headers_.clear();
 }
 
-// headersのkeyにhostがあれば、その値を確認し、不正であればfalseを返す。
-bool HTTPMessageParser::correctHostValue(std::map<std::string, std::string> headers) const
+bool HTTPMessageParser::isIllegalValueOfHostHeader(std::string headerField) const
 {
-  for (std::map<std::string, std::string>::iterator itr = headers.begin();
-    itr != headers.end();
-    itr++
-  )
-  {
-    if (itr->first == "host")
-    {
-      if (!correctHostValue(itr->second))
-        return false;
-    }
-  }
+  std::string s = headerField;
+  std::transform(s.begin(), s.end(), s.begin(), tolower);
+  std::string::size_type pos = s.find(std::string("host:"));
+  if (pos == std::string::npos)
+    return false;
+  std::string fieldValue  = headerField.substr(pos + 5);
+  fieldValue = ft_trim(fieldValue, " \t");
+  if (correctHostValue(fieldValue))
+    return false;
   return true;
 }
 

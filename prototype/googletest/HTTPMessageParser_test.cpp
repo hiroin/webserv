@@ -163,6 +163,21 @@ TEST(HTTPMessageParserEvenTest, parseHeader) {
   }
 }
 
+TEST(HTTPMessageParserEvenTest, isIllegalValueOfHostHeader) {
+  {
+    HTTPMessageParser c;
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host::"));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("host::"));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host:"));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host: "));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host:   "));
+    EXPECT_TRUE(c.isIllegalValueOfHostHeader("Host: /"));
+    EXPECT_FALSE(c.isIllegalValueOfHostHeader("Host: 127.0.0.1:5000"));
+    EXPECT_FALSE(c.isIllegalValueOfHostHeader("host: 127.0.0.1:5000"));
+    EXPECT_FALSE(c.isIllegalValueOfHostHeader("host: 127.0.0.1:5000:5000"));
+  }
+}
+
 TEST(HTTPMessageParserEvenTest, correctHostValue) {
   {
     HTTPMessageParser c;
@@ -171,6 +186,7 @@ TEST(HTTPMessageParserEvenTest, correctHostValue) {
     EXPECT_TRUE(c.correctHostValue("www.yahoo.co.jp:5000"));
     EXPECT_TRUE(c.correctHostValue("www.yahoo.co.jp::"));
     EXPECT_FALSE(c.correctHostValue(":5000"));
+    EXPECT_FALSE(c.correctHostValue(":"));
   }
 }
 
