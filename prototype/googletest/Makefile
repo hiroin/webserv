@@ -7,7 +7,9 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../ft_isvchar.cpp \
 	../ft_trim.cpp \
 	ft_split_use_find_first_of_test.cpp \
-	../ft_split_use_find_first_of.cpp
+	../ft_split_use_find_first_of.cpp \
+	../ft_isunreserved.cpp \
+	../ft_issubdelims.cpp
 
 .PHONY: all clean
 

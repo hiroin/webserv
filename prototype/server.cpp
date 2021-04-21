@@ -8,21 +8,13 @@
 #include <iostream>
 #include <algorithm>
 #include <errno.h>
-#include <sstream>
 #include <string>
-#include <iomanip>
-#include <fstream>
 #include <vector>
 
 #include "Socket.hpp"
-#include "http1response.hpp"
-#include "http1header.hpp"
-#include "http1parser.hpp"
 #include "recvData.hpp"
 #include "HTTPMessageParser.hpp"
 #include "Client.hpp"
-
-
 
 int http1()
 {

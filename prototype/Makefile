@@ -5,16 +5,15 @@ HTTP1_SOURCE = server.cpp \
                recvData.cpp \
                HTTPMessageParser.cpp \
                Client.cpp \
-               http1header.cpp \
-               http1parser.cpp \
-               http1response.cpp \
                ft_memset.cpp \
                ft_trim.cpp \
                ft_istchar.cpp \
                ft_isspase_and_htab.cpp \
                ft_isvchar.cpp \
                ft_split_use_find_first_of.cpp \
-							 ft_print_vector_string.cpp
+							 ft_print_vector_string.cpp \
+							 ft_issubdelims.cpp \
+							 ft_isunreserved.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

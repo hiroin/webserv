@@ -139,7 +139,6 @@ std::string HTTPMessageParser::getPathinfo() const
   return pathinfo_;
 }
 
-// Host:の値が不正な場合にFAILUREを返す
 bool HTTPMessageParser::parseHeader(std::string header)
 {
   if (!validationHeader(header))
@@ -170,6 +169,48 @@ void HTTPMessageParser::clearData()
   query_.clear();
   authority_.clear();
   headers_.clear();
+}
+
+// headersのkeyにhostがあれば、その値を確認し、不正であればfalseを返す。
+bool HTTPMessageParser::correctHostValue(std::map<std::string, std::string> headers) const
+{
+  for (std::map<std::string, std::string>::iterator itr = headers.begin();
+    itr != headers.end();
+    itr++
+  )
+  {
+    if (itr->first == "host")
+    {
+      if (!correctHostValue(itr->second))
+        return false;
+    }
+  }
+  return true;
+}
+
+bool HTTPMessageParser::correctHostValue(std::string hostValue) const
+{
+  std::string::size_type pos = hostValue.find(std::string(":"));
+  if (pos != std::string::npos)
+    hostValue = hostValue.substr(0, pos);
+  if (correctUrihost(hostValue))
+    return true;
+  return false;
+}
+
+bool HTTPMessageParser::correctUrihost(std::string uriHost) const
+{
+  if (uriHost.size() == 0)
+    return false;
+  for (std::string::iterator itr = uriHost.begin();
+    itr != uriHost.end();
+    itr++
+  )
+  {
+    if (!(ft_isunreserved(*itr) || *itr == '%' || ft_issubdelims(*itr)))
+      return false;
+  }
+  return true;
 }
 
 bool HTTPMessageParser::isAuthority(std::string requestTarget)
