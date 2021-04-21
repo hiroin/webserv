@@ -32,6 +32,9 @@ class Client
   bool bCGI;
   bool bChunked;
 
+  // メッセージボディ
+  std::string body;
+  
   // クライアントからの接続タイムアウト用
   struct timeval lastTv;
   struct timeval nowTv;
