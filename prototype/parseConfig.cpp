@@ -910,6 +910,18 @@ void parseConfig::inheritedFromHigherlevelDirectives(Config& c)
   }
 }
 
+bool parseConfig::notExistRootDirective(Config& c)
+{
+  for(std::vector<s_ConfigServer>::iterator itrServer = c.configGlobal.servers.begin();
+      itrServer != c.configGlobal.servers.end();
+      ++itrServer)
+  {
+    if (itrServer->root == "")
+      return true;
+  }
+  return false;
+}
+
 parseConfig::parseConfig(char *configFile, Config& c)
 {
   int fd = open(configFile, O_RDONLY);
@@ -992,6 +1004,12 @@ parseConfig::parseConfig(char *configFile, Config& c)
   catch(const std::exception& e)
   {
     std::cerr << e.what() << '\n';
+    exit(1);
+  }
+  // serverディレクティブにrootの設定があるかを確認し、なかったら終了する
+  if (notExistRootDirective(c))
+  {
+    std::cerr << "There is a server directive for which the root directive does not exist." << std::endl;
     exit(1);
   }
   {

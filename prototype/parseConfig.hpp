@@ -106,6 +106,7 @@ class parseConfig
   void initCommonConfig(s_ConfigCommon &c);
   void inheritedFromHigherlevelDirectives(Config& c);
   void inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& lower);
+  bool notExistRootDirective(Config& c);
 
   typedef std::vector<parseconfig::context>::iterator contextIterator;
   bool insertAutoindex(contextIterator itr, std::string& autoindex);
