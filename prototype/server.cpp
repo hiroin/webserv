@@ -20,11 +20,17 @@
 
 int http1(Config& c)
 {
+  
   std::vector<Socket> servers;
   try
   {
-    servers.push_back(Socket(8080, "*"));
-    servers.push_back(Socket(8081, "localhost"));
+    for (std::vector<s_ConfigServer>::iterator itr = c.configGlobal.servers.begin();
+      itr != c.configGlobal.servers.end();
+      itr++
+    )
+    {
+      servers.push_back(Socket(itr->port, itr->host));
+    }
   }
   catch(const std::exception& e)
   {
