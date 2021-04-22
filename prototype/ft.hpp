@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <climits>
 
 #define SUCCESS 1
 #define FAILURE 0
@@ -27,6 +28,7 @@ std::string ReplaceString
   , std::string String3   // 置き換える内容
 );
 std::vector<std::string> ft_split_use_find_first_of(std::string s, std::string d);
+int ft_stoi(std::string s);
 std::string ft_trim
 (
     const std::string& string
