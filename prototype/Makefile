@@ -13,7 +13,12 @@ HTTP1_SOURCE = server.cpp \
                ft_split_use_find_first_of.cpp \
 							 ft_print_vector_string.cpp \
 							 ft_issubdelims.cpp \
-							 ft_isunreserved.cpp
+							 ft_isunreserved.cpp \
+							 Config.cpp \
+							 parseConfig.cpp \
+							 ft_istoken.cpp \
+							 ft_isctl.cpp \
+							 ft_istspecials.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

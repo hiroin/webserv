@@ -202,6 +202,8 @@ Config::Config(int testPattern)
     configGlobal.servers[0].locations[1].alias = "/tmp/webserv0aa";
     configGlobal.servers[0].locations.push_back(tmpConfigLocation);
     configGlobal.servers[0].locations[2].path = "/";
+    configGlobal.servers[0].host = "*";
+    configGlobal.servers[0].port = 5000;
     configGlobal.servers.push_back(tmpConfigServer);
     configGlobal.servers[1].root = "/tmp/webserv1/";
     configGlobal.servers[1].locations.push_back(tmpConfigLocation);
@@ -212,6 +214,8 @@ Config::Config(int testPattern)
     configGlobal.servers[1].locations[1].alias = "/tmp/webserv0bb/";
     configGlobal.servers[1].locations.push_back(tmpConfigLocation);
     configGlobal.servers[1].locations[2].path = "/";
+    configGlobal.servers[1].host = "*";
+    configGlobal.servers[1].port = 5001;    
     configGlobal.servers.push_back(tmpConfigServer);
   }
 

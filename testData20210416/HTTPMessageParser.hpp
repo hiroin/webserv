@@ -28,9 +28,6 @@ class HTTPMessageParser {
   HTTPMessageParser(std::string conf, int testPattern);
   ~HTTPMessageParser();
 
- private:
-
- private:
   std::string requestLine_;
   std::vector<std::string> filenameExtensions_;
 
