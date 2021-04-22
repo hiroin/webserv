@@ -11,7 +11,7 @@ TEST(ft, ft_stoi)
   EXPECT_EQ(1, ft_stoi("1"));
   EXPECT_EQ(100, ft_stoi("100"));
   EXPECT_EQ(INT_MAX, ft_stoi("2147483647"));
-  EXPECT_EQ(-1, ft_stoi("01"));
+  EXPECT_EQ(1, ft_stoi("01"));
   EXPECT_EQ(-1, ft_stoi("-1"));
   EXPECT_EQ(-1, ft_stoi("-100"));
   EXPECT_EQ(-1, ft_stoi("2147483648"));

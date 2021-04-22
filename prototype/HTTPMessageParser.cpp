@@ -169,6 +169,7 @@ void HTTPMessageParser::clearData()
   query_.clear();
   authority_.clear();
   headers_.clear();
+  body_.clear();
 }
 
 bool HTTPMessageParser::isIllegalValueOfHostHeader(std::string headerField) const

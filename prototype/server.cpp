@@ -190,6 +190,12 @@ int http1(Config& c)
               }
               std::cout << "---------------------------------------" << std::endl;
             }
+            // ヘッダにtransfer-encoding: chunkedがある
+              // bChunked = ture;
+              // clients[i].status = RESV_BODY
+            // ヘッダにcontent-length: がある
+              // clients[i].status = RESV_BODY
+
             std::string response200;
             response200 += "HTTP/1.1 200 OK\r\n";
             response200 += "Content-Type: text/html\r\n";
@@ -229,6 +235,10 @@ int http1(Config& c)
             }
           }
         }
+      }
+      if (clients[i].status == RESV_BODY)
+      {
+
       }
     }
   }
