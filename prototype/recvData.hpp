@@ -16,6 +16,7 @@ class recvData {
   void clearData();
   void setSocketFd(int fd);
   bool recvFromSocket();
+  bool readFromFd();
   bool cutOutRecvDataBySpecifyingBytes(size_t size);
   bool cutOutRecvDataToEol();
   std::string getRecvData() const;
@@ -26,7 +27,7 @@ class recvData {
   ~recvData();
 
  private:
-  int socketFd_;
+  int fd_;
   std::string recvData_;
   std::string extractedData_;
 
