@@ -195,6 +195,7 @@ int http1(Config& c)
             }
             if (clients[i].isNeedBody(headers))
             {
+              // [やること]ここにすでにchunkedなデータを受け取った後のヘッダ処理な場合は、レスポンス作成に以降するロジックを追加
               clients[i].status = RESV_BODY;
             }
             else
@@ -228,6 +229,10 @@ int http1(Config& c)
         if (clients[i].bChunked == true)
         {
           // チャンクのデータが取得できる関数を書く
+          //if (チャンク取得エラー)
+          // ft_dummy_response(501, clients[i].socketFd);
+          //if (チャンク取得完了)
+          // clients[i].status = PARSE_HEADER;
         }
         else
         {
