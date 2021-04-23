@@ -24,7 +24,7 @@ class Client
   std::string host;
 
   // 各種処理をするためのclass
-  recvData recvData;
+  recvData receivedData;
   HTTPMessageParser hmp;
 
   // 処理状態とフラグ
@@ -38,6 +38,10 @@ class Client
   // クライアントからの接続タイムアウト用
   struct timeval lastTv;
   struct timeval nowTv;
+
+  // ヘッダの内容を見てボディを受信するかを返す
+  // ヘッダに「Transfer-Encoding: chunked」があった場合、bChunkedをtrueに変更する
+  bool isNeedBody(std::map<std::string, std::string> headers_);
 
   Client();
   ~Client();

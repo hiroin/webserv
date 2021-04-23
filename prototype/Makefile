@@ -18,7 +18,8 @@ HTTP1_SOURCE = server.cpp \
 							 parseConfig.cpp \
 							 ft_istoken.cpp \
 							 ft_isctl.cpp \
-							 ft_istspecials.cpp
+							 ft_istspecials.cpp \
+							 ft_stoi.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

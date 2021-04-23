@@ -1,5 +1,10 @@
 #include "Client.hpp"
 
+bool Client::isNeedBody(std::map<std::string, std::string> headers_)
+{
+  return false;
+}
+
 Client::Client() : \
   socketFd(-1), readFd(-1), writeFd(-1), pipeReadFd(-1), \
   pipeWriteFd(-1), port(-1), status(PARSE_STARTLINE), \
