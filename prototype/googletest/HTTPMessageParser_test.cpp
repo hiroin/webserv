@@ -214,3 +214,20 @@ TEST(HTTPMessageParserEvenTest, correctUrihost) {
     EXPECT_FALSE(c.correctUrihost("}"));
   }
 }
+
+TEST(HTTPMessageParserEvenTest, isInvalidHeaderValue) {
+
+  HTTPMessageParser c;
+  c.headers_["content-length"] = "3495";
+  EXPECT_EQ(200, c.isInvalidHeaderValue());
+  c.headers_.clear();
+  c.headers_["content-length"] = "a";
+  EXPECT_EQ(400, c.isInvalidHeaderValue());
+  c.headers_.clear();
+  c.headers_["transfer-encoding"] = "chunked";
+  EXPECT_EQ(200, c.isInvalidHeaderValue());
+  c.headers_.clear();
+  c.headers_["transfer-encoding"] = "a";
+  EXPECT_EQ(501, c.isInvalidHeaderValue());
+  c.headers_.clear();
+}

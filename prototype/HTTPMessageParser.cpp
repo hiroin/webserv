@@ -277,8 +277,8 @@ bool HTTPMessageParser::validationHeader(std::string header)
     i++;
   if (header[i++] != ':')
     return FAILURE;
-  while (ft_isspase_and_htab(header[i++]))
-    ;
+  while (ft_isspase_and_htab(header[i]))
+    i++;
   if (!ft_isvchar(header[i++]))
     return FAILURE;
   while (ft_isvchar(header[i]) || ft_isspase_and_htab(header[i]))
@@ -328,6 +328,21 @@ bool HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string
     headers_[fieldName] = fieldValue;
   }
   return SUCCESS;
+}
+
+int HTTPMessageParser::isInvalidHeaderValue()
+{
+  for (std::map<std::string, std::string>::iterator itr = headers_.begin();
+    itr != headers_.end();
+    itr++
+  )
+  {
+    if (itr->first == "content-length" && ft_stoi(itr->second) == -1)
+      return 400;
+    if (itr->first == "transfer-encoding" && itr->second != "chunked")
+      return 501;
+  }
+  return 200;
 }
 
 HTTPMessageParser::HTTPMessageParser() :

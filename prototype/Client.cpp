@@ -1,8 +1,17 @@
 #include "Client.hpp"
 
-bool Client::isNeedBody(std::map<std::string, std::string> headers_)
+bool Client::isNeedBody(std::map<std::string, std::string> headers)
 {
-  
+  std::map<std::string, std::string>::iterator itr;
+  itr = headers.find("transfer-encoding");
+  if (itr != headers.end() && itr->second == "chunked")
+  {
+    this->bChunked = true;
+    return true;
+  }
+  itr = headers.find("content-length");
+  if (itr != headers.end())
+    return true;
   return false;
 }
 

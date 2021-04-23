@@ -17,6 +17,7 @@
 #include "Client.hpp"
 #include "Config.hpp"
 #include "parseConfig.hpp"
+#include "ft.hpp"
 
 int http1(Config& c)
 {
@@ -156,16 +157,7 @@ int http1(Config& c)
           }
           else
           {
-            std::string response400;
-            response400 += "HTTP/1.1 400 Bad Request\r\n";
-            response400 += "Content-Type: text/html\r\n";
-            response400 += "Content-Length: 16\r\n";
-            response400 += "Connection: close\r\n";
-            response400 += "\r\n";
-            response400 += "400 Bad Request\n\r\n";
-            std::cout << response400 << std::endl;
-            if (send(clients[i].socketFd, response400.c_str(), response400.length(), 0) == -1)
-              std::cout << "send() failed." << std::endl;
+            ft_dummy_response(400, clients[i].socketFd);
             close(clients[i].socketFd);
             clients[i].receivedData.clearData();
             clients[i].hmp.clearData();
@@ -191,21 +183,21 @@ int http1(Config& c)
               }
               std::cout << "---------------------------------------" << std::endl;
             }
+            if (int code = clients[i].hmp.isInvalidHeaderValue() != 200)
+            {
+              ft_dummy_response(code, clients[i].socketFd);
+              // 状態を最初に戻す
+              clients[i].status = PARSE_STARTLINE;
+              clients[i].hmp.clearData();
+              break;
+            }
             if (clients[i].isNeedBody(headers))
             {
               clients[i].status = RESV_BODY;
             }
             else
             {
-              std::string response200;
-              response200 += "HTTP/1.1 200 OK\r\n";
-              response200 += "Content-Type: text/html\r\n";
-              response200 += "Content-Length: 7\r\n";
-              response200 += "\r\n";
-              response200 += "200 OK\n";
-              std::cout << response200 << std::endl;
-              if (send(clients[i].socketFd, response200.c_str(), response200.length(), 0) == -1)
-                std::cout << "send() failed." << std::endl;
+              ft_dummy_response(200, clients[i].socketFd);
               // 状態を最初に戻す
               clients[i].status = PARSE_STARTLINE;
               clients[i].hmp.clearData();
@@ -218,16 +210,7 @@ int http1(Config& c)
             std::map<std::string, std::string> headers = clients[i].hmp.getHeaders();
             if (clients[i].hmp.isIllegalValueOfHostHeader(clients[i].receivedData.getExtractedData()))
             {
-              std::string response400;
-              response400 += "HTTP/1.1 400 Bad Request\r\n";
-              response400 += "Content-Type: text/html\r\n";
-              response400 += "Content-Length: 16\r\n";
-              response400 += "Connection: close\r\n";
-              response400 += "\r\n";
-              response400 += "400 Bad Request\n";
-              std::cout << response400 << std::endl;
-              if (send(clients[i].socketFd, response400.c_str(), response400.length(), 0) == -1)
-                std::cout << "send() failed." << std::endl;
+              ft_dummy_response(400, clients[i].socketFd);
               close(clients[i].socketFd);
               clients[i].status = PARSE_STARTLINE;
               clients[i].receivedData.clearData();
@@ -240,25 +223,28 @@ int http1(Config& c)
       }
       if (clients[i].status == RESV_BODY)
       {
-        // ヘッダにtransfer-encoding: chunkedがある
-          // bChunked = ture;
-          // clients[i].status = RESV_BODY
-        // ヘッダにcontent-length: がある
-          // clients[i].status = RESV_BODY
-        // ※両方設定された場合は、transfer-encoding: chunkedが優先される
-
-        std::string response200;
-        response200 += "HTTP/1.1 200 OK\r\n";
-        response200 += "Content-Type: text/html\r\n";
-        response200 += "Content-Length: 7\r\n";
-        response200 += "\r\n";
-        response200 += "200 OK\n";
-        std::cout << response200 << std::endl;
-        if (send(clients[i].socketFd, response200.c_str(), response200.length(), 0) == -1)
-          std::cout << "send() failed." << std::endl;
+        if (clients[i].bChunked == true)
+        {
+          // チャンクのデータが取得できる関数を書く
+        }
+        else
+        {
+          if (clients[i].receivedData.cutOutRecvDataBySpecifyingBytes(ft_stoi(clients[i].hmp.headers_["content-length"])))
+          {
+            clients[i].body = clients[i].receivedData.getExtractedData();
+            {
+              // デバッグ
+              std::cout << "--body---------------------------------" << std::endl;
+              std::cout << clients[i].body << std::endl;
+              std::cout << "---------------------------------------" << std::endl;
+            }
+          }
+        }
+        ft_dummy_response(200, clients[i].socketFd);
         // 状態を最初に戻す
         clients[i].status = PARSE_STARTLINE;
         clients[i].hmp.clearData();
+        clients[i].body.clear();
         break;
       }
     }

@@ -5,10 +5,12 @@
 #include <string>
 #include <vector>
 #include <climits>
+#include <iostream>
 
 #define SUCCESS 1
 #define FAILURE 0
 
+void ft_dummy_response(int code, int socketFd);
 bool ft_isctl(char c);
 bool ft_isspase_and_htab(char c);
 bool ft_issubdelims(char c);

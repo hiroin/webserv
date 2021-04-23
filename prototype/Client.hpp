@@ -41,7 +41,7 @@ class Client
 
   // ヘッダの内容を見てボディを受信するかを返す
   // ヘッダに「Transfer-Encoding: chunked」があった場合、bChunkedをtrueに変更する
-  bool isNeedBody(std::map<std::string, std::string> headers_);
+  bool isNeedBody(std::map<std::string, std::string> headers);
 
   Client();
   ~Client();

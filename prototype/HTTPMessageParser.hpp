@@ -59,6 +59,9 @@ class HTTPMessageParser {
   bool pushFieldNameAndValue(std::string fieldName, std::string fieldValue);
   std::map<std::string, std::string> headers_;
 
+  // headerの値のチェック
+  int isInvalidHeaderValue();
+
   // bodyを格納
   std::string body_;
 };
