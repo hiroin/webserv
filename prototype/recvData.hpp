@@ -14,7 +14,7 @@ class recvData {
 
  public:
   void clearData();
-  void setSocketFd(int fd);
+  void setFd(int fd);
   bool recvFromSocket();
   bool readFromFd();
   bool cutOutRecvDataBySpecifyingBytes(size_t size);

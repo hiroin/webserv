@@ -8,7 +8,7 @@ void recvData::clearData()
   extractedData_.clear();
 }
 
-void recvData::setSocketFd(int fd)
+void recvData::setFd(int fd)
 {
   fd_ = fd;
 }

@@ -68,7 +68,7 @@ int http1(Config& c)
         FD_SET(clients[i].socketFd, &readFds);
         if (clients[i].status == SEND)
           FD_SET(clients[i].socketFd, &writeFds);
-        clients[i].receivedData.setSocketFd(clients[i].socketFd);
+        clients[i].receivedData.setFd(clients[i].socketFd);
         if (maxFd < (clients[i].socketFd + 1))
           maxFd = clients[i].socketFd + 1;
       }
