@@ -5,6 +5,7 @@
 #include <string>
 #include "HTTPMessageParser.hpp"
 
+enum clientStatus {PARSE_STARTLINE, PARSE_HEADER, RESV_BODY, CREATE_RESPONSE, READ, WRITE, SEND, NUM_OF_CLIENTSTATUS};
 class Client
 {
  public:

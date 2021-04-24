@@ -13,17 +13,17 @@ enum chunkStatus {GET_CHUNK_SIZE, GET_CHUNK_DATA, GET_CHUNK_CRLF};
 // chunkedのデータ書式に従わない場合は501を返す
 class getChunked {
  public:
-  void setClientBody(std::string& clientBody);
-  void setecvData(recvData& r);
+  void setClientBody(std::string *clientBody);
+  void setRecvData(recvData *r);
 
  public:
   getChunked();
   ~getChunked();
 
  private:
-  enum chunkStatus status;
-  std::string& clientBody_;
-  recvData& r;
+  enum chunkStatus status_;
+  std::string *clientBody_;
+  recvData *r_;
 };
 
 #endif
