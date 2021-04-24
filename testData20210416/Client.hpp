@@ -13,6 +13,7 @@ class Client
   int port_;
   std::string host_;
   HTTPMessageParser hmp_;
+  enum clientStatus status;
   Client(int testPatternOfClient, int testPatternOfHTTPMessageParser);
   Client(int testPatternOfClient, std::string testPatternOfHTTPMessageParserConf, int testPatternOfHTTPMessageParser); 
   Client();

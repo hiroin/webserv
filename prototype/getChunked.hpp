@@ -20,10 +20,15 @@ class getChunked {
   getChunked();
   ~getChunked();
 
- private:
+ public:
   enum chunkStatus status_;
   std::string *clientBody_;
   recvData *r_;
+
+ public:
+  int hexstring2dec(std::string chunksize);
+  int getChunked::hex2dec(char c);
+
 };
 
 #endif
