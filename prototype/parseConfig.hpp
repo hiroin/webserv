@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <climits>
 #include "Config.hpp"
 #include "ft.hpp"
 
@@ -99,13 +98,13 @@ class parseConfig
   bool pushModuleToServer(token vtoken, unsigned int& idx, parseconfig::configServer& configServer);
   bool pushModuleToHttp(token vtoken, unsigned int& idx, parseconfig::configHttp& configHttp);
 
-  int stoi(std::string s);
   bool isCode(std::string s);
   bool isMethod(std::string s);
   bool isFilenameExtension(std::string s);
   void initCommonConfig(s_ConfigCommon &c);
   void inheritedFromHigherlevelDirectives(Config& c);
   void inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& lower);
+  bool notExistRootDirective(Config& c);
 
   typedef std::vector<parseconfig::context>::iterator contextIterator;
   bool insertAutoindex(contextIterator itr, std::string& autoindex);

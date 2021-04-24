@@ -4,10 +4,13 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <climits>
+#include <iostream>
 
 #define SUCCESS 1
 #define FAILURE 0
 
+void ft_dummy_response(int code, int socketFd);
 bool ft_isctl(char c);
 bool ft_isspase_and_htab(char c);
 bool ft_issubdelims(char c);
@@ -27,6 +30,7 @@ std::string ReplaceString
   , std::string String3   // 置き換える内容
 );
 std::vector<std::string> ft_split_use_find_first_of(std::string s, std::string d);
+int ft_stoi(std::string s);
 std::string ft_trim
 (
     const std::string& string

@@ -506,30 +506,6 @@ bool parseConfig::insertToConfigClass(Config& c)
   return true;
 }
 
-int parseConfig::stoi(std::string s)
-{
-  size_t i;
-  long r;
-
-  i = 0;
-  if (!std::isdigit(s[i]))
-    return -1;
-  if (s[i] == '0')
-    return -1;
-  i++;
-  while (std::isdigit(s[i]))
-    i++;
-  if (i != s.size())
-    return -1;
-  i = 0;
-  r = s[i++] - '0';
-  while (i < s.size())
-    r = r * 10 + s[i++] - '0';
-  if (r > INT_MAX || r <= 0)
-    return -1;
-	return (r);
-}
-
 bool parseConfig::isCode(std::string s)
 {
   if (s == "400" ||
@@ -734,7 +710,7 @@ bool parseConfig::insertClientMaxBodySize(contextIterator itr, int& clientMaxBod
     // client_max_body_size 1000 100;のような場合はエラー
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid client_max_body_size");
-    clientMaxBodySize = parseConfig::stoi(itr->values.at(0).value.at(0).c_str());
+    clientMaxBodySize = ft_stoi(itr->values.at(0).value.at(0).c_str());
     if (clientMaxBodySize == -1)
       throw std::runtime_error("Config Error : invalid client_max_body_size");
     // std::cout << "[DEBUG]client_max_body_size : " << clientMaxBodySize << std::endl;
@@ -808,7 +784,7 @@ bool parseConfig::insertListen(contextIterator itr, std::string& host, int& port
       throw std::runtime_error("Config Error : invalid listen");
     host = itr->values.at(0).value.at(0).substr(0, pos);
     std::string tmpPort = itr->values.at(0).value.at(0).substr(pos + 1);
-    if ((port = stoi(tmpPort)) == -1 || port <=0 || port > 65535)
+    if ((port = ft_stoi(tmpPort)) == -1 || port <=0 || port > 65535)
       throw std::runtime_error("Config Error : invalid listen");
     // std::cout << "[DEBUG]host : " << host << std::endl;
     // std::cout << "[DEBUG]port : " << port << std::endl;
@@ -910,6 +886,18 @@ void parseConfig::inheritedFromHigherlevelDirectives(Config& c)
   }
 }
 
+bool parseConfig::notExistRootDirective(Config& c)
+{
+  for(std::vector<s_ConfigServer>::iterator itrServer = c.configGlobal.servers.begin();
+      itrServer != c.configGlobal.servers.end();
+      ++itrServer)
+  {
+    if (itrServer->root == "")
+      return true;
+  }
+  return false;
+}
+
 parseConfig::parseConfig(char *configFile, Config& c)
 {
   int fd = open(configFile, O_RDONLY);
@@ -992,6 +980,12 @@ parseConfig::parseConfig(char *configFile, Config& c)
   catch(const std::exception& e)
   {
     std::cerr << e.what() << '\n';
+    exit(1);
+  }
+  // serverディレクティブにrootの設定があるかを確認し、なかったら終了する
+  if (notExistRootDirective(c))
+  {
+    std::cerr << "There is a server directive for which the root directive does not exist." << std::endl;
     exit(1);
   }
   {

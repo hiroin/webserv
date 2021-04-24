@@ -10,6 +10,8 @@
 #include <errno.h>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <cstring>
 
 #include "Socket.hpp"
 #include "recvData.hpp"
@@ -17,6 +19,7 @@
 #include "Client.hpp"
 #include "Config.hpp"
 #include "parseConfig.hpp"
+#include "ft.hpp"
 
 int http1(Config& c)
 {
@@ -63,16 +66,17 @@ int http1(Config& c)
       if (clients[i].socketFd != -1)
       {
         FD_SET(clients[i].socketFd, &readFds);
-        FD_SET(clients[i].socketFd, &writeFds);
-        clients[i].recvData.setSocketFd(clients[i].socketFd);
+        if (clients[i].status == SEND)
+          FD_SET(clients[i].socketFd, &writeFds);
+        clients[i].receivedData.setFd(clients[i].socketFd);
         if (maxFd < (clients[i].socketFd + 1))
           maxFd = clients[i].socketFd + 1;
       }
     }
     tvForSelect.tv_sec = SELECT_TIMEOUT;
     tvForSelect.tv_usec = 0;   
-    // if (select(maxFd, &readFds, &writeFds, NULL, &tvForSelect) == -1)
-    if (select(maxFd, &readFds, NULL, NULL, &tvForSelect) == -1)
+    if (select(maxFd, &readFds, &writeFds, NULL, &tvForSelect) == -1)
+    // if (select(maxFd, &readFds, NULL, NULL, &tvForSelect) == -1)
       std::cout << "select() failed.(" << strerror(errno) << ")" << std::endl;
     for (std::vector<Socket>::iterator itrServer = servers.begin();
       itrServer != servers.end();
@@ -116,7 +120,7 @@ int http1(Config& c)
       }
       if (FD_ISSET(clients[i].socketFd, &readFds))
       {
-        if (!clients[i].recvData.recvFromSocket())
+        if (!clients[i].receivedData.recvFromSocket())
         {
           close(clients[i].socketFd);
           clients[i].socketFd = -1;
@@ -125,20 +129,20 @@ int http1(Config& c)
         {
           // デバッグ
           std::cout << "--recvData-----------------------------" << std::endl;
-          std::cout << clients[i].recvData.getRecvData();
+          std::cout << clients[i].receivedData.getRecvData();
           std::cout << "---------------------------------------" << std::endl;
         }        
       }
       if (clients[i].status == PARSE_STARTLINE)
       {
-        if (clients[i].recvData.cutOutRecvDataToEol() \
-          && clients[i].recvData.getExtractedData() != "")
+        if (clients[i].receivedData.cutOutRecvDataToEol() \
+          && clients[i].receivedData.getExtractedData() != "")
         {
           // デバッグ
           std::cout << "--extractedData_-----------------------" << std::endl;
-          std::cout << clients[i].recvData.getExtractedData() << std::endl;
+          std::cout << clients[i].receivedData.getExtractedData() << std::endl;
           std::cout << "---------------------------------------" << std::endl;
-          if (clients[i].hmp.parseRequestLine(clients[i].recvData.getExtractedData())
+          if (clients[i].hmp.parseRequestLine(clients[i].receivedData.getExtractedData())
             && clients[i].hmp.parseRequestTarget(clients[i].hmp.getRequestTarget()))
           {
             {
@@ -155,18 +159,9 @@ int http1(Config& c)
           }
           else
           {
-            std::string response400;
-            response400 += "HTTP/1.1 400 Bad Request\r\n";
-            response400 += "Content-Type: text/html\r\n";
-            response400 += "Content-Length: 16\r\n";
-            response400 += "Connection: close\r\n";
-            response400 += "\r\n";
-            response400 += "400 Bad Request\n\r\n";
-            std::cout << response400 << std::endl;
-            if (send(clients[i].socketFd, response400.c_str(), response400.length(), 0) == -1)
-              std::cout << "send() failed." << std::endl;
+            ft_dummy_response(400, clients[i].socketFd);
             close(clients[i].socketFd);
-            clients[i].recvData.clearData();
+            clients[i].receivedData.clearData();
             clients[i].hmp.clearData();
             clients[i].socketFd = -1;
             continue;
@@ -175,60 +170,89 @@ int http1(Config& c)
       }
       if (clients[i].status == PARSE_HEADER)
       {
-        while (clients[i].recvData.cutOutRecvDataToEol())
+        while (clients[i].receivedData.cutOutRecvDataToEol())
         {
           // \r\nのみが来た場合、MessageHeaderが終了
-          if (clients[i].recvData.getExtractedData() == "")
+          if (clients[i].receivedData.getExtractedData() == "")
           {
             // デバッグ
+            std::map<std::string, std::string> headers = clients[i].hmp.getHeaders();
             {
               std::cout << "--headers------------------------------" << std::endl;
-              std::map<std::string, std::string> headers = clients[i].hmp.getHeaders();
               for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
               {
                 std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
               }
               std::cout << "---------------------------------------" << std::endl;
             }
-            std::string response200;
-            response200 += "HTTP/1.1 200 OK\r\n";
-            response200 += "Content-Type: text/html\r\n";
-            response200 += "Content-Length: 7\r\n";
-            response200 += "\r\n";
-            response200 += "200 OK\n";
-            std::cout << response200 << std::endl;
-            if (send(clients[i].socketFd, response200.c_str(), response200.length(), 0) == -1)
-              std::cout << "send() failed." << std::endl;
-            // 状態を最初に戻す
-            clients[i].status = PARSE_STARTLINE;
-            clients[i].hmp.clearData();
-            break;
+            if (int code = clients[i].hmp.isInvalidHeaderValue() != 200)
+            {
+              ft_dummy_response(code, clients[i].socketFd);
+              // 状態を最初に戻す
+              clients[i].status = PARSE_STARTLINE;
+              clients[i].hmp.clearData();
+              break;
+            }
+            if (clients[i].isNeedBody(headers))
+            {
+              // [やること]ここにすでにchunkedなデータを受け取った後のヘッダ処理な場合は、レスポンス作成に以降するロジックを追加
+              clients[i].status = RESV_BODY;
+            }
+            else
+            {
+              ft_dummy_response(200, clients[i].socketFd);
+              // 状態を最初に戻す
+              clients[i].status = PARSE_STARTLINE;
+              clients[i].hmp.clearData();
+              break;
+            }
           }
           else
           {
-            clients[i].hmp.parseHeader(clients[i].recvData.getExtractedData());
+            clients[i].hmp.parseHeader(clients[i].receivedData.getExtractedData());
             std::map<std::string, std::string> headers = clients[i].hmp.getHeaders();
-            if (clients[i].hmp.isIllegalValueOfHostHeader(clients[i].recvData.getExtractedData()))
+            if (clients[i].hmp.isIllegalValueOfHostHeader(clients[i].receivedData.getExtractedData()))
             {
-              std::string response400;
-              response400 += "HTTP/1.1 400 Bad Request\r\n";
-              response400 += "Content-Type: text/html\r\n";
-              response400 += "Content-Length: 16\r\n";
-              response400 += "Connection: close\r\n";
-              response400 += "\r\n";
-              response400 += "400 Bad Request\n";
-              std::cout << response400 << std::endl;
-              if (send(clients[i].socketFd, response400.c_str(), response400.length(), 0) == -1)
-                std::cout << "send() failed." << std::endl;
+              ft_dummy_response(400, clients[i].socketFd);
               close(clients[i].socketFd);
               clients[i].status = PARSE_STARTLINE;
-              clients[i].recvData.clearData();
+              clients[i].receivedData.clearData();
               clients[i].hmp.clearData();
               clients[i].socketFd = -1;
               continue;
             }
           }
         }
+      }
+      if (clients[i].status == RESV_BODY)
+      {
+        if (clients[i].bChunked == true)
+        {
+          // チャンクのデータが取得できる関数を書く
+          //if (チャンク取得エラー)
+          // ft_dummy_response(501, clients[i].socketFd);
+          //if (チャンク取得完了)
+          // clients[i].status = PARSE_HEADER;
+        }
+        else
+        {
+          if (clients[i].receivedData.cutOutRecvDataBySpecifyingBytes(ft_stoi(clients[i].hmp.headers_["content-length"])))
+          {
+            clients[i].body = clients[i].receivedData.getExtractedData();
+            {
+              // デバッグ
+              std::cout << "--body---------------------------------" << std::endl;
+              std::cout << clients[i].body << std::endl;
+              std::cout << "---------------------------------------" << std::endl;
+            }
+          }
+        }
+        ft_dummy_response(200, clients[i].socketFd);
+        // 状態を最初に戻す
+        clients[i].status = PARSE_STARTLINE;
+        clients[i].hmp.clearData();
+        clients[i].body.clear();
+        break;
       }
     }
   }

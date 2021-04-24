@@ -8,9 +8,9 @@ void recvData::clearData()
   extractedData_.clear();
 }
 
-void recvData::setSocketFd(int fd)
+void recvData::setFd(int fd)
 {
-  socketFd_ = fd;
+  fd_ = fd;
 }
 
 bool recvData::recvFromSocket()
@@ -20,7 +20,7 @@ bool recvData::recvFromSocket()
   std::string tmp;
 
   ft_memset(buf, 0, sizeof(buf));
-  read_size = recv(socketFd_, buf, sizeof(buf), 0);
+  read_size = recv(fd_, buf, sizeof(buf), 0);
   if (read_size == 0) {
     std::cout << "graceful shutdown." << std::endl;
     recvData_.erase();
@@ -35,12 +35,28 @@ bool recvData::recvFromSocket()
     extractedData_.erase();
     return FAILURE;
   }
-  // 1バイトずつデータをいれるので遅い
-  // unsigned long i = 0;
-  // while (i < read_size)
-  // {
-  //   recvData_ += buf[i++];
-  // }
+  tmp.clear();
+  tmp.assign(buf, read_size);
+  recvData_ += tmp;
+  return SUCCESS;
+}
+
+bool recvData::readFromFd()
+{
+  int read_size;
+  char buf[recvBuffsize_];
+  std::string tmp;
+
+  ft_memset(buf, 0, sizeof(buf));
+  read_size = read(fd_, buf, sizeof(buf));
+  if (read_size == -1)
+  {
+    std::cout << "read() failed." << std::endl;
+    std::cout << "ERROR: " << errno << std::endl;
+    recvData_.erase();
+    extractedData_.erase();
+    return FAILURE;
+  }
   tmp.clear();
   tmp.assign(buf, read_size);
   recvData_ += tmp;
