@@ -9,7 +9,12 @@ int main()
 	std::cout << Response.configServer.host << std::endl;
 	std::cout << Response.configServer.port << std::endl;
 	std::cout << Response.configServer.root << std::endl;
-	std::cout << Response.configServer.serverNames[0] << std::endl;
 
+	Response.DecideConfigLocation();
+	std::cout << Response.configLocation.path << std::endl;
+	std::cout << Response.configLocation.alias << std::endl;
+	std::cout << Response.configLocation.configCommon.autoindex << std::endl;
+
+	std::cout << Response.GetSerachAbsolutePath() << std::endl;
 
 }
