@@ -90,7 +90,7 @@ bool recvData::cutOutRecvDataToEol()
     recvData_ = recvData_.substr(pos + 1);
     return SUCCESS;
   }
-  pos = recvData_.find("\r");
+  pos = recvData_.find("\n");
   if (pos != std::string::npos)
   {
     extractedData_ = recvData_.substr(0, pos);

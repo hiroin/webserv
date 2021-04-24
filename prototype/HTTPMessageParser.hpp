@@ -26,7 +26,7 @@ class HTTPMessageParser {
   std::string getQuery() const;
   std::string getAuthority() const;
   std::string getPathinfo() const;
-  bool parseHeader(std::string header);
+  int parseHeader(std::string header);
   std::map<std::string, std::string> getHeaders() const;
   void clearData();
   bool isIllegalValueOfHostHeader(std::string headerField ) const;
@@ -56,7 +56,7 @@ class HTTPMessageParser {
 
   // headerを格納
   bool validationHeader(std::string header);
-  bool pushFieldNameAndValue(std::string fieldName, std::string fieldValue);
+  int pushFieldNameAndValue(std::string fieldName, std::string fieldValue);
   std::map<std::string, std::string> headers_;
 
   // headerの値のチェック
