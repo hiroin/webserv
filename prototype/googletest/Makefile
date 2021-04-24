@@ -11,7 +11,8 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../ft_stoi.cpp \
 	../Client.cpp \
 	../recvData.cpp \
-	../ft_memset.cpp
+	../ft_memset.cpp \
+	../getChunked.cpp \
 
 .PHONY: all clean
 
@@ -24,6 +25,8 @@ ft: $(SOURCE) ft_split_use_find_first_of_test.cpp
 client: $(SOURCE) Client_test.cpp
 	g++ $(SOURCE) Client_test.cpp  -o $(EXECFILE) -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main
 
+gc: $(SOURCE) getChunked_test.cpp
+	g++ $(SOURCE) getChunked_test.cpp  -o $(EXECFILE) -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main
 
 clean:
 	rm -rf *.o $(EXECFILE) test_ft

@@ -15,6 +15,7 @@ class getChunked {
  public:
   void setClientBody(std::string *clientBody);
   void setRecvData(recvData *r);
+  int parseChunkedData();
 
  public:
   getChunked();
@@ -26,8 +27,8 @@ class getChunked {
   recvData *r_;
 
  public:
-  int hexstring2dec(std::string chunksize);
-  int getChunked::hex2dec(char c);
+  int hexstring2int(std::string chunksize);
+  int hex2int(char c);
 
 };
 
