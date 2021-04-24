@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <errno.h>
+#include <cstring>
 
 class recvData {
  private:
@@ -21,6 +22,9 @@ class recvData {
   bool cutOutRecvDataToEol();
   std::string getRecvData() const;
   std::string getExtractedData() const;
+
+  // デバッグ用
+  void setRecvData(std::string data);
 
  public:
   recvData();

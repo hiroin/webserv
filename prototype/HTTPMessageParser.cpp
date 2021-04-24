@@ -139,19 +139,17 @@ std::string HTTPMessageParser::getPathinfo() const
   return pathinfo_;
 }
 
-bool HTTPMessageParser::parseHeader(std::string header)
+int HTTPMessageParser::parseHeader(std::string header)
 {
   if (!validationHeader(header))
-    return FAILURE;
+    return 200;
   std::string::size_type pos = header.find(std::string(":"));
   if (pos == std::string::npos)
-    return FAILURE;
+    return 200;
   std::string fieldName = header.substr(0, pos);
   std::string fieldValue  = header.substr(pos + 1);
   fieldValue = ft_trim(fieldValue, " \t");
-  if (!pushFieldNameAndValue(fieldName, fieldValue))
-    return FAILURE;
-  return SUCCESS;
+  return (pushFieldNameAndValue(fieldName, fieldValue));
 }
 
 std::map<std::string, std::string> HTTPMessageParser::getHeaders() const
@@ -288,7 +286,7 @@ bool HTTPMessageParser::validationHeader(std::string header)
   return FAILURE;
 }
 
-bool HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string fieldValue)
+int HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string fieldValue)
 {
   std::transform(fieldName.begin(), fieldName.end(), fieldName.begin(), tolower);
   if (fieldName == "accept" \
@@ -309,7 +307,6 @@ bool HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string
     || fieldName == "content-length" \
     || fieldName == "content-type" \
     || fieldName == "date" \
-    || fieldName == "host" \
     || fieldName == "referer" \
     || fieldName == "transfer-encoding" \
     || fieldName == "user-agent"
@@ -317,17 +314,24 @@ bool HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string
   {
     std::map<std::string, std::string>::const_iterator itr = headers_.find(fieldName);
     if (itr != headers_.end())
-      return FAILURE;
+      return 200;
     headers_[fieldName] = fieldValue;
   }
+  else if (fieldName == "host")
+  {
+    std::map<std::string, std::string>::const_iterator itr = headers_.find(fieldName);
+    if (itr != headers_.end())
+      return 400;
+    headers_[fieldName] = fieldValue;
+  }  
   else
   {
     std::map<std::string, std::string>::const_iterator itr = headers_.find(fieldName);
     if (itr != headers_.end())
-      return FAILURE;
+      return 200;
     headers_[fieldName] = fieldValue;
   }
-  return SUCCESS;
+  return 200;
 }
 
 int HTTPMessageParser::isInvalidHeaderValue()

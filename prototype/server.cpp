@@ -209,9 +209,8 @@ int http1(Config& c)
           }
           else
           {
-            clients[i].hmp.parseHeader(clients[i].receivedData.getExtractedData());
-            std::map<std::string, std::string> headers = clients[i].hmp.getHeaders();
-            if (clients[i].hmp.isIllegalValueOfHostHeader(clients[i].receivedData.getExtractedData()))
+            if (clients[i].hmp.isIllegalValueOfHostHeader(clients[i].receivedData.getExtractedData())
+              || clients[i].hmp.parseHeader(clients[i].receivedData.getExtractedData()) == 400)
             {
               ft_dummy_response(400, clients[i].socketFd);
               close(clients[i].socketFd);

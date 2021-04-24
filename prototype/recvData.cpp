@@ -19,7 +19,7 @@ bool recvData::recvFromSocket()
   char buf[recvBuffsize_];
   std::string tmp;
 
-  ft_memset(buf, 0, sizeof(buf));
+  memset(buf, 0, sizeof(buf));
   read_size = recv(fd_, buf, sizeof(buf), 0);
   if (read_size == 0) {
     std::cout << "graceful shutdown." << std::endl;
@@ -47,7 +47,7 @@ bool recvData::readFromFd()
   char buf[recvBuffsize_];
   std::string tmp;
 
-  ft_memset(buf, 0, sizeof(buf));
+  memset(buf, 0, sizeof(buf));
   read_size = read(fd_, buf, sizeof(buf));
   if (read_size == -1)
   {
@@ -90,7 +90,7 @@ bool recvData::cutOutRecvDataToEol()
     recvData_ = recvData_.substr(pos + 1);
     return SUCCESS;
   }
-  pos = recvData_.find("\r");
+  pos = recvData_.find("\n");
   if (pos != std::string::npos)
   {
     extractedData_ = recvData_.substr(0, pos);
@@ -108,6 +108,11 @@ std::string recvData::getRecvData() const
 std::string recvData::getExtractedData() const
 {
   return extractedData_;
+}
+
+void recvData::setRecvData(std::string data)
+{
+  recvData_ = data;
 }
 
 recvData::recvData()
