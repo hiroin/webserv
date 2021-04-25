@@ -1,25 +1,22 @@
 #include "Response.hpp"
 #include <string.h>
-#include <errno.h>
+
 
 int main()
 {
 	Client client(1, 1);
 	Config config(1);
-	ResponseMaker Response(client, config);
-	// Response.DecideConfigServer();
-	std::cout << Response.configServer.host << std::endl;
-	std::cout << Response.configServer.port << std::endl;
-	std::cout << Response.configServer.root << std::endl;
+	Response Response(client, config);
 
-	// Response.DecideConfigLocation();
-	std::cout << Response.configLocation.path << std::endl;
-	std::cout << Response.configLocation.alias << std::endl;
-	std::cout << Response.configLocation.configCommon.autoindex << std::endl;
+	int ErrorPageFd = Response.getErrorFileFd();
+	size_t ErrorPageSize = Response.getErrorContentLength();
 
-	std::cout << Response.GetSerachAbsolutePath() << std::endl;
-	Response.setTargetFileAndStatus();
-	std::cout << Response.getContentLength() << std::endl;
-	std::cout << Response.ResponseStatus << std::endl;
+	int TargetFileFd = Response.getTargetFileFd();
+	size_t TargetFileFd = Response.getContentLength();
 
+	int ResponseStatus = Response.ResponseStatus;
+
+	std::string &ResponseMessage = Response.responseMessege;
+	ResponseMessage.append("Additional Information");
+	std::cout << ResponseMessage << std::endl;
 }
