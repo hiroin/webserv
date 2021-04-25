@@ -37,7 +37,7 @@ Client::Client(int testPatternOfClient, int testPatternOfHTTPMessageParser)
 
 Client::Client(int testPatternOfClient, std::string testPatternOfHTTPMessageParserConf, int testPatternOfHTTPMessageParser)
 {
-  this->generateTestValue(testPatternOfClient); 
+  this->generateTestValue(testPatternOfClient);
   this->hmp_ = HTTPMessageParser("serverNames", testPatternOfHTTPMessageParser);
 }
 
