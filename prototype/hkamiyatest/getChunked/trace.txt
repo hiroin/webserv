@@ -1,0 +1,37 @@
+== Info:   Trying 127.0.0.1...
+== Info: TCP_NODELAY set
+== Info: Connected to 127.0.0.1 (127.0.0.1) port 80 (#0)
+=> Send header, 162 bytes (0xa2)
+0000: POST /test.php HTTP/1.1
+0019: Host: 127.0.0.1
+002a: User-Agent: curl/7.58.0
+0043: Accept: */*
+0050: Transfer-Encoding: chunked
+006c: Content-Type: application/x-www-form-urlencoded
+009d: 
+009f: 5
+=> Send data, 12 bytes (0xc)
+0000: 12345
+0007: 0
+000a: 
+== Info: upload completely sent off: 12 out of 5 bytes
+<= Recv header, 17 bytes (0x11)
+0000: HTTP/1.1 200 OK
+<= Recv header, 31 bytes (0x1f)
+0000: Server: nginx/1.14.0 (Ubuntu)
+<= Recv header, 37 bytes (0x25)
+0000: Date: Mon, 26 Apr 2021 00:30:40 GMT
+<= Recv header, 40 bytes (0x28)
+0000: Content-Type: text/html; charset=UTF-8
+<= Recv header, 28 bytes (0x1c)
+0000: Transfer-Encoding: chunked
+<= Recv header, 24 bytes (0x18)
+0000: Connection: keep-alive
+<= Recv header, 2 bytes (0x2)
+0000: 
+<= Recv data, 52 bytes (0x34)
+0000: 29
+0004: test.Array.(.).Array.(.    [12345] => .).
+002f: 0
+0032: 
+== Info: Connection #0 to host 127.0.0.1 left intact

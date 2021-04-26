@@ -19,6 +19,7 @@
 #include "Client.hpp"
 #include "Config.hpp"
 #include "parseConfig.hpp"
+#include "getChunked.hpp"
 #include "ft.hpp"
 
 int http1(Config& c)
@@ -191,21 +192,26 @@ int http1(Config& c)
               // 状態を最初に戻す
               clients[i].status = PARSE_STARTLINE;
               clients[i].hmp.clearData();
-              break;
             }
             if (clients[i].isNeedBody(headers))
             {
-              // [やること]ここにすでにchunkedなデータを受け取った後のヘッダ処理な場合は、レスポンス作成に以降するロジックを追加
               clients[i].status = RESV_BODY;
+              // {
+              //   // デバッグ
+              //   std::cout << "--recvData-----------------------------" << std::endl;
+              //   std::cout << clients[i].receivedData.getRecvData();
+              //   std::cout << "---------------------------------------" << std::endl;
+              // }
             }
             else
             {
               ft_dummy_response(200, clients[i].socketFd);
               // 状態を最初に戻す
               clients[i].status = PARSE_STARTLINE;
+              clients[i].bChunked = false;
               clients[i].hmp.clearData();
-              break;
             }
+            break;
           }
           else
           {
@@ -227,11 +233,76 @@ int http1(Config& c)
       {
         if (clients[i].bChunked == true)
         {
-          // チャンクのデータが取得できる関数を書く
-          //if (チャンク取得エラー)
-          // ft_dummy_response(501, clients[i].socketFd);
-          //if (チャンク取得完了)
-          // clients[i].status = PARSE_HEADER;
+          clients[i].gc.setRecvData(&clients[i].receivedData);
+          clients[i].gc.setClientBody(&clients[i].body);
+          int code = clients[i].gc.parseChunkedData();
+          if (code == 200)
+          {
+            {
+              // デバッグ
+              std::cout << "--body---------------------------------" << std::endl;
+              std::cout << clients[i].body << std::endl;
+              std::cout << "---------------------------------------" << std::endl;
+            }
+            while (clients[i].receivedData.cutOutRecvDataToEol())
+            {
+              if (clients[i].receivedData.getExtractedData() == "")
+              {
+                // デバッグ
+                std::map<std::string, std::string> headers = clients[i].hmp.getHeaders();
+                {
+                  std::cout << "--headers------------------------------" << std::endl;
+                  for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
+                  {
+                    std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
+                  }
+                  std::cout << "---------------------------------------" << std::endl;
+                }
+                if (int code = clients[i].hmp.isInvalidHeaderValue() != 200)
+                {
+                  ft_dummy_response(code, clients[i].socketFd);
+                  // 状態を最初に戻す
+                  clients[i].status = PARSE_STARTLINE;
+                  clients[i].hmp.clearData();
+                }
+                break;
+              }
+              else
+              {
+                if (clients[i].hmp.isIllegalValueOfHostHeader(clients[i].receivedData.getExtractedData())
+                  || clients[i].hmp.parseHeader(clients[i].receivedData.getExtractedData()) == 400)
+                {
+                  ft_dummy_response(400, clients[i].socketFd);
+                  close(clients[i].socketFd);
+                  clients[i].status = PARSE_STARTLINE;
+                  clients[i].receivedData.clearData();
+                  clients[i].hmp.clearData();
+                  clients[i].socketFd = -1;
+                  continue;
+                }
+              }
+            }
+          }
+          else if (code == 400)
+          {
+            ft_dummy_response(400, clients[i].socketFd);
+            close(clients[i].socketFd);
+            clients[i].status = PARSE_STARTLINE;
+            clients[i].receivedData.clearData();
+            clients[i].hmp.clearData();
+            clients[i].socketFd = -1;
+            continue;
+          }
+          else if (code == 500)
+          {
+            ft_dummy_response(500, clients[i].socketFd);
+            close(clients[i].socketFd);
+            clients[i].status = PARSE_STARTLINE;
+            clients[i].receivedData.clearData();
+            clients[i].hmp.clearData();
+            clients[i].socketFd = -1;
+            continue;
+          }
         }
         else
         {

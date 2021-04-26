@@ -2,35 +2,53 @@
 
 // chunkedなデータをclientBody_に格納する
 // chunkedの形式にあっていないデータな場合400を返す
-// 
+// chunkedなデータの受信が完了しない場合は-1を返す
 int getChunked::parseChunkedData()
 {
   if (clientBody_ == NULL || r_ == NULL)
-    return -1;
+    return 500;
   bool bNotDone = true;
   std::string chunksize_chunkext;
-  std::string chunksize;  
   while (bNotDone == true)
   {
-    r_->cutOutRecvDataToEol();
-    chunksize_chunkext = r_->getExtractedData();
-    if (chunksize_chunkext == "0")
+    if (status_ == GET_CHUNK_SIZE)
     {
-      bNotDone = false;
-      continue;
+      if (r_->cutOutRecvDataToEol() == 0)
+        return -1;
+      chunksize_chunkext = r_->getExtractedData();
+      std::cout << "chunksize_chunkext : [" << chunksize_chunkext << "]" << std::endl;
+      std::string::size_type pos = chunksize_chunkext.find(";");
+      if (pos != std::string::npos)
+        chunksize_ = chunksize_chunkext.substr(0, pos);
+      else
+        chunksize_ = chunksize_chunkext;
+      if (chunksize_ == "0")
+      {
+        bNotDone = false;
+        break;
+      }
+      std::cout << "chunksize(hex)     : [" << chunksize_ << "]" << std::endl;
+      std::cout << "chunksize(dec)     : [" << hexstring2int(chunksize_) << "]" << std::endl;
+      if (hexstring2int(chunksize_) == -1)
+        return 400;
+      status_ = GET_CHUNK_DATA;
     }
-    std::cout << "chunksize_chunkext : " << chunksize_chunkext << std::endl;
-    std::string::size_type pos = chunksize_chunkext.find(";");
-    if (pos != std::string::npos)
-      chunksize = chunksize_chunkext.substr(0, pos);
-    else
-      chunksize = chunksize_chunkext;
-    std::cout << "chunksize(hex)     : " << chunksize << std::endl;
-    std::cout << "chunksize(dec)     : " << hexstring2int(chunksize) << std::endl;
-    r_->cutOutRecvDataBySpecifyingBytes(hexstring2int(chunksize));
-    std::cout << "chunk-data         : " << r_->getExtractedData() << std::endl;
-    *clientBody_ += r_->getExtractedData();
-    r_->cutOutRecvDataToEol();
+    if (status_ == GET_CHUNK_DATA)
+    {
+      if (r_->cutOutRecvDataBySpecifyingBytes(hexstring2int(chunksize_)) == 0)
+        return -1;
+      std::cout << "chunk-data         : [" << r_->getExtractedData() << "]" << std::endl;
+      *clientBody_ += r_->getExtractedData();
+      status_ = GET_CHUNK_CRLF;
+    }
+    if (status_ == GET_CHUNK_CRLF)
+    {
+      if (r_->cutOutRecvDataToEol() == 0)
+        return -1;
+      if (r_->getExtractedData() != "")
+        return 400;
+      status_ = GET_CHUNK_SIZE;
+    }
   }
   return 200;
 }
@@ -102,6 +120,12 @@ void getChunked::setRecvData(recvData *r)
   if (r == NULL)
     return;
   r_ = r;
+}
+
+void getChunked::clear()
+{
+  status_ = GET_CHUNK_SIZE;
+  chunksize_.clear();
 }
 
 getChunked::getChunked() : status_(GET_CHUNK_SIZE), clientBody_(NULL), r_(NULL)
