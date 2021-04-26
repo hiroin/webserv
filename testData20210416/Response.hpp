@@ -98,6 +98,7 @@ class Response
 		int getTargetFileFd();
 		int getErrorFileFd();
 
+
 		/*===============HTTPstatus===============*/
 
 
@@ -132,6 +133,7 @@ class Response
 		int send();
 		Response(int test_number);
 		Response(Client &client, Config &config);
+		Response(int ErrorCode ,Client &client, Config &config);
 		~Response();
 };
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */

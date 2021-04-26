@@ -2,6 +2,8 @@
 #include <string.h>
 
 
+
+
 int main()
 {
 	Client client(1, 1);
@@ -12,9 +14,6 @@ int main()
 	int TargetFileFd = Response.getTargetFileFd();
 	size_t TargetFileFd = Response.getContentLength();
 
-	int ResponseStatus = Response.ResponseStatus;
+	std::cout << Response.responseMessege << std::endl;
 
-	std::string &ResponseMessage = Response.responseMessege;
-	ResponseMessage.append("Additional Information");
-	std::cout << ResponseMessage << std::endl;
 }
