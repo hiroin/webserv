@@ -6,7 +6,7 @@ int main()
 {
 	Client client(1, 1);
 	Config config(1);
-	ResponseMaker Response(client, config);
+	Response Response(client, config);
 	// Response.DecideConfigServer();
 	std::cout << Response.configServer.host << std::endl;
 	std::cout << Response.configServer.port << std::endl;
