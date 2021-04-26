@@ -103,23 +103,32 @@ bool recvData::cutOutRecvDataBySpecifyingBytes(size_t size)
 bool recvData::cutOutRecvDataToEol()
 {
   std::string::size_type pos;
-  
-  pos = recvData_.find("\n");
-  if (pos != std::string::npos)
+
+  for (std::string::iterator itr = recvData_.begin(); itr != recvData_.end(); itr++)
   {
-    if (pos != 0 && recvData_[pos - 1] == '\r')
-      extractedData_ = recvData_.substr(0, pos - 1);
-    else
-      extractedData_ = recvData_.substr(0, pos);    
-    recvData_ = recvData_.substr(pos + 1);
-    return SUCCESS;
-  }
-  pos = recvData_.find("\r");
-  if (pos != std::string::npos)
-  {
-    extractedData_ = recvData_.substr(0, pos);
-    recvData_ = recvData_.substr(pos + 1);
-    return SUCCESS;
+    if (*itr == '\n')
+    {
+      pos = recvData_.find("\n");
+      extractedData_ = recvData_.substr(0, pos);
+      recvData_ = recvData_.substr(pos + 1);
+      return SUCCESS;
+    }
+    else if (*itr == '\r')
+    {
+      pos = recvData_.find("\r");
+      if (recvData_.size() >= pos && recvData_[pos + 1] == '\n')
+      {
+        extractedData_ = recvData_.substr(0, pos);
+        recvData_ = recvData_.substr(pos + 2);
+        return SUCCESS;
+      }
+      else
+      {
+        extractedData_ = recvData_.substr(0, pos);
+        recvData_ = recvData_.substr(pos + 1);
+        return SUCCESS;
+      }
+    }
   }
   return FAILURE;
 }

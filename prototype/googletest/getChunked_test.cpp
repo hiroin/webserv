@@ -48,6 +48,27 @@ TEST(getChunked, parseChunkedData) {
   EXPECT_EQ("Mozilla\r", clientBody);
   clientBody.clear();
 
+  // 改行文字がすべて\r
+  r.setRecvData("7\rMozilla\r9\rDeveloper\r7\rNetwork\r0\r");
+  gc.setRecvData(&r);
+  EXPECT_EQ(200, gc.parseChunkedData());
+  EXPECT_EQ("MozillaDeveloperNetwork", clientBody);
+  clientBody.clear();
+
+  // 改行文字がすべて\n
+  r.setRecvData("7\nMozilla\n9\nDeveloper\n7\nNetwork\n0\n");
+  gc.setRecvData(&r);
+  EXPECT_EQ(200, gc.parseChunkedData());
+  EXPECT_EQ("MozillaDeveloperNetwork", clientBody);
+  clientBody.clear();
+
+  // 改行文字が混在
+  r.setRecvData("7\r\nMozilla\n9\rDeveloper\r\n7\nNetwork\r0\r\n");
+  gc.setRecvData(&r);
+  EXPECT_EQ(200, gc.parseChunkedData());
+  EXPECT_EQ("MozillaDeveloperNetwork", clientBody);
+  clientBody.clear();
+
 
 }
 
