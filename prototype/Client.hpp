@@ -6,6 +6,7 @@
 #include <iostream>
 #include "recvData.hpp"
 #include "HTTPMessageParser.hpp"
+#include "getChunked.hpp"
 
 enum clientStatus {PARSE_STARTLINE, PARSE_HEADER, RESV_BODY, CREATE_RESPONSE, READ, WRITE, SEND, NUM_OF_CLIENTSTATUS};
 
@@ -26,6 +27,7 @@ class Client
   // 各種処理をするためのclass
   recvData receivedData;
   HTTPMessageParser hmp;
+  getChunked gc;
 
   // 処理状態とフラグ
   enum clientStatus status;

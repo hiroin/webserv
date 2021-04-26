@@ -20,7 +20,8 @@ HTTP1_SOURCE = server.cpp \
 							 ft_isctl.cpp \
 							 ft_istspecials.cpp \
 							 ft_stoi.cpp \
-							 ft_dummy_response.cpp
+							 ft_dummy_response.cpp \
+							 getChunked.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

@@ -29,6 +29,19 @@ void ft_dummy_response(int code, int socketFd)
     if (send(socketFd, response400.c_str(), response400.length(), 0) == -1)
       std::cout << "send() failed." << std::endl;
   }
+  if (code == 500)
+  {
+    std::string response;
+    response += "HTTP/1.1 500 Internal Server Error\r\n";
+    response += "Content-Type: text/html\r\n";
+    response += "Content-Length: 26\r\n";
+    response += "Connection: close\r\n";
+    response += "\r\n";
+    response += "500 Internal Server Error\n";
+    std::cout << response << std::endl;
+    if (send(socketFd, response.c_str(), response.length(), 0) == -1)
+      std::cout << "send() failed." << std::endl;
+  }   
   if (code == 501)
   {
     std::string response;
