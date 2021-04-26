@@ -6,7 +6,52 @@
 #include <fcntl.h>
 #include <string>
 #include <errno.h>
-#include <time.h>
+#include <ctime>
+#include <algorithm>
+
+int ft_pow(int n, int times)
+{
+	if (times == 0)
+	{
+		return (1);
+	}
+	for(int i = 0; i < times; i++)
+	{
+		n *= n;
+	}
+	return (n);
+}
+
+std::string ft_itos(int nu)
+{
+	std::string ret;
+	while (nu > 0)
+	{
+		char c[2];
+		c[0] = '0' + nu % 10;
+		c[1] = '\0';
+		ret.insert(0, std::string(c));
+		nu /= 10;
+	}
+	return (ret);
+
+}
+
+std::string ft_ltos(long nu)
+{
+	std::string ret;
+	while (nu > 0)
+	{
+		char c[2];
+		c[0] = '0' + nu % 10;
+		c[1] = '\0';
+		ret.insert(0, std::string(c));
+		nu /= 10;
+	}
+	return (ret);
+
+}
+
 
 void setResponseMap(std::map<int, std::string> &ResponseMap)
 {
@@ -211,6 +256,30 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	client.status = READ;
 }
 
+Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config)
+{
+	DecideConfigServer(); //使用するserverディレクティブを決定
+	DecideConfigLocation(); //使用するlocationディレクティブを決定
+	ResponseStatus = ErrorCode;
+	setResponseLine(); //responseStatus と serverNameヘッダを設定
+	setDate(); //Dateヘッダを設定
+	if (isErrorFilePathExist())
+	{
+		if (isErrorFilePathExist())
+		{
+			setContenType(errorFilePath);
+			client.status = READ;
+			return ;
+		}
+		else
+		{
+			client.status = SEND;
+			return ;
+		}
+	}
+}
+
+
 bool Response::DecideConfigServer()
 {
 	int clientPort = client.port_;
@@ -381,7 +450,7 @@ void Response::setResponseLine()
 	std::map<int, std::string> ResponseMap;
 	setResponseMap(ResponseMap);
 	responseMessege.append(std::string("HTTP/1.1") + " ");
-	responseMessege.append(std::to_string(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\n");
+	responseMessege.append(ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\n");
 	responseMessege.append("Server: nginx/1.14.0 (Ubuntu)\n");
 }
 
@@ -393,22 +462,22 @@ void Response::setDate()
 	gmt = gmtime(&timer);
 	responseMessege.append("Date: ");
 	responseMessege.append(GetDate()[gmt->tm_wday] + ", ");
-	responseMessege.append(std::to_string(gmt->tm_mday) + " ");
+	responseMessege.append(ft_itos(gmt->tm_mday) + " ");
 	responseMessege.append(GetMonth()[gmt->tm_mon] + " ");
-	responseMessege.append(std::to_string(gmt->tm_year + 1900) + " ");
-	responseMessege.append(std::to_string(gmt->tm_hour) + ":" + std::to_string(gmt->tm_min) + ":" + std::to_string(gmt->tm_sec) + " ");
+	responseMessege.append(ft_itos(gmt->tm_year + 1900) + " ");
+	responseMessege.append(ft_itos(gmt->tm_hour) + ":" + ft_itos(gmt->tm_min) + ":" + ft_itos(gmt->tm_sec) + " ");
 	responseMessege.append("GMT\n");
 }
 
 std::string Response::getErrorPage()
 {
-	errorFilePath = configServer.root + configServer.configCommon.errorPages[std::to_string(ResponseStatus)];
+	errorFilePath = configServer.root + configServer.configCommon.errorPages[ft_itos(ResponseStatus)];
 	return errorFilePath;
 }
 
 bool Response::isErrorFilePathExist()
 {
-	errorFilePath = configServer.root + configServer.configCommon.errorPages[std::to_string(ResponseStatus)];
+	errorFilePath = configServer.root + configServer.configCommon.errorPages[ft_itos(ResponseStatus)];
 	struct stat buf;
 
 	if (stat(errorFilePath.c_str(), &buf) == 0)
