@@ -282,9 +282,9 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 
 bool Response::DecideConfigServer()
 {
-	int clientPort = client.port_;
-	std::string clientHostName = client.host_;
-	HTTPMessageParser hmp = client.hmp_;
+	int clientPort = client.port;
+	std::string clientHostName = client.host;
+	HTTPMessageParser hmp = client.hmp;
 
 	//ここから、configをなめていって該当設定を見つけよう。
 	std::vector<s_ConfigServer> servers = config.configGlobal.servers;
@@ -328,7 +328,7 @@ bool Response::DecideConfigServer()
 //locationがなかったら、serverディレクティブ
 bool Response::DecideConfigLocation()
 {
-	std::string AbsolutePath = this->client.hmp_.absolutePath_;
+	std::string AbsolutePath = this->client.hmp.absolutePath_;
 	std::vector<s_ConfigLocation> locations = this->configServer.locations;
 
 	for(int i = 0; i < locations.size(); i++)// 文字が長い順番でlocationが入ってる。
@@ -345,7 +345,7 @@ bool Response::DecideConfigLocation()
 std::string Response::GetSerachAbsolutePath() //出来上がったpathに"/"が付いていなかったらindexを採用していく
 {
 	std::string SerachAbsolutePath = "";
-	std::string AbsolutePath = client.hmp_.absolutePath_;
+	std::string AbsolutePath = client.hmp.absolutePath_;
 	if (configLocation.path.size() == 0 || configLocation.alias.size() == 0) //該当するLocationがなかったoraliasがなかった場合、rootが先頭につく
 	{
 		SerachAbsolutePath = configServer.root + AbsolutePath; //targetFilePath

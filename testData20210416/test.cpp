@@ -3,7 +3,7 @@
 
 int main()
 {
-    Client client(1, 1);
+    Client client(2, 10);
     Config config(1);
     Response Response(client, config);
     

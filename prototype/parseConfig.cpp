@@ -105,7 +105,7 @@ void parseConfig::printToken()
       }
       std::cout << "token: " << itr->token.c_str();
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
   }
 }
 
@@ -456,7 +456,7 @@ bool parseConfig::insertToConfigClass(Config& c)
       errorMessage +=  itr->key ;
       throw std::runtime_error(errorMessage);
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
     for(std::vector<parseconfig::configLocation>::iterator itrConfig =
         itrServer->locations.begin(); itrConfig != itrServer->locations.end(); ++itrConfig)
     {
@@ -990,7 +990,7 @@ parseConfig::parseConfig(const char *configFile, Config& c)
   }
   {
     // デバッグ用出力
-    c.printConfig();
+    // c.printConfig();
   }
 }
 
