@@ -180,7 +180,7 @@ void parseConfig::pushContext(token& vtoken, unsigned int idx, parseconfig::conf
      config.contexts.begin(); itr != config.contexts.end(); ++itr) {
     if (key == itr->key)
     {
-      parseconfig::values values;
+      parseconfig::vvalues values;
       while (vtoken.at(idx).type == parseconfig::CHAR)
       {
         values.value.push_back(vtoken.at(idx).token);
@@ -192,7 +192,7 @@ void parseConfig::pushContext(token& vtoken, unsigned int idx, parseconfig::conf
   }
   parseconfig::context context;
   context.key = key;
-  parseconfig::values values;
+  parseconfig::vvalues values;
   while (vtoken.at(idx).type == parseconfig::CHAR)
   {
     values.value.push_back(vtoken.at(idx).token);
@@ -335,7 +335,7 @@ void parseConfig::printConfigHttp()
   for(std::vector<parseconfig::context>::iterator itr = 
       configHttp_.contexts.begin(); itr != configHttp_.contexts.end(); ++itr) {
     std::cout << "  key = " << itr->key << std::endl;
-    for(std::vector<parseconfig::values>::iterator itrValues = 
+    for(std::vector<parseconfig::vvalues>::iterator itrValues = 
         itr->values.begin(); itrValues != itr->values.end(); ++itrValues) {
       std::cout << "    value = ";
       for(std::vector<std::string>::iterator itrValue = 
@@ -353,7 +353,7 @@ void parseConfig::printConfigHttp()
     for(std::vector<parseconfig::context>::iterator itr =
         itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr) {
       std::cout << "  key = " << itr->key << std::endl;
-      for(std::vector<parseconfig::values>::iterator itrValues = 
+      for(std::vector<parseconfig::vvalues>::iterator itrValues = 
           itr->values.begin(); itrValues != itr->values.end(); ++itrValues) {
         std::cout << "    value = ";
         for(std::vector<std::string>::iterator itrValue = 
@@ -370,7 +370,7 @@ void parseConfig::printConfigHttp()
       for(std::vector<parseconfig::context>::iterator itr = 
           itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr) {
         std::cout << "    key = " << itr->key << std::endl;
-        for(std::vector<parseconfig::values>::iterator itrValues = 
+        for(std::vector<parseconfig::vvalues>::iterator itrValues = 
             itr->values.begin(); itrValues != itr->values.end(); ++itrValues) {
           std::cout << "      value = ";
           for(std::vector<std::string>::iterator itrValue = 
@@ -723,7 +723,7 @@ bool parseConfig::insertErrorPages(contextIterator itr, std::map<std::string, st
 {
   if (itr->key == "error_page")
   {
-    for (std::vector<parseconfig::values>::iterator itrValues = 
+    for (std::vector<parseconfig::vvalues>::iterator itrValues = 
         itr->values.begin(); itrValues != itr->values.end(); ++itrValues)
     {
       if (itrValues->value.size() < 2)
@@ -898,7 +898,7 @@ bool parseConfig::notExistRootDirective(Config& c)
   return false;
 }
 
-parseConfig::parseConfig(char *configFile, Config& c)
+parseConfig::parseConfig(const char *configFile, Config& c)
 {
   int fd = open(configFile, O_RDONLY);
   if (fd == -1)

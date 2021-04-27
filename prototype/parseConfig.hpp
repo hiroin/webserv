@@ -34,7 +34,7 @@ namespace parseconfig
     std::string   token;
   } ;
 
-  struct values
+  struct vvalues
   {
     std::vector<std::string> value;
   };
@@ -42,7 +42,7 @@ namespace parseconfig
   struct context
   {
     std::string key;
-    std::vector<values> values;
+    std::vector<vvalues> values;
   };
 
   class configBase
@@ -84,7 +84,7 @@ class parseConfig
   parseconfig::configHttp configHttp_;
 
   parseConfig();
-  parseConfig(char *configFile, Config& c);
+  parseConfig(const char *configFile, Config& c);
   ~parseConfig();
  
  private:

@@ -9,10 +9,16 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../ft_isunreserved.cpp \
 	../ft_issubdelims.cpp \
 	../ft_stoi.cpp \
+	../ft_istoken.cpp \
 	../Client.cpp \
 	../recvData.cpp \
 	../ft_memset.cpp \
+	../ft_isctl.cpp \
+	../ft_istspecials.cpp \
 	../getChunked.cpp \
+	../Response.cpp \
+  ../Config.cpp \
+	../parseConfig.cpp
 
 .PHONY: all clean
 
@@ -22,11 +28,14 @@ hmp: $(SOURCE) HTTPMessageParser_test.cpp
 ft: $(SOURCE) ft_split_use_find_first_of_test.cpp
 	g++ ft_split_use_find_first_of_test.cpp ../ft_split_use_find_first_of.cpp ft_stoi_test.cpp ../ft_stoi.cpp -o $(EXECFILE) -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main
 
-client: $(SOURCE) Client_test.cpp
+cl: $(SOURCE) Client_test.cpp
 	g++ $(SOURCE) Client_test.cpp  -o $(EXECFILE) -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main
 
 gc: $(SOURCE) getChunked_test.cpp
 	g++ $(SOURCE) getChunked_test.cpp  -o $(EXECFILE) -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main
+
+re: $(SOURCE) Response_test.cpp
+	g++ $(SOURCE) Response_test.cpp  -o $(EXECFILE) -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main
 
 clean:
 	rm -rf *.o $(EXECFILE) test_ft

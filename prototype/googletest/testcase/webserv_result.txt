@@ -1,0 +1,168 @@
+
+
+凡例
+URL
+リクエスト
+取得するファイル
+応答
+
+http://127.0.0.1:5000/
+GET / HTTP/1.1
+/tmp/webserv/0/index.html
+-------------------------------------
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:08:55 GMT
+Content-Type: text/html
+Content-Length: 54
+Last-Modified: Mon, 05 Apr 2021 06:06:28 GMT
+
+<html>
+        <body>
+                <p>0/index.html</p>
+        </body>
+</html>
+-------------------------------------
+
+http://127.0.0.1:5000/index.html
+GET /index.html HTTP/1.1
+/tmp/webserv/0/index.html
+-------------------------------------
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:08:55 GMT
+Content-Type: text/html
+Content-Length: 54
+Last-Modified: Mon, 05 Apr 2021 06:06:28 GMT
+
+<html>
+        <body>
+                <p>0/index.html</p>
+        </body>
+</html>
+-------------------------------------
+
+http://127.0.0.1:5000/aaa/index.html
+GET /aaa/index.html HTTP/1.1
+/tmp/webserv/0aaa/index.html
+-------------------------------------
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:14:45 GMT
+Content-Type: text/html
+Content-Length: 57
+Last-Modified: Mon, 05 Apr 2021 06:06:28 GMT
+
+<html>
+        <body>
+                <p>0aaa/index.html</p>
+        </body>
+</html>
+-------------------------------------
+
+http://127.0.0.1:5000/aaa/
+GET /aaa/ HTTP/1.1
+/tmp/webserv/0aaa/default.html
+-------------------------------------
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:15:54 GMT
+Content-Type: text/html
+Content-Length: 59
+Last-Modified: Mon, 05 Apr 2021 06:06:28 GMT
+
+<html>
+        <body>
+                <p>0aaa/default.html</p>
+        </body>
+</html>
+-------------------------------------
+
+http://127.0.0.1:5000/aa/index.html
+GET /aa/index.html HTTP/1.1
+/tmp/webserv/0aa/index.html
+-------------------------------------
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:16:47 GMT
+Content-Type: text/html
+Content-Length: 56
+Last-Modified: Mon, 05 Apr 2021 06:06:28 GMT
+
+<html>
+        <body>
+                <p>0aa/index.html</p>
+        </body>
+</html>
+-------------------------------------
+
+
+http://127.0.0.1:5000/aa/
+GET /aa/ HTTP/1.1
+/tmp/webserv/0aa/index.html
+-------------------------------------
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:16:47 GMT
+Content-Type: text/html
+Content-Length: 56
+Last-Modified: Mon, 05 Apr 2021 06:06:28 GMT
+
+<html>
+        <body>
+                <p>0aa/index.html</p>
+        </body>
+</html>
+-------------------------------------
+
+http://127.0.0.1:5000/www/aaa/index.html
+GET /www/aaa/index.html HTTP/1.1
+/tmp/webserv/0/www/aaa/index.html
+-------------------------------------
+HTTP/1.1 404 Not Found
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:26:52 GMT
+Content-Type: text/html
+Content-Length: 94
+
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<h1>404 Not Found</h1>
+</body>
+</html>
+-------------------------------------
+
+http://127.0.0.1:5001/index.html
+GET /index.html HTTP/1.1
+/tmp/webserv/1/index.html
+
+http://127.0.0.1:5001/
+GET / HTTP/1.1
+404
+
+http://127.0.0.1:5001/bbb/index.html
+GET /bbb/index.html HTTP/1.1
+/tmp/webserv/1bbb/index.html
+
+http://127.0.0.1:5001/bb/index.html
+GET /bb/index.html HTTP/1.1
+/tmp/webserv/1bb/index.html
+
+http://127.0.0.1:5000/www/bb/index.html
+GET /www/bb/index.html HTTP/1.1
+/tmp/webserv/1/www/bb/index.html
+
+http://127.0.0.1:5000/1.jpg
+GET /1.jpg HTTP/1.1
+/tmp/webserv/0/1.jpg
+-------------------------------------
+HTTP/1.1 200 OK
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 05 Apr 2021 06:29:57 GMT
+Content-Type: image/jpeg
+Content-Length: 915304
+Last-Modified: Mon, 05 Apr 2021 06:29:55 GMT
+
+1.jpgのバイナリデータ
+-------------------------------------
