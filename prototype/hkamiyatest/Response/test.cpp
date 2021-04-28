@@ -1,3 +1,8 @@
+/*
+テストケース
+https://docs.google.com/spreadsheets/d/1LNw2mvutl0X-ehI2lNGltf06Z1zOF04SorS-GIM8q2U/edit#gid=0
+*/
+
 #include "../../Response.hpp"
 #include "../../parseConfig.hpp"
 #include <string.h>

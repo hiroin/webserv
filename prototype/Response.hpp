@@ -3,6 +3,10 @@
 #ifndef A9308F37_DB41_4E16_8DFF_32241C903504
 #define A9308F37_DB41_4E16_8DFF_32241C903504
 
+#ifdef _GLIBCXX_DEBUG
+# include <debug/string>
+# include <debug/vector>
+#endif
 #include <string>
 #include <vector>
 #include <time.h>

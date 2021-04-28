@@ -1,12 +1,25 @@
+/*
+テストケース
+https://docs.google.com/spreadsheets/d/1LNw2mvutl0X-ehI2lNGltf06Z1zOF04SorS-GIM8q2U/edit#gid=0
+*/
+
 #include "Response.hpp"
 #include <string.h>
+#include <string>
 
 int main()
 {
-    Client client(2, 10);
+    // Client client(2, 10);
+
+    Client client;
+    client.port = 5000;
+    client.host = "*";
+    client.hmp.method_ = httpMessageParser::GET;
+    client.hmp.absolutePath_ = "/root.html";
+    client.hmp.headers_["host"] = "127.0.0.1";
     Config config(1);
+
     Response Response(client, config);
-    
     
     int ResponseStatus = Response.ResponseStatus;
     int ErrorPageFd = Response.getErrorFileFd();
