@@ -15,11 +15,11 @@ class Client
   HTTPMessageParser hmp;
   enum clientStatus status;
   Client(int testPatternOfClient, int testPatternOfHTTPMessageParser);
-  Client(int testPatternOfClient, std::string testPatternOfHTTPMessageParserConf, int testPatternOfHTTPMessageParser); 
+  Client(int testPatternOfClient, std::string testPatternOfHTTPMessageParserConf, int testPatternOfHTTPMessageParser);
   Client();
   ~Client();
   bool operator==(const Client&);
-  bool operator!=(const Client&);  
+  bool operator!=(const Client&);
 
  private:
   Client(const Client&);

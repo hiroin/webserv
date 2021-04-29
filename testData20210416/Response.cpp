@@ -115,6 +115,18 @@ void setResponseMap(std::map<int, std::string> &ResponseMap)
 	ResponseMap[511] =  "Network Authentication";
 }
 
+s_ConfigCommon Response::getConfigCommon()
+{
+	if (configLocation.path.size() != 0) //Locationがある時
+	{
+		return (configLocation.configCommon);
+	}
+	else
+	{
+		return (configServer.configCommon);
+	}
+}
+
 std::map<int, std::string> Response::GetDate()
 {
 	std::map<int, std::string> date;
@@ -238,14 +250,19 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
-	setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
+	/* メソッドが許可されているかを判断 */
+	if (isMethodAllowed())
+		setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
 	setResponseLine(); //responseStatus と serverNameヘッダを設定
-	setDate(); //
+	setDate();
 	if (ResponseStatus != 200)
 	{
+		if (ResponseStatus == 405)
+			setAllow();
 		//erro_pageを探して、あったらContent-Type,Content-Lengthを記入して
 		if (isErrorFilePathExist())
 		{
+
 			setContenType(errorFilePath);
 			client.status = READ;
 			return ;
@@ -283,6 +300,40 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 	}
 }
 
+bool	Response::isMethodAllowed()
+{
+	bool* allowMethodsBool;
+	s_ConfigCommon configCommon = getConfigCommon();
+	allowMethodsBool = configCommon.allowMethodsBool;
+	if (allowMethodsBool[client.hmp.method_])
+	{
+		return true;
+	}
+	else
+	{
+		ResponseStatus = 405;
+		return false;
+	}
+}
+
+void Response::setAllow()
+{
+	std::string AllowHeader = "Allow: ";
+	s_ConfigCommon configCommon = getConfigCommon();
+	std::vector<std::string> allowMethods = configCommon.allowMethods;
+	for(size_t i = 0; i < allowMethods.size(); i++)
+	{
+		if (i == allowMethods.size() - 1)
+		{
+			AllowHeader.append(allowMethods[i] + "\n");
+		}
+		else
+		{
+			AllowHeader.append(allowMethods[i] + ",");
+		}
+	}
+	responseMessege.append(AllowHeader);
+}
 
 bool Response::DecideConfigServer()
 {
@@ -350,7 +401,7 @@ std::string Response::GetSerachAbsolutePath() //出来上がったpathに"/"が�
 {
 	std::string SerachAbsolutePath = "";
 	std::string AbsolutePath = client.hmp.absolutePath_;
-	if (configLocation.path.size() == 0 || configLocation.alias.size() == 0) //該当するLocationがなかったoraliasがなかった場合、rootが先頭につく
+	if (configLocation.path.size() == 0 || configLocation.alias.size() == 0) //該当するLocationがなかった or aliasがなかった場合、rootが先頭につく
 	{
 		SerachAbsolutePath = configServer.root + AbsolutePath; //targetFilePath
 	}
@@ -364,26 +415,26 @@ std::string Response::GetSerachAbsolutePath() //出来上がったpathに"/"が�
 int isTargetFileAbailable(std::string SerachFileAbsolutePath)
 {
 	struct stat buf;
-	if(stat(SerachFileAbsolutePath.c_str(), &buf) == 0) //ファイルが存在して検索できた
+	int fd = open(SerachFileAbsolutePath.c_str(), O_RDONLY);
+	if(fd != -1) //ファイルが存在して検索できた
 	{
+		close(fd);
 		return (200);
 	}
 	else //失敗したから、errnoチェックして確認
 	{
-		if(errno == ENOENT)
+		switch (errno)
 		{
+		case EACCES:
+			return (403);
+		default:
 			return (404);
 		}
-		return (403);
 	}
-	/**
-	 * ステータスコードどうやって決めればいいかな....
-	 * **/
 }
 
 void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返してくる物をみて、ファイルがそもそも存在するかをチェック
 {
-	int statusNo;
 	std::string targetFilePath;
 	std::map<int, std::string> ret;
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
@@ -391,10 +442,9 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 	if (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/')
 	{
 		std::vector<std::string> indexs;
-		if (configLocation.path.size() == 0) //Locationにいない時
-			indexs = configServer.configCommon.indexs; //serverディレクティブが採用されている
-		else
-			indexs = configLocation.configCommon.indexs; //Locationディレクティブが採用されている
+		s_ConfigCommon configCommon = getConfigCommon();
+
+		indexs = configCommon.indexs;
 		for(int i = 0; i < indexs.size(); i++)
 		{
 			targetFilePath = SerachFileAbsolutePath + indexs[i]; //indexファイルを見ていく
@@ -407,13 +457,13 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 
 			}
 		}
-		ResponseStatus = statusNo;
+		ResponseStatus = 404; //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
 		this->targetFilePath = targetFilePath;
 		return ;
 	}
 	else
 	{
-		statusNo = isTargetFileAbailable(SerachFileAbsolutePath);
+		int statusNo = isTargetFileAbailable(SerachFileAbsolutePath);
 		ResponseStatus = statusNo;
 		this->targetFilePath = SerachFileAbsolutePath;
 		return ;
@@ -484,7 +534,7 @@ bool Response::isErrorFilePathExist()
 	errorFilePath = configServer.root + configServer.configCommon.errorPages[ft_itos(ResponseStatus)];
 	struct stat buf;
 
-	if (stat(errorFilePath.c_str(), &buf) == 0)
+	if (stat(errorFilePath.c_str(), &buf) == 0 && !S_ISDIR(buf.st_mode))
 	{
 		return true;
 	}

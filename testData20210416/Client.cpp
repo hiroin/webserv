@@ -43,9 +43,8 @@ Client::Client(int testPatternOfClient, std::string testPatternOfHTTPMessagePars
 
 Client::Client()
 {
-  HTTPMessageParser hmp_(1);
-  hmp = hmp_;
-
+  HTTPMessageParser hmp(1);
+  hmp = hmp;
   //テスト用
   socketFd = dummyFd;
   dummyFd++;

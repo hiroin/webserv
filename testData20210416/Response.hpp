@@ -97,6 +97,9 @@ class Response
 		std::string GetLastModified(); //最終更新日を返す関数
 		int getTargetFileFd();
 		int getErrorFileFd();
+		bool isMethodAllowed();
+		void setAllow();
+		s_ConfigCommon getConfigCommon();
 
 
 		/*===============HTTPstatus===============*/
