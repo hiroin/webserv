@@ -9,17 +9,17 @@ enum clientStatus {PARSE_STARTLINE, PARSE_HEADER, RESV_BODY, CREATE_RESPONSE, RE
 class Client
 {
  public:
-  int socketFd_;
-  int port_;
-  std::string host_;
-  HTTPMessageParser hmp_;
+  int socketFd;
+  int port;
+  std::string host;
+  HTTPMessageParser hmp;
   enum clientStatus status;
   Client(int testPatternOfClient, int testPatternOfHTTPMessageParser);
-  Client(int testPatternOfClient, std::string testPatternOfHTTPMessageParserConf, int testPatternOfHTTPMessageParser); 
+  Client(int testPatternOfClient, std::string testPatternOfHTTPMessageParserConf, int testPatternOfHTTPMessageParser);
   Client();
   ~Client();
   bool operator==(const Client&);
-  bool operator!=(const Client&);  
+  bool operator!=(const Client&);
 
  private:
   Client(const Client&);
