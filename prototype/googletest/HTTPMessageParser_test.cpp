@@ -143,16 +143,19 @@ TEST(HTTPMessageParserEvenTest, parseHeader) {
 
   {
     HTTPMessageParser c;
-    EXPECT_FALSE(c.parseHeader("Host : 127.0.0.1"));
+    
+    EXPECT_FALSE(c.validationHeader("Host : 127.0.0.1"));
+    EXPECT_EQ(200, c.parseHeader("Host : 127.0.0.1"));
   }
   {
     HTTPMessageParser c;
-    EXPECT_FALSE(c.parseHeader(" Host: 127.0.0.1"));
+    EXPECT_FALSE(c.validationHeader(" Host: 127.0.0.1"));
+    EXPECT_EQ(200, c.parseHeader(" Host: 127.0.0.1"));
   }
   {
     HTTPMessageParser c;
-    EXPECT_TRUE(c.parseHeader("Host: 127.0.0.1"));
-    EXPECT_FALSE(c.parseHeader("Host: 127.0.0.1"));
+    EXPECT_EQ(200, c.parseHeader("Host: 127.0.0.1"));
+    EXPECT_EQ(400, c.parseHeader("Host: 127.0.0.1"));
   }
   {
     HTTPMessageParser c;

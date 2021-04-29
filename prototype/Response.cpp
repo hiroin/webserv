@@ -1,7 +1,3 @@
-#ifdef _GLIBCXX_DEBUG
-# include <debug/string>
-# include <debug/vector>
-#endif
 #include "Response.hpp"
 #include "Config.hpp"
 #include <sys/types.h>
@@ -10,52 +6,7 @@
 #include <fcntl.h>
 #include <string>
 #include <errno.h>
-#include <ctime>
-#include <algorithm>
-
-int ft_pow(int n, int times)
-{
-	if (times == 0)
-	{
-		return (1);
-	}
-	for(int i = 0; i < times; i++)
-	{
-		n *= n;
-	}
-	return (n);
-}
-
-std::string ft_itos(int nu)
-{
-	std::string ret;
-	while (nu > 0)
-	{
-		char c[2];
-		c[0] = '0' + nu % 10;
-		c[1] = '\0';
-		ret.insert(0, std::string(c));
-		nu /= 10;
-	}
-	return (ret);
-
-}
-
-std::string ft_ltos(long nu)
-{
-	std::string ret;
-	while (nu > 0)
-	{
-		char c[2];
-		c[0] = '0' + nu % 10;
-		c[1] = '\0';
-		ret.insert(0, std::string(c));
-		nu /= 10;
-	}
-	return (ret);
-
-}
-
+#include <time.h>
 
 void setResponseMap(std::map<int, std::string> &ResponseMap)
 {
@@ -113,18 +64,6 @@ void setResponseMap(std::map<int, std::string> &ResponseMap)
 	ResponseMap[508] =  "Loop Detected";
 	ResponseMap[510] =  "Not Extended";
 	ResponseMap[511] =  "Network Authentication";
-}
-
-s_ConfigCommon Response::getConfigCommon()
-{
-	if (configLocation.path.size() != 0) //Locationがある時
-	{
-		return (configLocation.configCommon);
-	}
-	else
-	{
-		return (configServer.configCommon);
-	}
 }
 
 std::map<int, std::string> Response::GetDate()
@@ -250,19 +189,14 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
-	/* メソッドが許可されているかを判断 */
-	if (isMethodAllowed())
-		setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
+	setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
 	setResponseLine(); //responseStatus と serverNameヘッダを設定
-	setDate();
+	setDate(); //
 	if (ResponseStatus != 200)
 	{
-		if (ResponseStatus == 405)
-			setAllow();
 		//erro_pageを探して、あったらContent-Type,Content-Lengthを記入して
 		if (isErrorFilePathExist())
 		{
-
 			setContenType(errorFilePath);
 			client.status = READ;
 			return ;
@@ -275,64 +209,6 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 	setContenType(targetFilePath);
 	client.status = READ;
-}
-
-Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config)
-{
-	DecideConfigServer(); //使用するserverディレクティブを決定
-	DecideConfigLocation(); //使用するlocationディレクティブを決定
-	ResponseStatus = ErrorCode;
-	setResponseLine(); //responseStatus と serverNameヘッダを設定
-	setDate(); //Dateヘッダを設定
-	if (isErrorFilePathExist())
-	{
-		if (isErrorFilePathExist())
-		{
-			setContenType(errorFilePath);
-			client.status = READ;
-			return ;
-		}
-		else
-		{
-			client.status = SEND;
-			return ;
-		}
-	}
-}
-
-bool	Response::isMethodAllowed()
-{
-	bool* allowMethodsBool;
-	s_ConfigCommon configCommon = getConfigCommon();
-	allowMethodsBool = configCommon.allowMethodsBool;
-	if (allowMethodsBool[client.hmp.method_])
-	{
-		return true;
-	}
-	else
-	{
-		ResponseStatus = 405;
-		return false;
-	}
-}
-
-void Response::setAllow()
-{
-	std::string AllowHeader = "Allow: ";
-	s_ConfigCommon configCommon = getConfigCommon();
-	std::vector<std::string> allowMethods = configCommon.allowMethods;
-	for(size_t i = 0; i < allowMethods.size(); i++)
-	{
-		if (i == allowMethods.size() - 1)
-		{
-			AllowHeader.append(allowMethods[i] + "\n");
-		}
-		else
-		{
-			AllowHeader.append(allowMethods[i] + ",");
-		}
-	}
-	responseMessege.append(AllowHeader);
 }
 
 bool Response::DecideConfigServer()
@@ -401,7 +277,7 @@ std::string Response::GetSerachAbsolutePath() //出来上がったpathに"/"が�
 {
 	std::string SerachAbsolutePath = "";
 	std::string AbsolutePath = client.hmp.absolutePath_;
-	if (configLocation.path.size() == 0 || configLocation.alias.size() == 0) //該当するLocationがなかった or aliasがなかった場合、rootが先頭につく
+	if (configLocation.path.size() == 0 || configLocation.alias.size() == 0) //該当するLocationがなかったoraliasがなかった場合、rootが先頭につく
 	{
 		SerachAbsolutePath = configServer.root + AbsolutePath; //targetFilePath
 	}
@@ -415,26 +291,26 @@ std::string Response::GetSerachAbsolutePath() //出来上がったpathに"/"が�
 int isTargetFileAbailable(std::string SerachFileAbsolutePath)
 {
 	struct stat buf;
-	int fd = open(SerachFileAbsolutePath.c_str(), O_RDONLY);
-	if(fd != -1) //ファイルが存在して検索できた
+	if(stat(SerachFileAbsolutePath.c_str(), &buf) == 0) //ファイルが存在して検索できた
 	{
-		close(fd);
 		return (200);
 	}
 	else //失敗したから、errnoチェックして確認
 	{
-		switch (errno)
+		if(errno == ENOENT)
 		{
-		case EACCES:
-			return (403);
-		default:
 			return (404);
 		}
+		return (403);
 	}
+	/**
+	 * ステータスコードどうやって決めればいいかな....
+	 * **/
 }
 
 void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返してくる物をみて、ファイルがそもそも存在するかをチェック
 {
+	int statusNo;
 	std::string targetFilePath;
 	std::map<int, std::string> ret;
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
@@ -442,9 +318,10 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 	if (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/')
 	{
 		std::vector<std::string> indexs;
-		s_ConfigCommon configCommon = getConfigCommon();
-
-		indexs = configCommon.indexs;
+		if (configLocation.path.size() == 0) //Locationにいない時
+			indexs = configServer.configCommon.indexs; //serverディレクティブが採用されている
+		else
+			indexs = configLocation.configCommon.indexs; //Locationディレクティブが採用されている
 		for(int i = 0; i < indexs.size(); i++)
 		{
 			targetFilePath = SerachFileAbsolutePath + indexs[i]; //indexファイルを見ていく
@@ -457,13 +334,13 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 
 			}
 		}
-		ResponseStatus = 404; //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
+		ResponseStatus = statusNo;
 		this->targetFilePath = targetFilePath;
 		return ;
 	}
 	else
 	{
-		int statusNo = isTargetFileAbailable(SerachFileAbsolutePath);
+		statusNo = isTargetFileAbailable(SerachFileAbsolutePath);
 		ResponseStatus = statusNo;
 		this->targetFilePath = SerachFileAbsolutePath;
 		return ;
@@ -504,7 +381,7 @@ void Response::setResponseLine()
 	std::map<int, std::string> ResponseMap;
 	setResponseMap(ResponseMap);
 	responseMessege.append(std::string("HTTP/1.1") + " ");
-	responseMessege.append(ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\n");
+	responseMessege.append(std::to_string(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\n");
 	responseMessege.append("Server: nginx/1.14.0 (Ubuntu)\n");
 }
 
@@ -516,25 +393,25 @@ void Response::setDate()
 	gmt = gmtime(&timer);
 	responseMessege.append("Date: ");
 	responseMessege.append(GetDate()[gmt->tm_wday] + ", ");
-	responseMessege.append(ft_itos(gmt->tm_mday) + " ");
+	responseMessege.append(std::to_string(gmt->tm_mday) + " ");
 	responseMessege.append(GetMonth()[gmt->tm_mon] + " ");
-	responseMessege.append(ft_itos(gmt->tm_year + 1900) + " ");
-	responseMessege.append(ft_itos(gmt->tm_hour) + ":" + ft_itos(gmt->tm_min) + ":" + ft_itos(gmt->tm_sec) + " ");
+	responseMessege.append(std::to_string(gmt->tm_year + 1900) + " ");
+	responseMessege.append(std::to_string(gmt->tm_hour) + ":" + std::to_string(gmt->tm_min) + ":" + std::to_string(gmt->tm_sec) + " ");
 	responseMessege.append("GMT\n");
 }
 
 std::string Response::getErrorPage()
 {
-	errorFilePath = configServer.root + configServer.configCommon.errorPages[ft_itos(ResponseStatus)];
+	errorFilePath = configServer.root + configServer.configCommon.errorPages[std::to_string(ResponseStatus)];
 	return errorFilePath;
 }
 
 bool Response::isErrorFilePathExist()
 {
-	errorFilePath = configServer.root + configServer.configCommon.errorPages[ft_itos(ResponseStatus)];
+	errorFilePath = configServer.root + configServer.configCommon.errorPages[std::to_string(ResponseStatus)];
 	struct stat buf;
 
-	if (stat(errorFilePath.c_str(), &buf) == 0 && !S_ISDIR(buf.st_mode))
+	if (stat(errorFilePath.c_str(), &buf) == 0)
 	{
 		return true;
 	}

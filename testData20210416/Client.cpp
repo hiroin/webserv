@@ -45,7 +45,6 @@ Client::Client()
 {
   HTTPMessageParser hmp(1);
   hmp = hmp;
-
   //テスト用
   socketFd = dummyFd;
   dummyFd++;

@@ -195,12 +195,12 @@ Config::Config(int testPattern)
     configGlobal.servers[0].configCommon.errorPages["404"] = "/404.html";
     configGlobal.servers[0].locations.push_back(tmpConfigLocation);
     configGlobal.servers[0].locations[0].path = "/aaa";
-    configGlobal.servers[0].locations[0].alias = "/tmp/webserv/0/aaa";
+    configGlobal.servers[0].locations[0].alias = "/tmp/webserv/0aaa";
     configGlobal.servers[0].locations[0].configCommon.indexs.push_back("default.html");
     configGlobal.servers[0].locations[0].configCommon.errorPages["404"] = "/404.html";
     configGlobal.servers[0].locations.push_back(tmpConfigLocation);
     configGlobal.servers[0].locations[1].path = "/aa";
-    configGlobal.servers[0].locations[1].alias = "/tmp/webserv/0/aa";
+    configGlobal.servers[0].locations[1].alias = "/tmp/webserv/0aa";
     configGlobal.servers[0].locations[1].configCommon.indexs.push_back("index.html");
     configGlobal.servers[0].locations[1].configCommon.errorPages["404"] = "/404.html";
     configGlobal.servers[0].locations.push_back(tmpConfigLocation);
