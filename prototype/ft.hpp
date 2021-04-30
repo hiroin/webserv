@@ -11,6 +11,7 @@
 #define FAILURE 0
 
 void ft_dummy_response(int code, int socketFd);
+std::string ft_make_dummy_response(int code);
 bool ft_isctl(char c);
 bool ft_isspase_and_htab(char c);
 bool ft_issubdelims(char c);

@@ -21,7 +21,9 @@ HTTP1_SOURCE = server.cpp \
 							 ft_istspecials.cpp \
 							 ft_stoi.cpp \
 							 ft_dummy_response.cpp \
-							 getChunked.cpp
+							 getChunked.cpp \
+							 sendController.cpp \
+							 ft_make_dummy_response.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

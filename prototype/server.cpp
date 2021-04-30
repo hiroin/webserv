@@ -69,7 +69,6 @@ int http1(Config& c)
         FD_SET(clients[i].socketFd, &readFds);
         if (clients[i].status == SEND)
           FD_SET(clients[i].socketFd, &writeFds);
-        clients[i].receivedData.setFd(clients[i].socketFd);
         if (maxFd < (clients[i].socketFd + 1))
           maxFd = clients[i].socketFd + 1;
       }
@@ -100,9 +99,10 @@ int http1(Config& c)
           if (clients[i].socketFd == -1)
           {
             clients[i].socketFd = acceptFd;
+            clients[i].receivedData.setFd(clients[i].socketFd);
+            clients[i].sc.setFd(clients[i].socketFd);
             clients[i].port = itrServer->get_port();
             clients[i].host = itrServer->get_host();
-            clients[i].socketFd = acceptFd;
             limit_over = false;
             break;
           }
@@ -160,12 +160,16 @@ int http1(Config& c)
           }
           else
           {
-            ft_dummy_response(400, clients[i].socketFd);
-            close(clients[i].socketFd);
-            clients[i].receivedData.clearData();
-            clients[i].hmp.clearData();
-            clients[i].socketFd = -1;
-            continue;
+            // ft_dummy_response(400, clients[i].socketFd);
+            // close(clients[i].socketFd);
+            // clients[i].receivedData.clearData();
+            // clients[i].hmp.clearData();
+            // clients[i].socketFd = -1;
+            // continue;
+            std::string response = ft_make_dummy_response(400);
+            clients[i].sc.setSendData(const_cast<char *>(response.c_str()), response.size());
+            clients[i].responseCode = 400;
+            clients[i].status = SEND;
           }
         }
       }
@@ -317,12 +321,27 @@ int http1(Config& c)
             }
           }
         }
-        ft_dummy_response(200, clients[i].socketFd);
-        // 状態を最初に戻す
-        clients[i].status = PARSE_STARTLINE;
-        clients[i].hmp.clearData();
-        clients[i].body.clear();
-        break;
+          ft_dummy_response(200, clients[i].socketFd);
+          // 状態を最初に戻す
+          clients[i].status = PARSE_STARTLINE;
+          clients[i].hmp.clearData();
+          clients[i].body.clear();
+      }
+      if (FD_ISSET(clients[i].socketFd, &writeFds) && clients[i].status == SEND)
+      {
+        bool isFinish = clients[i].sc.SendMessage(10);
+        if (isFinish)
+        {
+          if (clients[i].responseCode != 200)
+          {
+            close(clients[i].socketFd);
+            clients[i].socketFd = -1;
+          }
+          // 状態を最初に戻す
+          clients[i].status = PARSE_STARTLINE;
+          clients[i].hmp.clearData();
+          clients[i].body.clear();
+        }
       }
     }
   }

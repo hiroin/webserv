@@ -7,6 +7,7 @@
 #include "recvData.hpp"
 #include "HTTPMessageParser.hpp"
 #include "getChunked.hpp"
+#include "sendController.hpp"
 
 enum clientStatus {PARSE_STARTLINE, PARSE_HEADER, RESV_BODY, CREATE_RESPONSE, READ, WRITE, SEND, NUM_OF_CLIENTSTATUS};
 
@@ -28,11 +29,13 @@ class Client
   recvData receivedData;
   HTTPMessageParser hmp;
   getChunked gc;
+  SendController sc;
 
   // 処理状態とフラグ
   enum clientStatus status;
   bool bCGI;
   bool bChunked;
+  int responseCode;
 
   // メッセージボディ
   std::string body;
