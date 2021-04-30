@@ -1,8 +1,14 @@
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "../Client.hpp"
 #include "../Config.hpp"
 #include "../Response.hpp"
 #include "../parseConfig.hpp"
+
+// Google TestでのMatcherの活用
+// https://goyoki.hatenablog.com/entry/2013/01/16/003803
+using ::testing::MatchesRegex;
+using ::testing::Ge;
 
 // googletestのインストール手順
 // https://rinatz.github.io/cpp-book/test-how-to-gtest/
@@ -174,20 +180,19 @@ TEST(Response_test, webserv_02)
     }
     // 0010
     {
-      // Client client_;
-      // client_.port = 5001;
-      // client_.host = "*";
-      // client_.hmp.method_ = httpMessageParser::GET;
-      // client_.hmp.absolutePath_ = "/www/bb/index.html";
-      // client_.hmp.headers_["host"] = "127.0.0.1";
+      Client client_;
+      client_.port = 5001;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.absolutePath_ = "/www/bb/index.html";
+      client_.hmp.headers_["host"] = "127.0.0.1";
 
-      // Response Response(client_, config_);
-      // int TargetFileFd = Response.getTargetFileFd();
-      // int ResponseStatus = Response.ResponseStatus;
+      Response Response(client_, config_);
+      int TargetFileFd = Response.getTargetFileFd();
+      int ResponseStatus = Response.ResponseStatus;
 
-      // EXPECT_EQ(404, ResponseStatus);
-      // EXPECT_EQ("/tmp/webserv/1/www/bb/index.html", Response.targetFilePath);
-      // EXPECT_EQ("/tmp/webserv/0/404.html", Response.errorFilePath);
+      EXPECT_EQ(404, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/1//www/bb/index.html", Response.targetFilePath);
     }
     // 0011
     {
@@ -374,20 +379,20 @@ TEST(Response_test, webserv_error)
     }
     // 0021
     {
-      // Client client_;
-      // client_.port = 5000;
-      // client_.host = "*";
-      // client_.hmp.method_ = httpMessageParser::GET;
-      // client_.hmp.absolutePath_ = "/root.html";
-      // client_.hmp.headers_["host"] = "127.0.0.1";
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.absolutePath_ = "/root.html";
+      client_.hmp.headers_["host"] = "127.0.0.1";
 
-      // Response Response(client_, config_);
-      // int TargetFileFd = Response.getTargetFileFd();
-      // int ResponseStatus = Response.ResponseStatus;
+      Response Response(client_, config_);
+      int TargetFileFd = Response.getTargetFileFd();
+      int ResponseStatus = Response.ResponseStatus;
 
-      // EXPECT_EQ(403, ResponseStatus);
-      // EXPECT_EQ("/tmp/webserv/0/root.html", Response.targetFilePath);
-      // EXPECT_EQ("", Response.errorFilePath);
+      EXPECT_EQ(403, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/root.html", Response.targetFilePath);
+      EXPECT_EQ("", Response.errorFilePath);
     }
     // 0022
     {
@@ -402,7 +407,7 @@ TEST(Response_test, webserv_error)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(404, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/1/none", Response.targetFilePath);
+      EXPECT_EQ("/tmp/webserv/1//none", Response.targetFilePath);
       EXPECT_EQ("", Response.errorFilePath);
     }
     // 0023
@@ -411,14 +416,14 @@ TEST(Response_test, webserv_error)
       client_.port = 5001;
       client_.host = "*";
       client_.hmp.method_ = httpMessageParser::GET;
-      client_.hmp.absolutePath_ = "/none";
+      client_.hmp.absolutePath_ = "/bbb/none";
       client_.hmp.headers_["host"] = "127.0.0.1";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(404, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/1/bbb/none", Response.targetFilePath);
+      EXPECT_EQ("/tmp/webserv/1bbb/none", Response.targetFilePath);
       EXPECT_EQ("", Response.errorFilePath);
     }
   }
@@ -570,7 +575,7 @@ TEST(Response_test, webserv_index)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ(404, ResponseStatus);
       EXPECT_EQ("/tmp/webserv/0aa/default.html", Response.targetFilePath);
     }
     catch(const std::exception& e)
@@ -613,7 +618,7 @@ TEST(Response_test, webserv_index)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(404, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/1/bbb/index.html", Response.targetFilePath);
+      EXPECT_EQ("/tmp/webserv/1//bbb/index.html", Response.targetFilePath);
     }
     catch(const std::exception& e)
     {
@@ -635,6 +640,390 @@ TEST(Response_test, webserv_index)
       // EXPECT_EQ(, ResponseStatus);
       // EXPECT_EQ("", Response.targetFilePath);
       // EXPECT_EQ("", Response.errorFilePath);
+    }
+  }
+}
+
+TEST(Response_test, allow)
+{
+  const char* configfile = "testcase/016_allow.conf";
+  Config config_;
+  parseConfig(configfile, config_);  
+  {
+    // 0033
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0034
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::HEAD;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0035
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::POST;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0036
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::PUT;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0037
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::DELETE;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0038
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::CONNECT;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0039
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::OPTIONS;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0040
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::TRACE;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0041
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0/index.html", Response.targetFilePath);
+    }
+    // 0042
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::POST;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0042
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::POST;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0043
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::HEAD;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0044
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::PUT;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0045
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::DELETE;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0046
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::CONNECT;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0047
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::OPTIONS;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0048
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::TRACE;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/get/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: GET\n.*"));
+    }
+    // 0049
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/head/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: HEAD\n.*"));
+    }
+    // 0050
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/put/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: PUT\n.*"));
+    }
+    // 0051
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/delete/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: DELETE\n.*"));
+    }
+    // 0052
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/connect/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: CONNECT\n.*"));
+    }
+    // 0053
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/options/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: OPTIONS\n.*"));
+    }
+    // 0054
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/trace/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: TRACE\n.*"));
+    }
+    // 0055
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::PUT;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/getheadpost/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(405, ResponseStatus);
+      std::string &ResponseMessage = Response.responseMessege;
+      EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: POST,HEAD,GET\n.*"));
     }
   }
 }

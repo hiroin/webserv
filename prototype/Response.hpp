@@ -3,10 +3,6 @@
 #ifndef A9308F37_DB41_4E16_8DFF_32241C903504
 #define A9308F37_DB41_4E16_8DFF_32241C903504
 
-#ifdef _GLIBCXX_DEBUG
-# include <debug/string>
-# include <debug/vector>
-#endif
 #include <string>
 #include <vector>
 #include <time.h>
@@ -101,6 +97,10 @@ class Response
 		std::string GetLastModified(); //最終更新日を返す関数
 		int getTargetFileFd();
 		int getErrorFileFd();
+		bool isMethodAllowed();
+		void setAllow();
+		s_ConfigCommon getConfigCommon();
+
 
 		/*===============HTTPstatus===============*/
 
@@ -136,6 +136,7 @@ class Response
 		int send();
 		Response(int test_number);
 		Response(Client &client, Config &config);
+		Response(int ErrorCode ,Client &client, Config &config);
 		~Response();
 };
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
