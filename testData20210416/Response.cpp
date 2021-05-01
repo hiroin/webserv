@@ -868,3 +868,9 @@ void Response::setContenType(std::string FilePath)
 		responseMessege.append(ContentType + "\n");
 
 }
+
+void Response::AppendBodyOnResponseMessage(std::string body)
+{
+	responseMessege.append(std::string("\n"));
+	responseMessege.append(body + "\n");
+}

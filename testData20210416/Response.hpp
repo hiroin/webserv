@@ -114,6 +114,8 @@ class Response
 		/*.<Accept-Language> がなかったら406を返す*/
 		std::map<std::string, std::vector<std::string> > parseAcceptLanguage(std::string src);
 
+		void AppendBodyOnResponseMessage(std::string body);
+
 
 		/*===============HTTPstatus===============*/
 
