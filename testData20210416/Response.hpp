@@ -62,6 +62,9 @@ class Response
 		std::string responseMessege;
 		std::string targetFilePath;
 		std::string errorFilePath;
+		/**
+		 * Accept-Language
+		 * **/
 
 		/**
 		 * エラーページがあったら出せる。なかったらエラーステータスだけを返すようにする。
@@ -79,13 +82,16 @@ class Response
 		 * **/
 		std::map<int, std::string> GetMonth();
 
+		std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
+
 		/**
 		 * クライアントと、リクエストからどのサーバーを使うのかきめる
-		 * **/
+		* **/
 		bool DecideConfigServer(); //使うサーバーを決定
 		bool DecideConfigLocation(); //使うlocation を決定
 		std::string GetSerachAbsolutePath(); //Requestのパスと、
 		void setTargetFileAndStatus();
+		int isTargetFileAbailable(std::string);
 		size_t getContentLength();
 		size_t getErrorContentLength();
 		void setResponseLine();
@@ -100,6 +106,13 @@ class Response
 		bool isMethodAllowed();
 		void setAllow();
 		s_ConfigCommon getConfigCommon();
+		bool isMatchAcceptLanguageFromat(std::string src);
+		bool isAcceptLanguageSet();
+		int isLanguageFileExist(std::string SerachFileAbsolutePath);
+		void setContentLanguage();
+		bool isLanguageFile(std::string FilePath, std::string sub);
+		/*.<Accept-Language> がなかったら406を返す*/
+		std::map<std::string, std::vector<std::string> > parseAcceptLanguage(std::string src);
 
 
 		/*===============HTTPstatus===============*/
