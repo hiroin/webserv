@@ -21,6 +21,7 @@
 #include "parseConfig.hpp"
 #include "getChunked.hpp"
 #include "ft.hpp"
+#include "Response.hpp"
 
 int http1(Config& c)
 {

@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
-#include "configure.hpp"
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <cstdlib>

@@ -5,7 +5,11 @@
 #include <string>
 #include <map>
 
-#define CLIENTMAXBODYSIZE 1048576;
+#define CLIENTMAXBODYSIZE 1048576
+#define MAX_SESSION 2
+#define SELECT_TIMEOUT 60
+#define SESSION_TIMEOUT 10
+
 enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER, METHOD_NUM};
 
 struct s_ConfigCommon
