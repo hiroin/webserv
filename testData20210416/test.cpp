@@ -11,12 +11,15 @@ int main()
 {
     // Client client(2, 10);
 
-    Client client;
-    client.port = 5000;
-    client.host = "*";
-    client.hmp.method_ = httpMessageParser::GET;
-    client.hmp.absolutePath_ = "/root.html";
-    client.hmp.headers_["host"] = "127.0.0.1";
+    // Client client;
+    // client.port = 5000;
+    // client.host = "*";
+    // client.hmp.method_ = httpMessageParser::GET;
+    // client.hmp.absolutePath_ = "/root.html";
+    // client.hmp.headers_["host"] = "127.0.0.1";
+    // Config config(1);
+
+    Client client(1, 1);
     Config config(1);
 
     Response Response(client, config);

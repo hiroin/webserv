@@ -43,6 +43,8 @@ int http1(Config& c)
     exit(1);
   }
   Client clients[MAX_SESSION];
+  Response *responses[MAX_SESSION];
+
   fd_set readFds;
   fd_set writeFds;
   int maxFd = 0; // [やること]起動時fdの上限をチェックする
@@ -161,12 +163,6 @@ int http1(Config& c)
           }
           else
           {
-            // ft_dummy_response(400, clients[i].socketFd);
-            // close(clients[i].socketFd);
-            // clients[i].receivedData.clearData();
-            // clients[i].hmp.clearData();
-            // clients[i].socketFd = -1;
-            // continue;
             std::string response = ft_make_dummy_response(400);
             clients[i].sc.setSendData(const_cast<char *>(response.c_str()), response.size());
             clients[i].responseCode = 400;
@@ -210,6 +206,7 @@ int http1(Config& c)
             }
             else
             {
+              // Responseクラスを組み込み
               ft_dummy_response(200, clients[i].socketFd);
               // 状態を最初に戻す
               clients[i].status = PARSE_STARTLINE;
