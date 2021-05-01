@@ -15,15 +15,12 @@
 
 int ft_pow(int n, int times)
 {
-	if (times == 0)
-	{
-		return (1);
-	}
+	int ret = 1;
 	for(int i = 0; i < times; i++)
 	{
-		n *= n;
+		ret *= n;
 	}
-	return (n);
+	return (ret);
 }
 
 std::string ft_itos(int nu)
@@ -54,6 +51,203 @@ std::string ft_ltos(long nu)
 	}
 	return (ret);
 
+}
+
+
+/**
+	 *
+		Accept-Language = "Accept-Language" ":"
+			1#( language-range [ ";" "q" "=" qvalue ] )
+			language-range  = ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) | "*" )
+			qvalue         = ( "0" [ "." 0*3DIGIT ] )
+                | ( "1" [ "." 0*3("0") ] )
+	 *
+	* **/
+// Accept-Language: da , en-EU
+
+bool isEightAlphas(std::string::iterator &itr)
+{
+	int count = 0;
+	while(isalpha(*itr)) //language-rangeを回収
+	{
+		itr++;
+		count++;
+	}
+	if (!(1 <= count && count <= 8))
+		return false;
+	return true;
+}
+
+bool isMatchQvalue(std::string::iterator &itr)
+{
+	if (*itr == '0')
+	{
+		++itr;
+		if (*itr != '.' && *itr != ' ' && *itr != ',') return false;
+		if (*itr == '.')
+		{
+			++itr;
+			int count = 0;
+			while(isdigit(*itr))
+			{
+				++itr;
+				count++;
+			}
+			if (count > 3) return false;
+		}
+		return true;
+	} //qValue まで確認してreturn;
+	else if (*itr == '1') //1.以外は認めない
+	{
+		++itr;
+		if (*itr != '.' && *itr != ' ' && *itr != ',') return false;
+		if (*itr == '.')
+		{
+			int count = 0;
+			++itr;
+			while(*itr == '0')
+			{
+				++itr;
+				count++;
+			}
+			if (count > 3) return false;
+		}
+		return true;
+	} //qValue まで確認してreturn;
+	else
+		return false;
+}
+
+bool isMatchOption(std::string::iterator &itr)
+{
+	if (*itr != 'q') return false;
+	++itr;
+	if (*itr != '=') return false;
+	++itr;
+	if (!isMatchQvalue(itr)) return false;
+	return true;
+}
+
+void skipBreak(std::string::iterator &itr)
+{
+	while (*itr == ',' || *itr == ' ')
+	{
+		++itr;
+	}
+}
+
+bool isMatchLanguageRange(std::string::iterator &itr)
+{
+	if (!isEightAlphas(itr))
+		return false;
+	if (*itr == '-')
+	{
+		++itr;
+		if (!isEightAlphas(itr))
+			return false;
+	}
+	return true;
+}
+
+bool Response::isMatchAcceptLanguageFromat(std::string src)
+{
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while(itr != last)
+	{
+		int count = 0;
+		if (*itr == '*')
+		{
+			++itr;
+		}
+		if (!isMatchLanguageRange(itr))
+			return false;
+		//ここまでで、langeage-rangeが回収できたとする
+		//次は、オプションの有無を確かめる
+		if (*itr == ';') //オプションのチェック
+		{
+			++itr;
+			if (!isMatchOption(itr))
+				return (false);
+		}
+		//オプションまで見たので、ブレイクを取り除く処理
+		skipBreak(itr);
+	}
+	return (true);
+}
+
+
+float ft_stof(std::string str)
+{
+	float ret = 0;
+	std::string upperPoint;
+	std::string underPoint;
+	std::string::iterator itr = str.begin();
+	while(*itr != '.')
+	{
+		ret *= 10;
+		ret += *itr - '0';
+		++itr;
+	}
+	++itr;
+    int count = 0;
+    while(isdigit(*itr))
+	{
+		ret *= 10;
+		ret += *itr - '0';
+		++itr;
+        count++;
+	}
+    ret /= (float)ft_pow(10, count);
+	return (ret);
+}
+
+void getAcceptLanguages(std::map<std::string, std::vector<std::string> >& AcceptLanguageMap, std::string::iterator &itr)
+{
+	std::string LanguageRange;
+	std::string qValue = "1";
+	while(isalpha(*itr))
+	{
+		LanguageRange.push_back(*itr);
+		++itr;
+	}
+	if (*itr == '-')
+	{
+		LanguageRange.push_back(*itr);
+		++itr;
+		while(isalpha(*itr))
+		{
+			LanguageRange.push_back(*itr);
+			++itr;
+		}
+	}
+	if (*itr == ';')
+	{
+		qValue.clear();
+		++itr;
+		++itr;
+		++itr;
+		while (isdigit(*itr) || *itr == '.')
+		{
+			qValue.push_back(*itr);
+			++itr;
+		}
+	}
+	AcceptLanguageMap[qValue].push_back(LanguageRange);
+	skipBreak(itr);
+}
+
+std::map<std::string, std::vector<std::string> > Response::parseAcceptLanguage(std::string src)
+{
+	//ここに入ってくる時点で、Accept-Languageの形式は満たしていることが決定している
+	std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while (itr != last)
+	{
+		getAcceptLanguages(AcceptLanguageMap, itr);
+	}
+	return AcceptLanguageMap;
 }
 
 
@@ -252,7 +446,9 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
 	/* メソッドが許可されているかを判断 */
 	if (isMethodAllowed())
+	{
 		setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
+	}
 	setResponseLine(); //responseStatus と serverNameヘッダを設定
 	setDate();
 	if (ResponseStatus != 200)

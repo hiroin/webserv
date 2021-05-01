@@ -100,6 +100,8 @@ class Response
 		bool isMethodAllowed();
 		void setAllow();
 		s_ConfigCommon getConfigCommon();
+		bool isMatchAcceptLanguageFromat(std::string src);
+		static std::map<std::string, std::vector<std::string> > parseAcceptLanguage(std::string src);
 
 
 		/*===============HTTPstatus===============*/

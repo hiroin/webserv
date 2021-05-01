@@ -55,6 +55,7 @@ HTTPMessageParser::HTTPMessageParser(int testPattern)
     HTTPVersion_ = "HTTP/1.1";
     absolutePath_ = "/";
     headers_["host"] = "127.0.0.1";
+    headers_["accept-language"] = "127.0.0.1";
     break;
 
   case 2:
