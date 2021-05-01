@@ -10,17 +10,18 @@ https://docs.google.com/spreadsheets/d/1LNw2mvutl0X-ehI2lNGltf06Z1zOF04SorS-GIM8
 
 int main()
 {
-    // Client client(2, 10);
 
-    // Client client;
-    // client.port = 5000;
-    // client.host = "*";
-    // client.hmp.method_ = httpMessageParser::GET;
-    // client.hmp.absolutePath_ = "/root.html";
-    // client.hmp.headers_["host"] = "127.0.0.1";
-    // Config config(1);
 
-    // Response Response(client, config);
+    Client client;
+    client.port = 5000;
+    client.host = "*";
+    client.hmp.method_ = httpMessageParser::GET;
+    client.hmp.absolutePath_ = "/index.html.en";
+    client.hmp.headers_["host"] = "127.0.0.1";
+    client.hmp.headers_["Accept-Language"] = "en;q=0.8, ja;q=0.9, *";
+    Config config(1);
+
+    Response Response(client, config);
 
     // int ResponseStatus = Response.ResponseStatus;
     // int ErrorPageFd = Response.getErrorFileFd();
@@ -35,24 +36,5 @@ int main()
     // std::cout << "--------response---------" << Response.errorFilePath << std::endl;
     // std::string &ResponseMessage = Response.responseMessege;
     // ResponseMessage.append("Additional Information");
-    // std::cout << ResponseMessage << std::endl;
-    std::string src = "en, da-CH, ja;q=0.1";
-
-    std::map<std::string, std::vector<std::string> > ret = Response::parseAcceptLanguage(src);
-
-    std::map<std::string, std::vector<std::string> >::reverse_iterator first = ret.rbegin();
-    std::map<std::string, std::vector<std::string> >::reverse_iterator last = ret.rend();
-
-    while(first != last)
-    {
-        std::cout << "qValue = " << first->first << std::endl;
-        std::vector<std::string> values = first->second;
-        for(int i = 0; i < values.size(); i++)
-        {
-            std::cout << "value" << i + 1 << " = " << values[i] << std::endl;
-        }
-        ++first;
-    }
-
-
+    std::cout << Response.responseMessege << std::endl;
 }
