@@ -207,6 +207,21 @@ int http1(Config& c)
             else
             {
               // Responseクラスを組み込み
+              responses[i] = new Response(clients[i], c);
+              clients[i].responseCode = responses[i]->ResponseStatus;
+              clients[i].readFd = responses[i]->getTargetFileFd();
+              clients[i].responseFileSize = responses[i]->getContentLength();
+              {
+                // デバッグ
+                std::cout << "--responceData-------------------------" << std::endl;
+                std::cout << "response_code  : " << clients[i].responseCode << std::endl;
+                std::cout << "file_path      : " << responses[i]->targetFilePath << std::endl;
+                std::cout << "client_status  : " << clients[i].status << std::endl;
+                std::cout << "---------------------------------------" << std::endl;
+              }
+              delete responses[i];
+
+              responses[i] = NULL;
               ft_dummy_response(200, clients[i].socketFd);
               // 状態を最初に戻す
               clients[i].status = PARSE_STARTLINE;

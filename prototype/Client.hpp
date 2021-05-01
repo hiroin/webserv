@@ -36,6 +36,7 @@ class Client
   bool bCGI;
   bool bChunked;
   int responseCode;
+  size_t responseFileSize;
 
   // メッセージボディ
   std::string body;
