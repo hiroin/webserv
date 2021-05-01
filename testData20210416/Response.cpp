@@ -15,15 +15,12 @@
 
 int ft_pow(int n, int times)
 {
-	if (times == 0)
-	{
-		return (1);
-	}
+	int ret = 1;
 	for(int i = 0; i < times; i++)
 	{
-		n *= n;
+		ret *= n;
 	}
-	return (n);
+	return (ret);
 }
 
 std::string ft_itos(int nu)
@@ -54,6 +51,203 @@ std::string ft_ltos(long nu)
 	}
 	return (ret);
 
+}
+
+
+/**
+	 *
+		Accept-Language = "Accept-Language" ":"
+			1#( language-range [ ";" "q" "=" qvalue ] )
+			language-range  = ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) | "*" )
+			qvalue         = ( "0" [ "." 0*3DIGIT ] )
+                | ( "1" [ "." 0*3("0") ] )
+	 *
+	* **/
+// Accept-Language: da , en-EU
+
+bool isEightAlphas(std::string::iterator &itr)
+{
+	int count = 0;
+	while(isalpha(*itr)) //language-rangeを回収
+	{
+		itr++;
+		count++;
+	}
+	if (!(1 <= count && count <= 8))
+		return false;
+	return true;
+}
+
+bool isMatchQvalue(std::string::iterator &itr)
+{
+	if (*itr == '0')
+	{
+		++itr;
+		if (*itr != '.' && *itr != ' ' && *itr != ',') return false;
+		if (*itr == '.')
+		{
+			++itr;
+			int count = 0;
+			while(isdigit(*itr))
+			{
+				++itr;
+				count++;
+			}
+			if (count > 3) return false;
+		}
+		return true;
+	} //qValue まで確認してreturn;
+	else if (*itr == '1') //1.以外は認めない
+	{
+		++itr;
+		if (*itr != '.' && *itr != ' ' && *itr != ',') return false;
+		if (*itr == '.')
+		{
+			int count = 0;
+			++itr;
+			while(*itr == '0')
+			{
+				++itr;
+				count++;
+			}
+			if (count > 3) return false;
+		}
+		return true;
+	} //qValue まで確認してreturn;
+	else
+		return false;
+}
+
+bool isMatchOption(std::string::iterator &itr)
+{
+	if (*itr != 'q') return false;
+	++itr;
+	if (*itr != '=') return false;
+	++itr;
+	if (!isMatchQvalue(itr)) return false;
+	return true;
+}
+
+void skipBreak(std::string::iterator &itr)
+{
+	while (*itr == ',' || *itr == ' ')
+	{
+		++itr;
+	}
+}
+
+bool isMatchLanguageRange(std::string::iterator &itr)
+{
+	if (!isEightAlphas(itr))
+		return false;
+	if (*itr == '-')
+	{
+		++itr;
+		if (!isEightAlphas(itr))
+			return false;
+	}
+	return true;
+}
+
+bool Response::isMatchAcceptLanguageFromat(std::string src)
+{
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while(itr != last)
+	{
+		int count = 0;
+		if (*itr == '*')
+		{
+			++itr;
+		}
+		if (!isMatchLanguageRange(itr))
+			return false;
+		//ここまでで、langeage-rangeが回収できたとする
+		//次は、オプションの有無を確かめる
+		if (*itr == ';') //オプションのチェック
+		{
+			++itr;
+			if (!isMatchOption(itr))
+				return (false);
+		}
+		//オプションまで見たので、ブレイクを取り除く処理
+		skipBreak(itr);
+	}
+	return (true);
+}
+
+
+float ft_stof(std::string str)
+{
+	float ret = 0;
+	std::string upperPoint;
+	std::string underPoint;
+	std::string::iterator itr = str.begin();
+	while(*itr != '.')
+	{
+		ret *= 10;
+		ret += *itr - '0';
+		++itr;
+	}
+	++itr;
+    int count = 0;
+    while(isdigit(*itr))
+	{
+		ret *= 10;
+		ret += *itr - '0';
+		++itr;
+        count++;
+	}
+    ret /= (float)ft_pow(10, count);
+	return (ret);
+}
+
+void getAcceptLanguages(std::map<std::string, std::vector<std::string> >& AcceptLanguageMap, std::string::iterator &itr)
+{
+	std::string LanguageRange;
+	std::string qValue = "1";
+	while(isalpha(*itr))
+	{
+		LanguageRange.push_back(*itr);
+		++itr;
+	}
+	if (*itr == '-')
+	{
+		LanguageRange.push_back(*itr);
+		++itr;
+		while(isalpha(*itr))
+		{
+			LanguageRange.push_back(*itr);
+			++itr;
+		}
+	}
+	if (*itr == ';')
+	{
+		qValue.clear();
+		++itr;
+		++itr;
+		++itr;
+		while (isdigit(*itr) || *itr == '.')
+		{
+			qValue.push_back(*itr);
+			++itr;
+		}
+	}
+	AcceptLanguageMap[qValue].push_back(LanguageRange);
+	skipBreak(itr);
+}
+
+std::map<std::string, std::vector<std::string> > Response::parseAcceptLanguage(std::string src)
+{
+	//ここに入ってくる時点で、Accept-Languageの形式は満たしていることが決定している
+	std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while (itr != last)
+	{
+		getAcceptLanguages(AcceptLanguageMap, itr);
+	}
+	return AcceptLanguageMap;
 }
 
 
@@ -158,87 +352,87 @@ std::map<int, std::string> Response::GetMonth()
 	return (month);
 }
 
-std::string Response::GetContentType(std::string key)
+std::string Response::GetContentType(std::string key) //この拡張子リストになかったらapplication/octet-stream を返す。
 {
 	std::map<std::string, std::string> TypeMap;
 
-TypeMap[".aac"]    = "audio/aac";                              //AAC 音声
-TypeMap[".abw"]    = "application/x-abiword";                  //AbiWord文書
-TypeMap[".arc"]    = "application/x-freearc";                  //(複数のファイルが埋め込まれた) アーカイブ文書
-TypeMap[".avi"]    = "video/x-msvideo";                        //AVI: Audio Video Interleave
-TypeMap[".azw"]    = "application/vnd.amazon.ebook";           //Amazon Kindle eBook 形式
-TypeMap[".bin"]    = "application/octet-stream";               //任意の種類のバイナリーデータ
-TypeMap[".bmp"]    = "image/bmp";                              //Windows OS/2 ビットマップ画像
-TypeMap[".bz"]     = "application/x-bzip";                     //BZip アーカイブ
-TypeMap[".bz2"]    = "application/x-bzip2";                    //BZip2 アーカイブ
-TypeMap[".csh"]    = "application/x-csh";                      //C-Shell スクリプト
-TypeMap[".css"]    = "text/css";                               //カスケーディングスタイルシート (CSS)
-TypeMap[".csv"]    = "text/csv";                               //カンマ区切り値 (CSV)
-TypeMap[".doc"]    = "application/msword";                     //Microsoft Word
-TypeMap[".docx"]   = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; // Microsoft Word (OpenXML)
-TypeMap[".eot"]    = "application/vnd.ms-fontobject";          //MS 埋め込み OpenType フォント
-TypeMap[".epub"]   = "application/epub+zip";                   //電子出版 (EPUB)
-TypeMap[".gz"]     = "application/gzip";                       //GZip 圧縮アーカイブ
-TypeMap[".gif"]    = "image/gif";                              //グラフィック交換形式 (GIF)
-TypeMap[".htm"]    = "text/html";                              //ハイパーテキストマークアップ言語 (HTML)
-TypeMap[".html"]   = "text/html";                              //ハイパーテキストマークアップ言語 (HTML)
-TypeMap[".ico"]    = "image/vnd.microsoft.icon";               //アイコン形式
-TypeMap[".ics"]    = "text/calendar";                          //iCalendar 形式
-TypeMap[".jar"]    = "Java Archive (JAR)";                     //application/java-archive
-TypeMap[".jpeg"]   = "image/jpeg";                             //JPEG 画像
-TypeMap[".jpg"]    = "image/jpeg";                             //JPEG 画像
-TypeMap[".js"]     = "text/javascript";                        //JavaScript
-TypeMap[".json"]   = "application/json";                       //JSON 形式
-TypeMap[".jsonld"] = "application/ld+json";                    //JSON-LD 形式
-TypeMap[".midi"]   = "audio/x-midi";                           //Musical Instrument Digital Interface (MIDI)
-TypeMap[".mid"]    = "audio/midi";                             //Musical Instrument Digital Interface (MIDI)
-TypeMap[".mjs"]    = "text/javascript";                        //JavaScript モジュール
-TypeMap[".mp3"]    = "audio/mpeg";                             //MP3 音声
-TypeMap[".mpeg"]   = "video/mpeg";                             //MPEG 動画
-TypeMap[".mpkg"]   = "application/vnd.apple.installer+xml";    //Apple Installer Package
-TypeMap[".odp"]    = "application/vnd.oasis.opendocument.presentation";    //OpenDocuemnt プレゼンテーション文書
-TypeMap[".ods"]    = "application/vnd.oasis.opendocument.spreadsheet";     //OpenDocuemnt 表計算文書
-TypeMap[".odt"]    = "application/vnd.oasis.opendocument.text";            //OpenDocument テキスト文書
-TypeMap[".oga"]    = "audio/ogg";                              //OGG 音声
-TypeMap[".ogv"]    = "video/ogg";                              //OGG 動画
-TypeMap[".ogx"]    = "application/ogg";                        //OGG
-TypeMap[".opus"]   = "audio/opus";                             //Opus 音声
-TypeMap[".otf"]    = "font/otf";                               //OpenType フォント
-TypeMap[".png"]    = "image/png";                              //Portable Network Graphics
-TypeMap[".pdf"]    = "application/pdf";                        //Adobe Portable Document Format (PDF)
-TypeMap[".php"]    = "application/x-httpd-php";                //Hypertext Preprocessor (Personal Home Page)
-TypeMap[".ppt"]    = "application/vnd.ms-powerpoint";          //Microsoft PowerPoint
-TypeMap[".pptx"]   = "application/vnd.openxmlformats-officedocument.presentationml.presentation"; //     Microsoft PowerPoint (OpenXML)
-TypeMap[".rar"]    = "application/vnd.rar";                    //RAR アーカイブ
-TypeMap[".rtf"]    = "application/rtf";                        //リッチテキスト形式 (RTF)
-TypeMap[".sh"]     = "application/x-sh";                       //Bourne shell スクリプト
-TypeMap[".svg"]    = "image/svg+xml";                          //Scalable Vector Graphics (SVG)
-TypeMap[".swf"]    = "application/x-shockwave-flash";          //Small web format (SWF) または Adobe Flash 文書
-TypeMap[".tar"]    = "application/x-tar";                      //Tape Archive (TAR)
-TypeMap[".tif"]    = "image/tiff";                             //Tagged Image File Format (TIFF)
-TypeMap[".tiff"]   = "image/tiff";                             //Tagged Image File Format (TIFF)
-TypeMap[".ts"]     = "video/mp2t";                             //MPEG transport stream
-TypeMap[".ttf"]    = "font/ttf";                               //TrueType フォント
-TypeMap[".txt"]    = "text/plain";                             //テキストファイル (一般に ASCII or ISO 8859-<em>n</em>)
-TypeMap[".vsd"]    = "application/vnd.visio";                  //Microsoft Visio
-TypeMap[".wav"]    = "audio/wav";                              //Waveform 音声形式
-TypeMap[".weba"]   = "audio/webm";                             //WEBM 音声
-TypeMap[".webm"]   = "video/webm";                             //WEBM 動画
-TypeMap[".webp"]   = "image/webp";                             //WEBP 画像
-TypeMap[".woff"]   = "font/woff";                              //Web Open Font Format (WOFF)
-TypeMap[".woff2"]  = "font/woff2";                             //Web Open Font Format (WOFF)
-TypeMap[".xhtml"]  = "application/xhtml+xml";                  //XHTML
-TypeMap[".xls"]    = "application/vnd.ms-excel";               //Microsoft Excel
-TypeMap[".xlsx"]   = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-TypeMap[".xml"]    = "application/xml";                        //XML (一般のユーザから読める場合)
-TypeMap[".xml"]    = "text/xml";                               //XML (一般のユーザから読めない場合)
-TypeMap[".xul"]    = "application/vnd.mozilla.xul+xml";        //XUL
-TypeMap[".zip"]    = "application/zip";                        //ZIP アーカイブ
-TypeMap[".3gp"]    = "video/3gpp";                             //3GPP 音声/動画コンテナー
-TypeMap[".3gp"]    = "audio/3gpp";                             //3GPP 音声/動画コンテナー (動画含まず)
-TypeMap[".3g2"]    = "video/3gpp2";                            //3GPP2 音声/動画コンテナー
-TypeMap[".3g2"]    = "audio/3gpp2";                            //3GPP2 音声/動画コンテナー (動画含まず)
-TypeMap[".7z"]     = "application/x-7z-compressed";            //7-zipアーカイブ
+TypeMap["aac"]    = "audio/aac";                              //AAC 音声
+TypeMap["abw"]    = "application/x-abiword";                  //AbiWord文書
+TypeMap["arc"]    = "application/x-freearc";                  //(複数のファイルが埋め込まれた) アーカイブ文書
+TypeMap["avi"]    = "video/x-msvideo";                        //AVI: Audio Video Interleave
+TypeMap["azw"]    = "application/vnd.amazon.ebook";           //Amazon Kindle eBook 形式
+TypeMap["bin"]    = "application/octet-stream";               //任意の種類のバイナリーデータ
+TypeMap["bmp"]    = "image/bmp";                              //Windows OS/2 ビットマップ画像
+TypeMap["bz"]     = "application/x-bzip";                     //BZip アーカイブ
+TypeMap["bz2"]    = "application/x-bzip2";                    //BZip2 アーカイブ
+TypeMap["csh"]    = "application/x-csh";                      //C-Shell スクリプト
+TypeMap["css"]    = "text/css";                               //カスケーディングスタイルシート (CSS)
+TypeMap["csv"]    = "text/csv";                               //カンマ区切り値 (CSV)
+TypeMap["doc"]    = "application/msword";                     //Microsoft Word
+TypeMap["docx"]   = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; // Microsoft Word (OpenXML)
+TypeMap["eot"]    = "application/vnd.ms-fontobject";          //MS 埋め込み OpenType フォント
+TypeMap["epub"]   = "application/epub+zip";                   //電子出版 (EPUB)
+TypeMap["gz"]     = "application/gzip";                       //GZip 圧縮アーカイブ
+TypeMap["gif"]    = "image/gif";                              //グラフィック交換形式 (GIF)
+TypeMap["htm"]    = "text/html";                              //ハイパーテキストマークアップ言語 (HTML)
+TypeMap["html"]   = "text/html";                              //ハイパーテキストマークアップ言語 (HTML)
+TypeMap["ico"]    = "image/vnd.microsoft.icon";               //アイコン形式
+TypeMap["ics"]    = "text/calendar";                          //iCalendar 形式
+TypeMap["jar"]    = "Java Archive (JAR)";                     //application/java-archive
+TypeMap["jpeg"]   = "image/jpeg";                             //JPEG 画像
+TypeMap["jpg"]    = "image/jpeg";                             //JPEG 画像
+TypeMap["js"]     = "text/javascript";                        //JavaScript
+TypeMap["json"]   = "application/json";                       //JSON 形式
+TypeMap["jsonld"] = "application/ld+json";                    //JSON-LD 形式
+TypeMap["midi"]   = "audio/x-midi";                           //Musical Instrument Digital Interface (MIDI)
+TypeMap["mid"]    = "audio/midi";                             //Musical Instrument Digital Interface (MIDI)
+TypeMap["mjs"]    = "text/javascript";                        //JavaScript モジュール
+TypeMap["mp3"]    = "audio/mpeg";                             //MP3 音声
+TypeMap["mpeg"]   = "video/mpeg";                             //MPEG 動画
+TypeMap["mpkg"]   = "application/vnd.apple.installer+xml";    //Apple Installer Package
+TypeMap["odp"]    = "application/vnd.oasis.opendocument.presentation";    //OpenDocuemnt プレゼンテーション文書
+TypeMap["ods"]    = "application/vnd.oasis.opendocument.spreadsheet";     //OpenDocuemnt 表計算文書
+TypeMap["odt"]    = "application/vnd.oasis.opendocument.text";            //OpenDocument テキスト文書
+TypeMap["oga"]    = "audio/ogg";                              //OGG 音声
+TypeMap["ogv"]    = "video/ogg";                              //OGG 動画
+TypeMap["ogx"]    = "application/ogg";                        //OGG
+TypeMap["opus"]   = "audio/opus";                             //Opus 音声
+TypeMap["otf"]    = "font/otf";                               //OpenType フォント
+TypeMap["png"]    = "image/png";                              //Portable Network Graphics
+TypeMap["pdf"]    = "application/pdf";                        //Adobe Portable Document Format (PDF)
+TypeMap["php"]    = "application/x-httpd-php";                //Hypertext Preprocessor (Personal Home Page)
+TypeMap["ppt"]    = "application/vnd.ms-powerpoint";          //Microsoft PowerPoint
+TypeMap["pptx"]   = "application/vnd.openxmlformats-officedocument.presentationml.presentation"; //     Microsoft PowerPoint (OpenXML)
+TypeMap["rar"]    = "application/vnd.rar";                    //RAR アーカイブ
+TypeMap["rtf"]    = "application/rtf";                        //リッチテキスト形式 (RTF)
+TypeMap["sh"]     = "application/x-sh";                       //Bourne shell スクリプト
+TypeMap["svg"]    = "image/svg+xml";                          //Scalable Vector Graphics (SVG)
+TypeMap["swf"]    = "application/x-shockwave-flash";          //Small web format (SWF) または Adobe Flash 文書
+TypeMap["tar"]    = "application/x-tar";                      //Tape Archive (TAR)
+TypeMap["tif"]    = "image/tiff";                             //Tagged Image File Format (TIFF)
+TypeMap["tiff"]   = "image/tiff";                             //Tagged Image File Format (TIFF)
+TypeMap["ts"]     = "video/mp2t";                             //MPEG transport stream
+TypeMap["ttf"]    = "font/ttf";                               //TrueType フォント
+TypeMap["txt"]    = "text/plain";                             //テキストファイル (一般に ASCII or ISO 8859-<em>n</em>)
+TypeMap["vsd"]    = "application/vnd.visio";                  //Microsoft Visio
+TypeMap["wav"]    = "audio/wav";                              //Waveform 音声形式
+TypeMap["weba"]   = "audio/webm";                             //WEBM 音声
+TypeMap["webm"]   = "video/webm";                             //WEBM 動画
+TypeMap["webp"]   = "image/webp";                             //WEBP 画像
+TypeMap["woff"]   = "font/woff";                              //Web Open Font Format (WOFF)
+TypeMap["woff2"]  = "font/woff2";                             //Web Open Font Format (WOFF)
+TypeMap["xhtml"]  = "application/xhtml+xml";                  //XHTML
+TypeMap["xls"]    = "application/vnd.ms-excel";               //Microsoft Excel
+TypeMap["xlsx"]   = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+TypeMap["xml"]    = "application/xml";                        //XML (一般のユーザから読める場合)
+TypeMap["xml"]    = "text/xml";                               //XML (一般のユーザから読めない場合)
+TypeMap["xul"]    = "application/vnd.mozilla.xul+xml";        //XUL
+TypeMap["zip"]    = "application/zip";                        //ZIP アーカイブ
+TypeMap["3gp"]    = "video/3gpp";                             //3GPP 音声/動画コンテナー
+TypeMap["3gp"]    = "audio/3gpp";                             //3GPP 音声/動画コンテナー (動画含まず)
+TypeMap["3g2"]    = "video/3gpp2";                            //3GPP2 音声/動画コンテナー
+TypeMap["3g2"]    = "audio/3gpp2";                            //3GPP2 音声/動画コンテナー (動画含まず)
+TypeMap["7z"]     = "application/x-7z-compressed";            //7-zipアーカイブ
 
 	return (TypeMap[key]);
 }
@@ -252,7 +446,17 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
 	/* メソッドが許可されているかを判断 */
 	if (isMethodAllowed())
+	{
+		if (isAcceptLanguageSet())
+		{
+			std::string AcceptLanguageValue = client.hmp.headers_[std::string("Accept-Language")];
+			if(isMatchAcceptLanguageFromat(AcceptLanguageValue))
+			{
+				AcceptLanguageMap = parseAcceptLanguage(AcceptLanguageValue);
+			}
+		}
 		setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
+	}
 	setResponseLine(); //responseStatus と serverNameヘッダを設定
 	setDate();
 	if (ResponseStatus != 200)
@@ -262,7 +466,6 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		//erro_pageを探して、あったらContent-Type,Content-Lengthを記入して
 		if (isErrorFilePathExist())
 		{
-
 			setContenType(errorFilePath);
 			client.status = READ;
 			return ;
@@ -273,7 +476,9 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 			return ;
 		}
 	}
-	setContenType(targetFilePath);
+	setContenType(targetFilePath); //Languageを考えて選択する。
+	if (AcceptLanguageMap.size() != 0)
+		setContentLanguage();
 	client.status = READ;
 }
 
@@ -298,6 +503,11 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 			return ;
 		}
 	}
+}
+
+bool Response::isAcceptLanguageSet()
+{
+	return (client.hmp.headers_[std::string("Accept-Language")].size() != 0);
 }
 
 bool	Response::isMethodAllowed()
@@ -412,10 +622,9 @@ std::string Response::GetSerachAbsolutePath() //出来上がったpathに"/"が�
 	return (SerachAbsolutePath);
 }
 
-int isTargetFileAbailable(std::string SerachFileAbsolutePath)
+int isTheFileExist(std::string targetFile)
 {
-	struct stat buf;
-	int fd = open(SerachFileAbsolutePath.c_str(), O_RDONLY);
+	int fd = open(targetFile.c_str(), O_RDONLY);
 	if(fd != -1) //ファイルが存在して検索できた
 	{
 		close(fd);
@@ -433,32 +642,98 @@ int isTargetFileAbailable(std::string SerachFileAbsolutePath)
 	}
 }
 
+int Response::isLanguageFileExist(std::string SerachFileAbsolutePath)
+{
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptLanguageMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptLanguageMap.rend();
+	while(first != last)
+	{
+		int statusNo;
+		std::string targetFile;
+		std::vector<std::string> Languages = first->second;
+		for(int i = 0; i < Languages.size(); i++)
+		{
+			if (Languages[i] == "*")
+				targetFile = SerachFileAbsolutePath;
+			else
+				targetFile = SerachFileAbsolutePath + "." + Languages[i];
+			statusNo = isTheFileExist(targetFile);
+			switch (statusNo)
+			{
+			case 200:
+				this->targetFilePath = targetFile; //見つかったら、filePath変更してreturn
+				return (statusNo);
+				break;
+			case 403: //Permittion Denied だったらreturn
+				return (statusNo);
+			default:
+				continue;
+				break;
+			}
+		}
+		++first;
+	}
+	return (406); //見つからなかったら406
+}
+
+std::string getFileExtention(std::string FilePath)
+{
+	int i = FilePath.size() - 1;
+	int count = 0;
+	while (i >= 0)
+	{
+		if (FilePath[i] == '.')
+			break ;
+		++count;
+		--i;
+	}
+	return (FilePath.substr(i + 1, count));
+}
+
+
+void Response::setContentLanguage()
+{
+	std::string ContentLanguage = "Content-Language: ";
+	ContentLanguage.append(getFileExtention(targetFilePath) + "\n");
+	responseMessege.append(ContentLanguage);
+	return ;
+}
+
+int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
+{
+	/**
+	 * Accept-Language を回していく、それで発見できなかったら406
+	 * **/
+	if (AcceptLanguageMap.size() != 0) //AcceptLanguageがあったらその要素分回して、returnさせる
+	{
+		return(isLanguageFileExist(SerachFileAbsolutePath));
+	}
+	return(isTheFileExist(SerachFileAbsolutePath));
+}
+
 void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返してくる物をみて、ファイルがそもそも存在するかをチェック
 {
-	std::string targetFilePath;
-	std::map<int, std::string> ret;
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
-	// std::cout << (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '\\') << std::endl;
 	if (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/')
 	{
 		std::vector<std::string> indexs;
 		s_ConfigCommon configCommon = getConfigCommon();
-
+		int statusNo = 403;
 		indexs = configCommon.indexs;
 		for(int i = 0; i < indexs.size(); i++)
 		{
-			targetFilePath = SerachFileAbsolutePath + indexs[i]; //indexファイルを見ていく
-			int statusNo = isTargetFileAbailable(targetFilePath);
-			if (statusNo == 200 || statusNo == 403)
+
+			this->targetFilePath = SerachFileAbsolutePath + indexs[i]; //indexファイルを見ていく
+			statusNo = isTargetFileAbailable(this->targetFilePath);
+			if (statusNo == 200 || statusNo == 403) //403 と 200が発生したらそのままreturn
 			{
 				ResponseStatus = statusNo;
-				this->targetFilePath = targetFilePath;
 				return ;
-
 			}
 		}
-		ResponseStatus = 404; //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
-		this->targetFilePath = targetFilePath;
+		// indexディレクティブがなかったら403
+		ResponseStatus = statusNo; //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
+		this->targetFilePath = "";
 		return ;
 	}
 	else
@@ -545,21 +820,57 @@ bool Response::isErrorFilePathExist()
 	}
 }
 
+bool Response::isLanguageFile(std::string FilePath, std::string fileExtention)
+{
+	if(AcceptLanguageMap.size() == 0)
+		return(false);
+
+	//LanguageFile だったら、AcceptLanguageMapに該当する奴がいないかチェックしていって、あったらtrueを返す
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptLanguageMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptLanguageMap.rend();
+	while (first != last)
+	{
+		std::vector<std::string> values = first->second;
+		for(int i = 0; i < values.size(); i++)
+		{
+			if (values[i] == fileExtention)
+			{
+				return (true);
+			}
+		}
+		++first;
+	}
+	return (false);
+}
+
+
 void Response::setContenType(std::string FilePath)
 {
+	/**
+	 * Languageつきのファイルの対応をする必要あり。
+	 * AcceptLanguageMapに一致する拡張子があるかどうかチェックして、あったら切り取る
+	 * **/
 	std::map<int, std::string> ContentTypeMap;
 	setResponseMap(ContentTypeMap);
-	int i = FilePath.size() - 1;
-	int count = 0;
-	while (i >= 0)
-	{
-		if (FilePath[i] == '.')
-			break ;
-		++count;
-		--i;
-	}
-	std::string sub = FilePath.substr(i , count + 1);
-	responseMessege.append("Content-Type: ");
-	responseMessege.append(GetContentType(sub) + "\n");
+	std::string fileExtention = getFileExtention(FilePath);
 
+	//このsubに該当する言語が入っているかを確認する。いたら切り取って、もう一個拡張子取りに行く
+	if (isLanguageFile(FilePath, fileExtention))
+	{
+		FilePath = FilePath.substr(0, FilePath.size() - fileExtention.size() - 1);
+		fileExtention = getFileExtention(FilePath);
+	}
+	responseMessege.append("Content-Type: ");
+	std::string ContentType = GetContentType(fileExtention);
+	if (ContentType == "")
+		responseMessege.append(std::string("application/octet-stream") + "\n");
+	else
+		responseMessege.append(ContentType + "\n");
+
+}
+
+void Response::AppendBodyOnResponseMessage(std::string body)
+{
+	responseMessege.append(std::string("\n"));
+	responseMessege.append(body + "\n");
 }
