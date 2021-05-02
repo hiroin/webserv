@@ -14,7 +14,7 @@ void Config::printCommonConfig(s_ConfigCommon& c) const
 {
   std::cout << " autoindex         : " << c.autoindex << std::endl;
   std::cout << " allowMethods      : " ;
-  for(std::vector<std::string>::iterator itr = 
+  for(std::vector<std::string>::iterator itr =
       c.allowMethods.begin();
       itr != c.allowMethods.end(); ++itr)
   {
@@ -220,7 +220,7 @@ Config::Config(int testPattern)
     configGlobal.servers[1].locations.push_back(tmpConfigLocation);
     configGlobal.servers[1].locations[2].path = "/";
     configGlobal.servers[1].host = "*";
-    configGlobal.servers[1].port = 5001;    
+    configGlobal.servers[1].port = 5001;
     configGlobal.servers.push_back(tmpConfigServer);
   }
 
@@ -255,9 +255,9 @@ Config::Config(int testPattern)
     configGlobal.configCommon.cgiScripts.push_back(".cgi");
     configGlobal.configCommon.cgiScripts.push_back(".php");
     configGlobal.configCommon.clientMaxBodySize = 1048576;
-    configGlobal.configCommon.errorPages["400"] = "/40x.html"; 
-    configGlobal.configCommon.errorPages["403"] = "/40x.html"; 
-    configGlobal.configCommon.errorPages["404"] = "/40x.html"; 
+    configGlobal.configCommon.errorPages["400"] = "/40x.html";
+    configGlobal.configCommon.errorPages["403"] = "/40x.html";
+    configGlobal.configCommon.errorPages["404"] = "/40x.html";
     configGlobal.configCommon.indexs.push_back("index.html");
     configGlobal.configCommon.indexs.push_back("default.html");
     configGlobal.servers.push_back(tmpConfigServer);

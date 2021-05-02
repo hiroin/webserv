@@ -1,0 +1,20 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "echo",
+			"type": "shell",
+			"command": "clang++",
+			"args": [
+				"-g",
+				"./testData20210416/test.cpp",
+				"./testData20210416/Client.cpp",
+				"./testData20210416/Config.cpp",
+				"./testData20210416/HTTPMessageParser.cpp",
+				"./testData20210416/Response.cpp"
+			]
+		}
+	]
+}
