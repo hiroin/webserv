@@ -40,6 +40,10 @@ std::string ft_itos(int nu)
 
 std::string ft_ltos(long nu)
 {
+	if (nu == 0)
+	{
+		return ("0");
+	}
 	std::string ret;
 	while (nu > 0)
 	{
@@ -52,6 +56,20 @@ std::string ft_ltos(long nu)
 	return (ret);
 
 }
+std::string getFileExtention(std::string FilePath)
+{
+	int i = FilePath.size() - 1;
+	int count = 0;
+	while (i >= 0)
+	{
+		if (FilePath[i] == '.')
+			break ;
+		++count;
+		--i;
+	}
+	return (FilePath.substr(i + 1, count));
+}
+
 
 
 /**
@@ -160,7 +178,7 @@ bool Response::isMatchAcceptLanguageFromat(std::string src)
 		{
 			++itr;
 		}
-		if (!isMatchLanguageRange(itr))
+		else if (!isMatchLanguageRange(itr))
 			return false;
 		//ここまでで、langeage-rangeが回収できたとする
 		//次は、オプションの有無を確かめる
@@ -206,7 +224,7 @@ void getAcceptLanguages(std::map<std::string, std::vector<std::string> >& Accept
 {
 	std::string LanguageRange;
 	std::string qValue = "1";
-	while(isalpha(*itr))
+	while(isalpha(*itr) || *itr == '*')
 	{
 		LanguageRange.push_back(*itr);
 		++itr;
@@ -466,7 +484,8 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		//erro_pageを探して、あったらContent-Type,Content-Lengthを記入して
 		if (isErrorFilePathExist())
 		{
-			setContenType(errorFilePath);
+			setContenType();
+			setContentLength();
 			client.status = READ;
 			return ;
 		}
@@ -476,8 +495,9 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 			return ;
 		}
 	}
-	setContenType(targetFilePath); //Languageを考えて選択する。
-	if (AcceptLanguageMap.size() != 0)
+	setContenType(); //Languageを考えて選択する。
+	setContentLength();
+	if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
 		setContentLanguage();
 	client.status = READ;
 }
@@ -493,7 +513,7 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 	{
 		if (isErrorFilePathExist())
 		{
-			setContenType(errorFilePath);
+			setContenType();
 			client.status = READ;
 			return ;
 		}
@@ -535,7 +555,7 @@ void Response::setAllow()
 	{
 		if (i == allowMethods.size() - 1)
 		{
-			AllowHeader.append(allowMethods[i] + "\n");
+			AllowHeader.append(allowMethods[i] + "\r\n");
 		}
 		else
 		{
@@ -676,25 +696,12 @@ int Response::isLanguageFileExist(std::string SerachFileAbsolutePath)
 	return (406); //見つからなかったら406
 }
 
-std::string getFileExtention(std::string FilePath)
-{
-	int i = FilePath.size() - 1;
-	int count = 0;
-	while (i >= 0)
-	{
-		if (FilePath[i] == '.')
-			break ;
-		++count;
-		--i;
-	}
-	return (FilePath.substr(i + 1, count));
-}
 
 
 void Response::setContentLanguage()
 {
 	std::string ContentLanguage = "Content-Language: ";
-	ContentLanguage.append(getFileExtention(targetFilePath) + "\n");
+	ContentLanguage.append(getFileExtention(targetFilePath) + "\r\n");
 	responseMessege.append(ContentLanguage);
 	return ;
 }
@@ -708,6 +715,7 @@ int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
 	{
 		return(isLanguageFileExist(SerachFileAbsolutePath));
 	}
+	this->targetFilePath = SerachFileAbsolutePath;
 	return(isTheFileExist(SerachFileAbsolutePath));
 }
 
@@ -740,7 +748,6 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 	{
 		int statusNo = isTargetFileAbailable(SerachFileAbsolutePath);
 		ResponseStatus = statusNo;
-		this->targetFilePath = SerachFileAbsolutePath;
 		return ;
 	}
 }
@@ -752,13 +759,6 @@ size_t	Response::getContentLength()
 	return buf.st_size;
 }
 
-size_t	Response::getErrorContentLength()
-{
-	struct stat buf;
-	stat(errorFilePath.c_str(), &buf);
-	return buf.st_size;
-}
-
 int	Response::getTargetFileFd()
 {
 	int fd;
@@ -766,12 +766,6 @@ int	Response::getTargetFileFd()
 	return fd;
 }
 
-int Response::getErrorFileFd()
-{
-	int fd;
-	fd = open(errorFilePath.c_str(), O_RDONLY);
-	return fd;
-}
 
 void Response::setResponseLine()
 {
@@ -779,8 +773,8 @@ void Response::setResponseLine()
 	std::map<int, std::string> ResponseMap;
 	setResponseMap(ResponseMap);
 	responseMessege.append(std::string("HTTP/1.1") + " ");
-	responseMessege.append(ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\n");
-	responseMessege.append("Server: nginx/1.14.0 (Ubuntu)\n");
+	responseMessege.append(ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\r\n");
+	responseMessege.append("Server: nginx/1.14.0 (Ubuntu)\r\n");
 }
 
 void Response::setDate()
@@ -795,27 +789,28 @@ void Response::setDate()
 	responseMessege.append(GetMonth()[gmt->tm_mon] + " ");
 	responseMessege.append(ft_itos(gmt->tm_year + 1900) + " ");
 	responseMessege.append(ft_itos(gmt->tm_hour) + ":" + ft_itos(gmt->tm_min) + ":" + ft_itos(gmt->tm_sec) + " ");
-	responseMessege.append("GMT\n");
+	responseMessege.append("GMT\r\n");
 }
 
-std::string Response::getErrorPage()
-{
-	errorFilePath = configServer.root + configServer.configCommon.errorPages[ft_itos(ResponseStatus)];
-	return errorFilePath;
-}
 
 bool Response::isErrorFilePathExist()
 {
-	errorFilePath = configServer.root + configServer.configCommon.errorPages[ft_itos(ResponseStatus)];
+	s_ConfigCommon configCommon;
+	if (configLocation.path.size() != 0) //Location優先
+		configCommon = configLocation.configCommon;
+	else
+		configCommon = configServer.configCommon;
+	std::string errorFilePath = configServer.root + configCommon.errorPages[ft_itos(ResponseStatus)];
 	struct stat buf;
 
 	if (stat(errorFilePath.c_str(), &buf) == 0 && !S_ISDIR(buf.st_mode))
 	{
+		targetFilePath = errorFilePath;
 		return true;
 	}
 	else
 	{
-		errorFilePath = "";
+		targetFilePath = "";
 		return false;
 	}
 }
@@ -844,7 +839,7 @@ bool Response::isLanguageFile(std::string FilePath, std::string fileExtention)
 }
 
 
-void Response::setContenType(std::string FilePath)
+void Response::setContenType()
 {
 	/**
 	 * Languageつきのファイルの対応をする必要あり。
@@ -852,26 +847,34 @@ void Response::setContenType(std::string FilePath)
 	 * **/
 	std::map<int, std::string> ContentTypeMap;
 	setResponseMap(ContentTypeMap);
-	std::string fileExtention = getFileExtention(FilePath);
+	std::string fileExtention = getFileExtention(targetFilePath);
 
 	//このsubに該当する言語が入っているかを確認する。いたら切り取って、もう一個拡張子取りに行く
-	if (isLanguageFile(FilePath, fileExtention))
+	if (isLanguageFile(targetFilePath, fileExtention))
 	{
-		FilePath = FilePath.substr(0, FilePath.size() - fileExtention.size() - 1);
-		fileExtention = getFileExtention(FilePath);
+		std::string LanguageRemoved = targetFilePath.substr(0, targetFilePath.size() - fileExtention.size() - 1);
+		fileExtention = getFileExtention(LanguageRemoved);
 	}
 	responseMessege.append("Content-Type: ");
 	std::string ContentType = GetContentType(fileExtention);
 	if (ContentType == "")
-		responseMessege.append(std::string("application/octet-stream") + "\n");
+		responseMessege.append(std::string("application/octet-stream") + "\r\n");
 	else
-		responseMessege.append(ContentType + "\n");
+		responseMessege.append(ContentType + "\r\n");
 
 }
 
+void Response::setContentLength()
+{
+	std::string ContentLength = "Content-Length: ";
+	size_t contentLen = getContentLength();
+	ContentLength.append(ft_ltos((long)contentLen) + "\n");
+	responseMessege.append(ContentLength);
+}
+
+
 void Response::AppendBodyOnResponseMessage(std::string body)
 {
-  responseMessege.append("Content-Length: 54\n");
-	responseMessege.append(std::string("\n"));
-	responseMessege.append(body + "\n");
+	responseMessege.append(std::string("\r\n"));
+	responseMessege.append(body);
 }

@@ -24,7 +24,8 @@ HTTP1_SOURCE = server.cpp \
 							 getChunked.cpp \
 							 sendController.cpp \
 							 ft_make_dummy_response.cpp \
-							 Response.cpp
+							 Response.cpp \
+							 ft_inet_ntoa.cpp
 .PHONY: all clean
 
 all: $(HTTP1)
