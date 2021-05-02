@@ -94,6 +94,7 @@ class Response
 		int isTargetFileAbailable(std::string);
 		size_t getContentLength();
 		size_t getErrorContentLength();
+		void setContentLength();
 		void setResponseLine();
 		void setDate();
 		bool isErrorFilePathExist();

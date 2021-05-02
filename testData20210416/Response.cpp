@@ -37,7 +37,7 @@ std::string ft_itos(int nu)
 	return (ret);
 
 }
-
+size_t
 std::string ft_ltos(long nu)
 {
 	std::string ret;
@@ -467,6 +467,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		if (isErrorFilePathExist())
 		{
 			setContenType(errorFilePath);
+
 			client.status = READ;
 			return ;
 		}
@@ -477,6 +478,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		}
 	}
 	setContenType(targetFilePath); //Languageを考えて選択する。
+	setContentLength();
 	if (AcceptLanguageMap.size() != 0)
 		setContentLanguage();
 	client.status = READ;
@@ -868,6 +870,24 @@ void Response::setContenType(std::string FilePath)
 		responseMessege.append(ContentType + "\n");
 
 }
+
+void Response::setContentLength()
+{
+	std::string ContentLength = "Content-Length: ";
+	size_t contentLen = getContentLength();
+	ContentLength.append(ft_ltos((long)contentLen) + "\n");
+	responseMessage.append(ContentLength);
+}
+
+void Response::setErrorContntLength(std::string errorFilePath)
+{
+	std::string ContentLength = "Content-Length: ";
+	size_t contentLen = getContentLength();
+	ContentLength.append(ft_ltos((long)contentLen) + "\n");
+	responseMessage.append(ContentLength);
+
+}
+
 
 void Response::AppendBodyOnResponseMessage(std::string body)
 {
