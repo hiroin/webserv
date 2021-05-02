@@ -449,7 +449,6 @@ TEST(Response_test, webserv_index)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(404, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/0/default.html", Response.targetFilePath);
     }
     catch(const std::exception& e)
     {
@@ -555,7 +554,6 @@ TEST(Response_test, webserv_index)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(404, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/0aaa/002.html", Response.targetFilePath);
     }
     catch(const std::exception& e)
     {
@@ -576,7 +574,6 @@ TEST(Response_test, webserv_index)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(404, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/0aa/default.html", Response.targetFilePath);
     }
     catch(const std::exception& e)
     {
@@ -618,7 +615,6 @@ TEST(Response_test, webserv_index)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(404, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/1//bbb/index.html", Response.targetFilePath);
     }
     catch(const std::exception& e)
     {
@@ -640,6 +636,35 @@ TEST(Response_test, webserv_index)
       // EXPECT_EQ(, ResponseStatus);
       // EXPECT_EQ("", Response.targetFilePath);
       // EXPECT_EQ("", Response.errorFilePath);
+    }
+  }
+}
+
+TEST(Response_test, webserv_index_2)
+{
+  const char* configfile = "testcase/015_index2.conf";
+  Config config_;
+  parseConfig(configfile, config_);  
+  {
+    // 0056
+    try
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(403, ResponseStatus);
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << "0024" << '\n';
+      std::cerr << e.what() << '\n';
     }
   }
 }
@@ -1026,4 +1051,228 @@ TEST(Response_test, allow)
       EXPECT_THAT(ResponseMessage, MatchesRegex(".*\nAllow: POST,HEAD,GET\n.*"));
     }
   }
+}
+
+TEST(Response_test, AcceptLanguage)
+{
+  const char* configfile = "testcase/017_acceptlanguage.conf";
+  Config config_;
+  parseConfig(configfile, config_);  
+  {
+    // 0057
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "en;q=0.8, ja;q=0.9, *";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
+    }
+  }
+  {
+    // 0058
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/index.html";
+      client_.hmp.headers_["Accept-Language"] = "ja";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html.ja", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+  {
+    // 00
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/";
+      client_.hmp.headers_["Accept-Language"] = "";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/", Response.targetFilePath);
+    }
+  }
+
 }

@@ -75,11 +75,16 @@ int http1(Config& c)
         if (maxFd < (clients[i].socketFd + 1))
           maxFd = clients[i].socketFd + 1;
       }
+      if (clients[i].readFd != -1)
+      {
+        FD_SET(clients[i].readFd, &readFds);
+        if (maxFd < (clients[i].readFd + 1))
+          maxFd = clients[i].readFd + 1;
+      }
     }
     tvForSelect.tv_sec = SELECT_TIMEOUT;
     tvForSelect.tv_usec = 0;   
     if (select(maxFd, &readFds, &writeFds, NULL, &tvForSelect) == -1)
-    // if (select(maxFd, &readFds, NULL, NULL, &tvForSelect) == -1)
       std::cout << "select() failed.(" << strerror(errno) << ")" << std::endl;
     for (std::vector<Socket>::iterator itrServer = servers.begin();
       itrServer != servers.end();
@@ -135,7 +140,24 @@ int http1(Config& c)
           std::cout << "--recvData-----------------------------" << std::endl;
           std::cout << clients[i].receivedData.getRecvData();
           std::cout << "---------------------------------------" << std::endl;
-        }        
+        }
+      }
+      if (FD_ISSET(clients[i].readFd, &readFds))
+      {
+        if (!clients[i].readData.readFromFd())
+        {
+          close(clients[i].readFd);
+          close(clients[i].socketFd);
+          clients[i].readFd = -1;
+          clients[i].socketFd = -1;
+          continue;
+        }
+        {
+          // デバッグ
+          std::cout << "--readData-----------------------------" << std::endl;
+          std::cout << clients[i].readData.getRecvData();
+          std::cout << "---------------------------------------" << std::endl;
+        }
       }
       if (clients[i].status == PARSE_STARTLINE)
       {
@@ -210,23 +232,26 @@ int http1(Config& c)
               responses[i] = new Response(clients[i], c);
               clients[i].responseCode = responses[i]->ResponseStatus;
               clients[i].readFd = responses[i]->getTargetFileFd();
-              clients[i].responseFileSize = responses[i]->getContentLength();
+              clients[i].readData.setFd(clients[i].readFd);
               {
                 // デバッグ
                 std::cout << "--responceData-------------------------" << std::endl;
                 std::cout << "response_code  : " << clients[i].responseCode << std::endl;
                 std::cout << "file_path      : " << responses[i]->targetFilePath << std::endl;
+                std::cout << "file_length    : " << responses[i]->getContentLength() << std::endl;
+                std::cout << "open_fd        : " << clients[i].readFd << std::endl;
                 std::cout << "client_status  : " << clients[i].status << std::endl;
+                std::cout << "responseMessege  " << std::endl << responses[i]->responseMessege << std::endl;
                 std::cout << "---------------------------------------" << std::endl;
               }
-              delete responses[i];
+              // delete responses[i];
+              // responses[i] = NULL;
 
-              responses[i] = NULL;
-              ft_dummy_response(200, clients[i].socketFd);
+              // ft_dummy_response(200, clients[i].socketFd);
               // 状態を最初に戻す
-              clients[i].status = PARSE_STARTLINE;
-              clients[i].bChunked = false;
-              clients[i].hmp.clearData();
+              // clients[i].status = PARSE_STARTLINE;
+              // clients[i].bChunked = false;
+              // clients[i].hmp.clearData();
             }
             break;
           }
@@ -340,9 +365,37 @@ int http1(Config& c)
           clients[i].hmp.clearData();
           clients[i].body.clear();
       }
+      if (clients[i].status == READ)
+      {
+        if (clients[i].readData.cutOutRecvDataBySpecifyingBytes(responses[i]->getContentLength()))
+        {
+          close(clients[i].readFd);
+          clients[i].readFd = -1;          
+          {
+            // デバッグ
+            std::cout << "--responseMessege(before append)--------" << std::endl;
+            std::cout << responses[i]->responseMessege << std::endl;
+            std::cout << "----------------------------------------" << std::endl;
+            std::cout << "--append body---------------------------" << std::endl;
+            std::cout << clients[i].readData.getExtractedData() << std::endl;
+            std::cout << "----------------------------------------" << std::endl;
+          }
+          responses[i]->AppendBodyOnResponseMessage(clients[i].readData.getExtractedData());
+          {
+            // デバッグ
+            std::cout << "--responseMessege(after append)--------" << std::endl;
+            std::cout << responses[i]->responseMessege << std::endl;
+            std::cout << "---------------------------------------" << std::endl;
+          }
+          clients[i].responseMessege = responses[i]->responseMessege;
+          clients[i].sc.setSendData(const_cast<char *>(clients[i].responseMessege.c_str()), responses[i]->responseMessege.size());
+          clients[i].status = SEND;
+          delete responses[i];
+        }
+      }
       if (FD_ISSET(clients[i].socketFd, &writeFds) && clients[i].status == SEND)
       {
-        bool isFinish = clients[i].sc.SendMessage(10);
+        bool isFinish = clients[i].sc.SendMessage(1024);
         if (isFinish)
         {
           if (clients[i].responseCode != 200)

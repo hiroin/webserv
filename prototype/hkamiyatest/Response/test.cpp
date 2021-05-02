@@ -5,19 +5,19 @@ https://docs.google.com/spreadsheets/d/1LNw2mvutl0X-ehI2lNGltf06Z1zOF04SorS-GIM8
 
 #include "../../Response.hpp"
 #include "../../parseConfig.hpp"
-#include <string.h>
 
 int main()
 {
-  const char* configfile = "../../googletest/testcase/webserv.conf";
+  const char* configfile = "../../googletest/testcase/017_acceptlanguage.conf";
 	Config config_;
   Client client_;
   parseConfig(configfile, config_);
-  client_.port = 5001;
+  client_.port = 8080;
   client_.host = "*";
   client_.hmp.method_ = httpMessageParser::GET;
-  client_.hmp.absolutePath_ = "/www/bb/index.html";
+  client_.hmp.absolutePath_ = "/";
   client_.hmp.headers_["host"] = "127.0.0.1";
+  client_.hmp.headers_["Accept-Language"] = "en;q=0.8, ja;q=0.9, *";
   Response Response(client_, config_);
      
   int ResponseStatus = Response.ResponseStatus;

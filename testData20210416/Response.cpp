@@ -535,7 +535,7 @@ void Response::setAllow()
 	{
 		if (i == allowMethods.size() - 1)
 		{
-			AllowHeader.append(allowMethods[i] + "\n");
+			AllowHeader.append(allowMethods[i] + "\r\n");
 		}
 		else
 		{
@@ -694,7 +694,7 @@ std::string getFileExtention(std::string FilePath)
 void Response::setContentLanguage()
 {
 	std::string ContentLanguage = "Content-Language: ";
-	ContentLanguage.append(getFileExtention(targetFilePath) + "\n");
+	ContentLanguage.append(getFileExtention(targetFilePath) + "\r\n");
 	responseMessege.append(ContentLanguage);
 	return ;
 }
@@ -779,8 +779,8 @@ void Response::setResponseLine()
 	std::map<int, std::string> ResponseMap;
 	setResponseMap(ResponseMap);
 	responseMessege.append(std::string("HTTP/1.1") + " ");
-	responseMessege.append(ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\n");
-	responseMessege.append("Server: nginx/1.14.0 (Ubuntu)\n");
+	responseMessege.append(ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\r\n");
+	responseMessege.append("Server: nginx/1.14.0 (Ubuntu)\r\n");
 }
 
 void Response::setDate()
@@ -795,7 +795,7 @@ void Response::setDate()
 	responseMessege.append(GetMonth()[gmt->tm_mon] + " ");
 	responseMessege.append(ft_itos(gmt->tm_year + 1900) + " ");
 	responseMessege.append(ft_itos(gmt->tm_hour) + ":" + ft_itos(gmt->tm_min) + ":" + ft_itos(gmt->tm_sec) + " ");
-	responseMessege.append("GMT\n");
+	responseMessege.append("GMT\r\n");
 }
 
 std::string Response::getErrorPage()
@@ -863,14 +863,14 @@ void Response::setContenType(std::string FilePath)
 	responseMessege.append("Content-Type: ");
 	std::string ContentType = GetContentType(fileExtention);
 	if (ContentType == "")
-		responseMessege.append(std::string("application/octet-stream") + "\n");
+		responseMessege.append(std::string("application/octet-stream") + "\r\n");
 	else
-		responseMessege.append(ContentType + "\n");
+		responseMessege.append(ContentType + "\r\n");
 
 }
 
 void Response::AppendBodyOnResponseMessage(std::string body)
 {
-	responseMessege.append(std::string("\n"));
-	responseMessege.append(body + "\n");
+	responseMessege.append(std::string("\r\n"));
+	responseMessege.append(body);
 }

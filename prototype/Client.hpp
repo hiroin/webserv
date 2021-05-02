@@ -27,6 +27,7 @@ class Client
 
   // 各種処理をするためのclass
   recvData receivedData;
+  recvData readData;
   HTTPMessageParser hmp;
   getChunked gc;
   SendController sc;
@@ -37,6 +38,7 @@ class Client
   bool bChunked;
   int responseCode;
   size_t responseFileSize;
+  std::string responseMessege;
 
   // メッセージボディ
   std::string body;
