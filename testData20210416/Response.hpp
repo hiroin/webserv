@@ -61,7 +61,7 @@ class Response
 
 		std::string responseMessege;
 		std::string targetFilePath;
-		std::string errorFilePath;
+		// std::string errorFilePath;
 		/**
 		 * Accept-Language
 		 * **/
@@ -93,17 +93,14 @@ class Response
 		void setTargetFileAndStatus();
 		int isTargetFileAbailable(std::string);
 		size_t getContentLength();
-		size_t getErrorContentLength();
 		void setContentLength();
 		void setResponseLine();
 		void setDate();
 		bool isErrorFilePathExist();
-		void setContenType(std::string FilePath);
-		std::string getErrorPage();
+		void setContenType();
 		std::string GetContentType(std::string key); //contentTypeを取得する関数
 		std::string GetLastModified(); //最終更新日を返す関数
 		int getTargetFileFd();
-		int getErrorFileFd();
 		bool isMethodAllowed();
 		void setAllow();
 		s_ConfigCommon getConfigCommon();
