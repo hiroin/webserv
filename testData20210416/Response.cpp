@@ -101,7 +101,7 @@ bool isMatchQvalue(std::string::iterator &itr)
 	if (*itr == '0')
 	{
 		++itr;
-		if (*itr != '.' && *itr != ' ' && *itr != ',') return false;
+		if (*itr != '.' && *itr != ' ' && *itr != ',' && *itr != '\0') return false;
 		if (*itr == '.')
 		{
 			++itr;
@@ -118,7 +118,7 @@ bool isMatchQvalue(std::string::iterator &itr)
 	else if (*itr == '1') //1.以外は認めない
 	{
 		++itr;
-		if (*itr != '.' && *itr != ' ' && *itr != ',') return false;
+		if (*itr != '.' && *itr != ' ' && *itr != ',' && *itr != '\0') return false;
 		if (*itr == '.')
 		{
 			int count = 0;
@@ -495,7 +495,7 @@ std::string Base64Encode(std::string szStr)
 	default:
 		break;
 	}
-	szEnc[j + 4] = NULL;
+	szEnc[j + 4] = '\0';
 	std::string ret = std::string(szEnc);
 	delete szEnc;
 	return (ret);
@@ -572,8 +572,9 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
 	/*Authorization をチェック*/
-	if (!isAuthorized()) //認証情報がなかったら
+	if (!isAuthorized()) //認証情報に問題があったら
 	{
+		ResponseStatus = 401;
 		setResponseLine(); //responseStatus と serverNameヘッダを設定
 		setDate();
 		setWWWAuthenticate();
