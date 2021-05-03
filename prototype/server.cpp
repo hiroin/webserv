@@ -92,7 +92,9 @@ int http1(Config& c)
     {
       if (FD_ISSET(itrServer->get_listenfd(), &readFds))
       {
-        int acceptFd = accept(itrServer->get_listenfd(), (struct sockaddr*)NULL, NULL);
+        struct sockaddr_in clienSockaddrIn;
+        socklen_t clienSockaddrInLen = sizeof(clienSockaddrIn);
+        int acceptFd = accept(itrServer->get_listenfd(), (struct sockaddr*)&clienSockaddrIn, &clienSockaddrInLen);
         int r = fcntl(acceptFd, F_SETFL, O_NONBLOCK);
         if (r == -1)
         {
@@ -100,7 +102,7 @@ int http1(Config& c)
           close(acceptFd);
           continue;
         }
-        std::cout << "accept[" << itrServer->get_host() << ":" << itrServer->get_port() << "]" << std::endl;
+        std::cout << "accept[to " << itrServer->get_host() << ":" << itrServer->get_port() << " from " << ft_inet_ntos(clienSockaddrIn.sin_addr) << "]" << std::endl;
         bool limit_over = true;
         for (int i = 0; i < MAX_SESSION; i++)
         {
@@ -111,6 +113,7 @@ int http1(Config& c)
             clients[i].sc.setFd(clients[i].socketFd);
             clients[i].port = itrServer->get_port();
             clients[i].host = itrServer->get_host();
+            clients[i].ip = ft_inet_ntos(clienSockaddrIn.sin_addr);
             limit_over = false;
             break;
           }

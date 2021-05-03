@@ -25,6 +25,9 @@ class Client
   int port;
   std::string host;
 
+  // クライアントの情報
+  std::string ip;
+
   // 各種処理をするためのclass
   recvData receivedData;
   recvData readData;
