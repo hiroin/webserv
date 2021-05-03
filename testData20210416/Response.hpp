@@ -83,6 +83,7 @@ class Response
 		std::map<int, std::string> GetMonth();
 
 		std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
+		std::map<std::string, std::vector<std::string> > AcceptCharsetMap;
 
 		/**
 		 * クライアントと、リクエストからどのサーバーを使うのかきめる
@@ -104,11 +105,11 @@ class Response
 		bool isMethodAllowed();
 		void setAllow();
 		s_ConfigCommon getConfigCommon();
-		bool isMatchAcceptLanguageFromat(std::string src);
+		bool isMatchAcceptLanguageFromat(std::string);
 		bool isAcceptLanguageSet();
-		int isLanguageFileExist(std::string SerachFileAbsolutePath);
+		int isLanguageFileExist(std::string);
 		void setContentLanguage();
-		bool isLanguageFile(std::string FilePath, std::string sub);
+		bool isLanguageFile(std::string, std::string);
 		/*.<Accept-Language> がなかったら406を返す*/
 		std::map<std::string, std::vector<std::string> > parseAcceptLanguage(std::string src);
 		bool isAuthorized();
@@ -117,7 +118,15 @@ class Response
 		bool isRequestMatchAuth();
 		std::string getEncodedServerCredential();
 		void setWWWAuthenticate();
+		bool isAcceptCharsetSet();
+		bool isMatchAcceptCharsetFromat(std::string);
+		std::map<std::string, std::vector<std::string> > parseAcceptCharset(std::string src);
+		int isCharsetFileExist(std::string);
 
+		std::string removeLanguageAndCharsetFileExtention();
+		bool isCharsetFile(std::string FilePath, std::string fileExtention);
+		int isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath);
+		std::string getCharsetExtention();
 		/*===============HTTPstatus===============*/
 
 
