@@ -457,11 +457,130 @@ TypeMap["7z"]     = "application/x-7z-compressed";            //7-zipアーカ�
 
 Response::~Response(){};
 
+std::string Base64Encode(std::string szStr)
+{
+	std::string szB64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+	char *szEnc;
+	int iLen, i, j;
+	iLen = szStr.size();
+	szEnc = new char [(int)((float)iLen * 1.5)];
+
+	j = 0;
+	for(i = 0; i < (iLen - (iLen % 3));  i+=3)
+	{
+		szEnc[j] = szB64[(szStr[i] & 0xfc) >> 2];
+		szEnc[j + 1] = szB64[((szStr[i] & 0x03) << 4) | ((szStr[i + 1] & 0xf0) >> 4)];
+		szEnc[j + 2] = szB64[((szStr[i + 1] & 0x0f) << 2) | ((szStr[i + 2] & 0xc0) >> 6)];
+		szEnc[j + 3] = szB64[(szStr[i + 2] & 0x3f)];
+		j += 4;
+	}
+	i = iLen - (iLen % 3);
+	switch (iLen % 3)
+	{
+		case 2:
+		{
+			szEnc[j] = szB64[ (szStr[i] & 0xfc) >> 2];
+			szEnc[j + 1] = szB64[ ((szStr[i] & 0x03) << 4) | ((szStr[i + 1] & 0xf0) >> 4) ];
+			szEnc[j + 2] = szB64[(szStr[i + 1] & 0x0f) << 2];
+			szEnc[j + 3] = szB64[64];
+			break;
+		}
+		case 1:
+		{
+			szEnc[j] = szB64[ (szStr[i] & 0xfc) >> 2];
+			szEnc[j + 1] = szB64[ (szStr[i] & 0x03) << 4];
+			szEnc[j + 2] = szB64[64];
+			szEnc[j + 3] = szB64[64];
+		}
+	default:
+		break;
+	}
+	szEnc[j + 4] = NULL;
+	std::string ret = std::string(szEnc);
+	delete szEnc;
+	return (ret);
+
+}
+
+bool Response::isNecesarryAuth()
+{
+	s_ConfigCommon configCommon = getConfigCommon();
+	if (configCommon.authBasicUid.size() == 0 && configCommon.authBasicPassword.size() == 0) //認証情報ない。
+		return false;
+	return true;
+
+}
+
+std::string Response::getEncodedServerCredential()
+{
+	s_ConfigCommon configCommon = getConfigCommon();
+	std::string ServerCredential = configCommon.authBasicUid + ":" + configCommon.authBasicPassword;
+	return (Base64Encode(ServerCredential));
+}
+
+bool Response::isRequestMatchAuth()
+{
+	std::string Authorization = client.hmp.headers_["Authorization"];
+	std::string Type;
+	std::string credential;
+	std::string EncodedServerCredential;
+
+	int i = 0;
+	for(i = 0; i < Authorization.size(); i++)
+	{
+		if (Authorization[i] == ' ')
+		{
+			Type = Authorization.substr(0, i);
+			++i;
+			break ;
+		}
+	}
+	if (Type != std::string("Basic")) return false;
+	while(i < Authorization.size())
+	{
+		credential.push_back(Authorization[i]);
+		++i;
+	}
+	EncodedServerCredential = getEncodedServerCredential();
+	if (credential != EncodedServerCredential) return false;
+	return true;
+}
+
+
+bool Response::isAuthorized()
+{
+	//Configを調べて、求めるリソースに認証が必要かをチェック
+	if (isNecesarryAuth())
+	{
+		if (isRequestMatchAuth())
+			return true;
+		return false;
+	}
+	return true;
+}
+
+void Response::setWWWAuthenticate()
+{
+	responseMessege.append("WWW-Authenticate: ");
+	responseMessege.append(std::string("basic "));
+	responseMessege.append(std::string("realm=") + "\"" + getConfigCommon().authBasicRealm + "\"");
+	responseMessege.append(std::string("\r\n"));
+}
 
 Response::Response(Client &client, Config &config) : client(client), config(config)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
+	/*Authorization をチェック*/
+	if (!isAuthorized()) //認証情報がなかったら
+	{
+		setResponseLine(); //responseStatus と serverNameヘッダを設定
+		setDate();
+		setWWWAuthenticate();
+		responseMessege.append(std::string("\r\n"));
+		client.status = SEND;
+		return ;
+	}
 	/* メソッドが許可されているかを判断 */
 	if (isMethodAllowed())
 	{
@@ -492,6 +611,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		else
 		{
 			client.status = SEND;
+			responseMessege.append(std::string("\r\n"));
 			return ;
 		}
 	}
@@ -862,7 +982,7 @@ void Response::setContentLength()
 {
 	std::string ContentLength = "Content-Length: ";
 	size_t contentLen = getContentLength();
-	ContentLength.append(ft_ltos((long)contentLen) + "\n");
+	ContentLength.append(ft_ltos((long)contentLen) + "\r\n");
 	responseMessege.append(ContentLength);
 }
 
