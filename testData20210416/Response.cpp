@@ -516,11 +516,6 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 		client.status = READ;
 		return ;
 	}
-	else
-	{
-		client.status = SEND;
-		return ;
-	}
 	client.status = SEND;
 }
 
