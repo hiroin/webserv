@@ -1057,7 +1057,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "en;q=0.8, ja;q=0.9, *";
+      client_.hmp.headers_["accept-language"] = "en;q=0.8, ja;q=0.9, *";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1075,7 +1075,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/index.html";
-      client_.hmp.headers_["Accept-Language"] = "ja";
+      client_.hmp.headers_["accept-language"] = "ja";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1095,7 +1095,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja";
+      client_.hmp.headers_["accept-language"] = "ja";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1115,7 +1115,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "*";
+      client_.hmp.headers_["accept-language"] = "*";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1133,7 +1133,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "en";
+      client_.hmp.headers_["accept-language"] = "en";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1153,7 +1153,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja, en;q=0.9";
+      client_.hmp.headers_["accept-language"] = "ja, en;q=0.9";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1173,7 +1173,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "en;q=0.9";
+      client_.hmp.headers_["accept-language"] = "en;q=0.9";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1193,7 +1193,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "fr";
+      client_.hmp.headers_["accept-language"] = "fr";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1211,7 +1211,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "en;q=0.9, ja";
+      client_.hmp.headers_["accept-language"] = "en;q=0.9, ja";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1229,7 +1229,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "fr, ja";
+      client_.hmp.headers_["accept-language"] = "fr, ja";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1247,7 +1247,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "fr, *";
+      client_.hmp.headers_["accept-language"] = "fr, *";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1265,7 +1265,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "fr, ja, en";
+      client_.hmp.headers_["accept-language"] = "fr, ja, en";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1283,7 +1283,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=1.000";
+      client_.hmp.headers_["accept-language"] = "ja;q=1.000";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1301,7 +1301,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=1.00";
+      client_.hmp.headers_["accept-language"] = "ja;q=1.00";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1319,7 +1319,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=1.0";
+      client_.hmp.headers_["accept-language"] = "ja;q=1.0";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1337,7 +1337,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=1.";
+      client_.hmp.headers_["accept-language"] = "ja;q=1.";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1355,7 +1355,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=1";
+      client_.hmp.headers_["accept-language"] = "ja;q=1";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1373,7 +1373,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=1.0000";
+      client_.hmp.headers_["accept-language"] = "ja;q=1.0000";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1391,7 +1391,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=1.2";
+      client_.hmp.headers_["accept-language"] = "ja;q=1.2";
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
@@ -1408,7 +1408,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=2";
+      client_.hmp.headers_["accept-language"] = "ja;q=2";
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
@@ -1425,7 +1425,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja,";
+      client_.hmp.headers_["accept-language"] = "ja,";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1443,7 +1443,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=0.999";
+      client_.hmp.headers_["accept-language"] = "ja;q=0.999";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1461,7 +1461,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=0.99";
+      client_.hmp.headers_["accept-language"] = "ja;q=0.99";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1479,7 +1479,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=0.9";
+      client_.hmp.headers_["accept-language"] = "ja;q=0.9";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1497,7 +1497,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=0.";
+      client_.hmp.headers_["accept-language"] = "ja;q=0.";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1515,7 +1515,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=0";
+      client_.hmp.headers_["accept-language"] = "ja;q=0";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1533,7 +1533,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "zz";
+      client_.hmp.headers_["accept-language"] = "zz";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1550,7 +1550,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=2, en";
+      client_.hmp.headers_["accept-language"] = "ja;q=2, en";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1568,7 +1568,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=2, en,";
+      client_.hmp.headers_["accept-language"] = "ja;q=2, en,";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1586,7 +1586,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=2, en;,";
+      client_.hmp.headers_["accept-language"] = "ja;q=2, en;,";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1604,7 +1604,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=0.11, en;q=0.11, *;q=0.11";
+      client_.hmp.headers_["accept-language"] = "ja;q=0.11, en;q=0.11, *;q=0.11";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1622,7 +1622,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "ja;q=0.111, en;q=0.11, *;q=0.1";
+      client_.hmp.headers_["accept-language"] = "ja;q=0.111, en;q=0.11, *;q=0.1";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
@@ -1640,7 +1640,7 @@ TEST(Response_test, AcceptLanguage)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.headers_["host"] = "127.0.0.1";
       client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["Accept-Language"] = "fr,de;q=0.5,el;q=0.3";
+      client_.hmp.headers_["accept-language"] = "fr,de;q=0.5,el;q=0.3";
 
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;

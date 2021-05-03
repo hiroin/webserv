@@ -171,8 +171,34 @@ int http1(Config& c)
           std::cout << "--extractedData_-----------------------" << std::endl;
           std::cout << clients[i].receivedData.getExtractedData() << std::endl;
           std::cout << "---------------------------------------" << std::endl;
-          if (clients[i].hmp.parseRequestLine(clients[i].receivedData.getExtractedData())
-            && clients[i].hmp.parseRequestTarget(clients[i].hmp.getRequestTarget()))
+          int code = clients[i].hmp.parseRequestLine(clients[i].receivedData.getExtractedData());
+          if (code != 200)
+          {
+            responses[i] = new Response(code ,clients[i], c);
+            clients[i].responseCode = code;
+            if (clients[i].status == READ)
+            {
+              clients[i].readFd = responses[i]->getTargetFileFd();
+              clients[i].readData.setFd(clients[i].readFd);
+            }
+            else if (clients[i].status == SEND)
+            {
+              clients[i].responseMessege = responses[i]->responseMessege;
+              delete responses[i];
+              clients[i].sc.setSendData(const_cast<char *>(clients[i].responseMessege.c_str()), responses[i]->responseMessege.size());              
+            }
+            else
+            {
+              // ここにくるケースはないはず
+              std::cout << "[emerg] Irregularity in PARSE_STARTLINE" << std::endl;
+              delete responses[i];
+              std::string response = ft_make_dummy_response(400);
+              clients[i].sc.setSendData(const_cast<char *>(response.c_str()), response.size());
+              clients[i].responseCode = 400;
+              clients[i].status = SEND;
+            }
+          }
+          else if (clients[i].hmp.parseRequestTarget(clients[i].hmp.getRequestTarget()))
           {
             {
               // デバッグ
@@ -211,13 +237,6 @@ int http1(Config& c)
               clients[i].sc.setSendData(const_cast<char *>(response.c_str()), response.size());
               clients[i].responseCode = 400;
               clients[i].status = SEND;
-
-              // close(clients[i].socketFd);
-              // clients[i].status = PARSE_STARTLINE;
-              // clients[i].receivedData.clearData();
-              // clients[i].hmp.clearData();
-              // clients[i].socketFd = -1;
-              // continue;
             }
           }
         }

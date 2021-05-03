@@ -12,11 +12,12 @@
 
 namespace httpMessageParser {
   enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER};
+  const int MAX_URI_SIZE = 100;
 }
 
 class HTTPMessageParser {
  public:
-  bool parseRequestLine(const std::string requestLine);
+  int parseRequestLine(const std::string requestLine);
   std::string getMessageHeader() const;
   enum httpMessageParser::method getMethod() const;
   std::string getRequestTarget() const;

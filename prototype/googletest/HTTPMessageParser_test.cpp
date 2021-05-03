@@ -8,26 +8,27 @@
 TEST(HTTPMessageParserEvenTest, parseRequestLine) {
 
   HTTPMessageParser c;
-  EXPECT_TRUE(c.parseRequestLine("GET / HTTP/1.1"));
-  EXPECT_TRUE(c.parseRequestLine("HEAD / HTTP/1.1"));
-  EXPECT_TRUE(c.parseRequestLine("POST / HTTP/1.1"));
-  EXPECT_TRUE(c.parseRequestLine("PUT / HTTP/1.1"));
-  EXPECT_TRUE(c.parseRequestLine("DELETE / HTTP/1.1"));
-  EXPECT_TRUE(c.parseRequestLine("CONNECT / HTTP/1.1"));
-  EXPECT_TRUE(c.parseRequestLine("OPTIONS / HTTP/1.1"));
-  EXPECT_TRUE(c.parseRequestLine("TRACE / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("GET / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("HEAD / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("POST / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("PUT / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("DELETE / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("CONNECT / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("OPTIONS / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("TRACE / HTTP/1.1"));
 
-  EXPECT_TRUE(c.parseRequestLine("GET / HTTP/1.0"));
-  EXPECT_TRUE(c.parseRequestLine("GET test HTTP/1.0"));
+  EXPECT_EQ(505, c.parseRequestLine("GET / HTTP/1.0"));
+  EXPECT_EQ(505, c.parseRequestLine("GET test HTTP/1.0"));
 
-  EXPECT_FALSE(c.parseRequestLine("OTHER / HTTP/1.1"));
-  EXPECT_FALSE(c.parseRequestLine("GET / HTTP/0.9"));
-  EXPECT_FALSE(c.parseRequestLine("GET /  "));
-  EXPECT_FALSE(c.parseRequestLine("GET / "));
-  EXPECT_FALSE(c.parseRequestLine("GET /"));
-  EXPECT_FALSE(c.parseRequestLine("GET "));
-  EXPECT_FALSE(c.parseRequestLine("GET"));
-  EXPECT_FALSE(c.parseRequestLine(" GET / HTTP/1.1"));
+  EXPECT_EQ(501, c.parseRequestLine("OTHER / HTTP/1.1"));
+  EXPECT_EQ(505, c.parseRequestLine("GET / HTTP/0.9"));
+  EXPECT_EQ(400, c.parseRequestLine("GET /  "));
+  EXPECT_EQ(400, c.parseRequestLine("GET / "));
+  EXPECT_EQ(400, c.parseRequestLine("GET /"));
+  EXPECT_EQ(400, c.parseRequestLine("GET "));
+  EXPECT_EQ(400, c.parseRequestLine("GET"));
+  EXPECT_EQ(400, c.parseRequestLine(" GET / HTTP/1.1"));
+  EXPECT_EQ(414, c.parseRequestLine("GET /00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.html HTTP/1.1"));
 }
 
 TEST(HTTPMessageParserEvenTest, getAfterParseRequestLine) {

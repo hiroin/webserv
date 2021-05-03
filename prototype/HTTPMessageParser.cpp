@@ -1,12 +1,14 @@
 #include "HTTPMessageParser.hpp"
 
-bool HTTPMessageParser::parseRequestLine(const std::string requestLine)
+int HTTPMessageParser::parseRequestLine(const std::string requestLine)
 {
   // std::cout << "[DEBUG]requestLine = " << requestLine << std::endl;
   requestLine_ = requestLine;
   std::string::size_type firstSpPos = requestLine.find(std::string(" "));
   if (firstSpPos == std::string::npos)
-    return FAILURE;
+    return 400;
+  if (!ft_istchar(requestLine_[0]))
+    return 400;
   std::string method = requestLine.substr(0, firstSpPos);
   // std::cout << "[DEBUG]method = " << method << std::endl;
   if (method == "GET")
@@ -28,18 +30,32 @@ bool HTTPMessageParser::parseRequestLine(const std::string requestLine)
   else
   {
     method_ = httpMessageParser::OTHER;
-    return FAILURE;
+    return 501;
   }
   std::string::size_type secondSpPos = requestLine.find(std::string(" "), firstSpPos + 1);
   if (secondSpPos == std::string::npos)
-    return FAILURE;
+    return 400;
   requestTarget_ = requestLine.substr(firstSpPos + 1, secondSpPos - firstSpPos - 1);
+  if (requestTarget_.size() > httpMessageParser::MAX_URI_SIZE)
+    return 414;
   // std::cout << "[DEBUG]requestTarget_ = \"" << requestTarget_ << "\"" << std::endl;
   HTTPVersion_ = requestLine.substr(secondSpPos + 1);
   // std::cout << "[DEBUG]HTTPVersion_ = \"" << HTTPVersion_ << "\"" << std::endl;
-  if (HTTPVersion_ == "HTTP/1.1" || HTTPVersion_ == "HTTP/1.0")
-    return SUCCESS;
-  return FAILURE;
+  if (HTTPVersion_ == "HTTP/1.1")
+    return 200;
+  if (HTTPVersion_[0] == 'H' &&
+    HTTPVersion_[1] == 'T' &&
+    HTTPVersion_[2] == 'T' &&
+    HTTPVersion_[3] == 'P' &&
+    HTTPVersion_[4] == '/' &&
+    std::isdigit(HTTPVersion_[5]) &&
+    HTTPVersion_[6] == '.' &&
+    std::isdigit(HTTPVersion_[7])
+    )
+  {
+    return 505;
+  }
+  return 400;
 }
 
 enum httpMessageParser::method HTTPMessageParser::getMethod() const
