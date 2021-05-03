@@ -17,7 +17,7 @@ int main()
   client_.hmp.method_ = httpMessageParser::GET;
   client_.hmp.absolutePath_ = "/";
   client_.hmp.headers_["host"] = "127.0.0.1";
-  client_.hmp.headers_["Accept-Language"] = "en;q=0.8, ja;q=0.9, *";
+  client_.hmp.headers_["Accept-Language"] = "ja;q=1";
   Response Response(client_, config_);
      
   int ResponseStatus = Response.ResponseStatus;

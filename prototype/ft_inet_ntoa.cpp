@@ -6,7 +6,7 @@
 /*   By: user42 <user42@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/23 06:20:50 by user42            #+#    #+#             */
-/*   Updated: 2021/05/02 16:11:57 by user42           ###   ########.fr       */
+/*   Updated: 2021/05/03 02:29:08 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ static int	ft_digit_count(long i)
 	return (count);
 }
 
-char		*ft_itoa(int n)
+static char		*ft_itoa(int n)
 {
 	char		*str;
 	int			i;

@@ -111,9 +111,12 @@ class Response
 		bool isLanguageFile(std::string FilePath, std::string sub);
 		/*.<Accept-Language> がなかったら406を返す*/
 		std::map<std::string, std::vector<std::string> > parseAcceptLanguage(std::string src);
-
+		bool isAuthorized();
 		void AppendBodyOnResponseMessage(std::string body);
-
+		bool isNecesarryAuth();
+		bool isRequestMatchAuth();
+		std::string getEncodedServerCredential();
+		void setWWWAuthenticate();
 
 		/*===============HTTPstatus===============*/
 
