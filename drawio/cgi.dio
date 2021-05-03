@@ -328,6 +328,105 @@
                         <mxPoint x="40" y="40" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
+                <mxCell id="99" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="87" target="88">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="87" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_2;whiteSpace=wrap;" vertex="1" parent="1">
+                    <mxGeometry x="375" y="585" width="40" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="116" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="88" target="115">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="88" value="&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;status = write&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="670" width="170" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="89" value="" style="endArrow=none;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="10" y="520" as="sourcePoint"/>
+                        <mxPoint x="1090" y="520" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="90" value="メインループ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="540" width="110" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="91" value="レスポンスクラス" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="540" width="110" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="92" value="pipe の write fd" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="680" width="130" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="93" value="" style="endArrow=classic;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="295" y="704.5" as="sourcePoint"/>
+                        <mxPoint x="100" y="705" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="94" value="pipe の read fd" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="660" width="130" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="98" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="96" target="97">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="96" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_2;whiteSpace=wrap;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="585" width="40" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="97" target="100">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="97" value="&lt;div style=&quot;text-align: left&quot;&gt;&lt;span&gt;write処理&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="5" y="730" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="104" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="100" target="101">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="100" value="&lt;div style=&quot;text-align: left&quot;&gt;status = read&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="5" y="800" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="108" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="101" target="107">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="101" value="&lt;div style=&quot;text-align: left&quot;&gt;read処理&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="5" y="870" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="118" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="107" target="117">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="107" value="&lt;div style=&quot;text-align: left&quot;&gt;CGIのレスポンスをparse&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="5" y="940" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="110" value="" style="endArrow=classic;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="110" y="1020.5" as="sourcePoint"/>
+                        <mxPoint x="300" y="1020" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="111" value="CGIのヘッダ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="140" y="1000" width="130" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="112" value="CGIのボディ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="140" y="1030" width="130" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="113" value="" style="endArrow=classic;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="110" y="1050.5" as="sourcePoint"/>
+                        <mxPoint x="300" y="1050" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="115" value="&lt;div style=&quot;text-align: left&quot;&gt;ヘッダとボディの結合&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="1015" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="117" value="&lt;div style=&quot;text-align: left&quot;&gt;status = send&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="5" y="1110" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="119" value="" style="endArrow=classic;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="300" y="1080" as="sourcePoint"/>
+                        <mxPoint x="110" y="1080" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="120" value="クライアントへのレスポンス" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="1060" width="170" height="20" as="geometry"/>
+                </mxCell>
             </root>
         </mxGraphModel>
     </diagram>
