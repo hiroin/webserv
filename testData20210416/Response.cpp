@@ -511,18 +511,17 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 	setDate(); //Dateヘッダを設定
 	if (isErrorFilePathExist())
 	{
-		if (isErrorFilePathExist())
-		{
-			setContenType();
-			client.status = READ;
-			return ;
-		}
-		else
-		{
-			client.status = SEND;
-			return ;
-		}
+		setContenType();
+		setContentLength();
+		client.status = READ;
+		return ;
 	}
+	else
+	{
+		client.status = SEND;
+		return ;
+	}
+	client.status = SEND;
 }
 
 bool Response::isAcceptLanguageSet()
