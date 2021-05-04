@@ -134,8 +134,7 @@ int http1(Config& c)
       {
         if (!clients[i].receivedData.recvFromSocket())
         {
-          close(clients[i].socketFd);
-          clients[i].socketFd = -1;
+          clients[i].initClient();
           continue;
         }
         {
@@ -149,10 +148,7 @@ int http1(Config& c)
       {
         if (!clients[i].readData.readFromFd())
         {
-          close(clients[i].readFd);
-          close(clients[i].socketFd);
-          clients[i].readFd = -1;
-          clients[i].socketFd = -1;
+          clients[i].initClient();
           continue;
         }
         {
@@ -261,9 +257,7 @@ int http1(Config& c)
             if (int code = clients[i].hmp.isInvalidHeaderValue() != 200)
             {
               ft_dummy_response(code, clients[i].socketFd);
-              // 状態を最初に戻す
-              clients[i].status = PARSE_STARTLINE;
-              clients[i].hmp.clearData();
+            clients[i].initClient();
             }
             if (clients[i].isNeedBody(headers))
             {
@@ -310,11 +304,7 @@ int http1(Config& c)
               || clients[i].hmp.parseHeader(clients[i].receivedData.getExtractedData()) == 400)
             {
               ft_dummy_response(400, clients[i].socketFd);
-              close(clients[i].socketFd);
-              clients[i].status = PARSE_STARTLINE;
-              clients[i].receivedData.clearData();
-              clients[i].hmp.clearData();
-              clients[i].socketFd = -1;
+              clients[i].initClient();
               continue;
             }
           }
@@ -352,9 +342,7 @@ int http1(Config& c)
                 if (int code = clients[i].hmp.isInvalidHeaderValue() != 200)
                 {
                   ft_dummy_response(code, clients[i].socketFd);
-                  // 状態を最初に戻す
-                  clients[i].status = PARSE_STARTLINE;
-                  clients[i].hmp.clearData();
+                  clients[i].initClient();
                 }
                 break;
               }
@@ -364,34 +352,16 @@ int http1(Config& c)
                   || clients[i].hmp.parseHeader(clients[i].receivedData.getExtractedData()) == 400)
                 {
                   ft_dummy_response(400, clients[i].socketFd);
-                  close(clients[i].socketFd);
-                  clients[i].status = PARSE_STARTLINE;
-                  clients[i].receivedData.clearData();
-                  clients[i].hmp.clearData();
-                  clients[i].socketFd = -1;
+                  clients[i].initClient();
                   continue;
                 }
               }
             }
           }
-          else if (code == 400)
+          else if (code == 400 || code == 500)
           {
-            ft_dummy_response(400, clients[i].socketFd);
-            close(clients[i].socketFd);
-            clients[i].status = PARSE_STARTLINE;
-            clients[i].receivedData.clearData();
-            clients[i].hmp.clearData();
-            clients[i].socketFd = -1;
-            continue;
-          }
-          else if (code == 500)
-          {
-            ft_dummy_response(500, clients[i].socketFd);
-            close(clients[i].socketFd);
-            clients[i].status = PARSE_STARTLINE;
-            clients[i].receivedData.clearData();
-            clients[i].hmp.clearData();
-            clients[i].socketFd = -1;
+            ft_dummy_response(code, clients[i].socketFd);
+            clients[i].initClient();
             continue;
           }
         }
@@ -445,18 +415,27 @@ int http1(Config& c)
       }
       if (FD_ISSET(clients[i].socketFd, &writeFds) && clients[i].status == SEND)
       {
-        bool isFinish = clients[i].sc.SendMessage(1024);
-        if (isFinish)
+        try
         {
-          if (clients[i].responseCode != 200)
+          bool isFinish = clients[i].sc.SendMessage(1024);
+          if (isFinish)
           {
-            close(clients[i].socketFd);
-            clients[i].socketFd = -1;
+            if (clients[i].responseCode != 200)
+            {
+              clients[i].initClient();
+            }
+            else
+            {
+              clients[i].status = PARSE_STARTLINE;
+              clients[i].hmp.clearData();
+              clients[i].body.clear();
+            }
           }
-          // 状態を最初に戻す
-          clients[i].status = PARSE_STARTLINE;
-          clients[i].hmp.clearData();
-          clients[i].body.clear();
+        }
+        catch(const std::exception& e)
+        {
+          clients[i].initClient();
+          std::cerr << e.what() << '\n';
         }
       }
     }

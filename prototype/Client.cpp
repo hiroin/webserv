@@ -15,6 +15,49 @@ bool Client::isNeedBody(std::map<std::string, std::string> headers)
   return false;
 }
 
+void Client::initClient()
+{
+  if (socketFd > 0)
+  {
+    close(socketFd);
+    socketFd = -1;
+  }
+  if (readFd > 0)
+  {
+    close(readFd);
+    readFd = -1;
+  }
+  if (writeFd > 0)
+  {
+    close(writeFd);
+    writeFd = -1;
+  }
+  if (pipeReadFd > 0)
+  {
+    close(pipeReadFd);
+    pipeReadFd = -1;
+  }
+  if (pipeWriteFd > 0)
+  {
+    close(pipeWriteFd);
+    pipeWriteFd = -1;
+  }
+  port = -1;
+  host.clear();
+  ip.clear();
+  receivedData.clearData();
+  readData.clearData();
+  hmp.clearData();
+  gc.clear();
+  status = PARSE_STARTLINE;
+  bCGI = false;
+  bChunked = false;
+  responseCode = -1;
+  responseFileSize = 0;
+  responseMessege.clear();
+  body.clear();
+}
+
 Client::Client() : \
   socketFd(-1), readFd(-1), writeFd(-1), pipeReadFd(-1), \
   pipeWriteFd(-1), port(-1), status(PARSE_STARTLINE), \

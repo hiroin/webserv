@@ -55,6 +55,8 @@ class Client
   // ヘッダに「Transfer-Encoding: chunked」があった場合、bChunkedをtrueに変更する
   bool isNeedBody(std::map<std::string, std::string> headers);
 
+  void initClient();
+
   Client();
   ~Client();
   bool operator==(const Client&);
