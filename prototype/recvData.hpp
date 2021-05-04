@@ -20,6 +20,7 @@ class recvData {
   bool readFromFd();
   bool cutOutRecvDataBySpecifyingBytes(size_t size);
   bool cutOutRecvDataToEol();
+  bool recvDataToEof();
   std::string getRecvData() const;
   std::string getExtractedData() const;
 

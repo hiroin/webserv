@@ -158,7 +158,7 @@ int http1(Config& c)
         {
           // デバッグ
           std::cout << "--readData-----------------------------" << std::endl;
-          std::cout << clients[i].readData.getRecvData();
+          std::cout << clients[i].readData.getReadData();
           std::cout << "---------------------------------------" << std::endl;
         }
       }
@@ -416,7 +416,7 @@ int http1(Config& c)
       }
       if (clients[i].status == READ)
       {
-        if (clients[i].readData.cutOutRecvDataBySpecifyingBytes(responses[i]->getContentLength()))
+        if (clients[i].readData.isCompleteRead())
         {
           close(clients[i].readFd);
           clients[i].readFd = -1;          
@@ -426,16 +426,17 @@ int http1(Config& c)
             std::cout << responses[i]->responseMessege << std::endl;
             std::cout << "----------------------------------------" << std::endl;
             std::cout << "--append body---------------------------" << std::endl;
-            std::cout << clients[i].readData.getExtractedData() << std::endl;
+            std::cout << clients[i].readData.getReadData() << std::endl;
             std::cout << "----------------------------------------" << std::endl;
           }
-          responses[i]->AppendBodyOnResponseMessage(clients[i].readData.getExtractedData());
+          responses[i]->AppendBodyOnResponseMessage(clients[i].readData.getReadData());
           {
             // デバッグ
             std::cout << "--responseMessege(after append)--------" << std::endl;
             std::cout << responses[i]->responseMessege << std::endl;
             std::cout << "---------------------------------------" << std::endl;
           }
+          clients[i].readData.clearData();
           clients[i].responseMessege = responses[i]->responseMessege;
           clients[i].sc.setSendData(const_cast<char *>(clients[i].responseMessege.c_str()), responses[i]->responseMessege.size());
           clients[i].status = SEND;

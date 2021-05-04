@@ -72,34 +72,6 @@ bool recvData::cutOutRecvDataBySpecifyingBytes(size_t size)
   return SUCCESS;
 }
 
-// bool recvData::cutOutRecvDataToEol()
-// {
-//   std::string::size_type pos;
-  
-//   pos = recvData_.find("\r\n");
-//   if (pos != std::string::npos)
-//   {
-//     extractedData_ = recvData_.substr(0, pos);
-//     recvData_ = recvData_.substr(pos + 2);
-//     return SUCCESS;
-//   }
-//   pos = recvData_.find("\r");
-//   if (pos != std::string::npos)
-//   {
-//     extractedData_ = recvData_.substr(0, pos);
-//     recvData_ = recvData_.substr(pos + 1);
-//     return SUCCESS;
-//   }
-//   pos = recvData_.find("\n");
-//   if (pos != std::string::npos)
-//   {
-//     extractedData_ = recvData_.substr(0, pos);
-//     recvData_ = recvData_.substr(pos + 1);
-//     return SUCCESS;
-//   }
-//   return FAILURE;
-// }
-
 bool recvData::cutOutRecvDataToEol()
 {
   std::string::size_type pos;

@@ -25,7 +25,8 @@ HTTP1_SOURCE = server.cpp \
 							 sendController.cpp \
 							 ft_make_dummy_response.cpp \
 							 Response.cpp \
-							 ft_inet_ntoa.cpp
+							 ft_inet_ntoa.cpp \
+							 readData.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

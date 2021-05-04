@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include "recvData.hpp"
+#include "readData.hpp"
 #include "HTTPMessageParser.hpp"
 #include "getChunked.hpp"
 #include "sendController.hpp"
@@ -30,7 +31,7 @@ class Client
 
   // 各種処理をするためのclass
   recvData receivedData;
-  recvData readData;
+  readData readData;
   HTTPMessageParser hmp;
   getChunked gc;
   SendController sc;
