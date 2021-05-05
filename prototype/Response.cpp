@@ -167,6 +167,7 @@ bool isMatchLanguageRange(std::string::iterator &itr)
 	return true;
 }
 
+
 bool Response::isMatchAcceptLanguageFromat(std::string src)
 {
 	std::string::iterator itr = src.begin();
@@ -463,7 +464,7 @@ std::string Base64Encode(std::string szStr)
 	char *szEnc;
 	int iLen, i, j;
 	iLen = szStr.size();
-	szEnc = new char [(int)((float)iLen * 1.5)];
+	szEnc = new char [(int)((float)iLen * 1.5 + 4)];
 
 	j = 0;
 	for(i = 0; i < (iLen - (iLen % 3));  i+=3)
@@ -497,7 +498,7 @@ std::string Base64Encode(std::string szStr)
 	}
 	szEnc[j + 4] = '\0';
 	std::string ret = std::string(szEnc);
-	delete szEnc;
+	delete [] szEnc;
 	return (ret);
 
 }
@@ -520,7 +521,7 @@ std::string Response::getEncodedServerCredential()
 
 bool Response::isRequestMatchAuth()
 {
-	std::string Authorization = client.hmp.headers_["Authorization"];
+	std::string Authorization = client.hmp.headers_[std::string("authorization")];
 	std::string Type;
 	std::string credential;
 	std::string EncodedServerCredential;
@@ -567,6 +568,96 @@ void Response::setWWWAuthenticate()
 	responseMessege.append(std::string("\r\n"));
 }
 
+bool Response::isAcceptCharsetSet()
+{
+	return (client.hmp.headers_[std::string("accept-charset")].size() != 0);
+}
+
+bool isMatchCharset(std::string::iterator &itr)
+{
+	while(isdigit(*itr) || isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
+				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
+	{
+		++itr;
+	}
+	if (!(isprint(*itr)) && *itr != '\0') return false; //非表示文字が入ってたらreturn
+	return true;
+}
+
+bool Response::isMatchAcceptCharsetFromat(std::string src)
+{
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while(itr != last)
+	{
+		int count = 0;
+		if (!isMatchCharset(itr))
+			return false;
+		//ここまでで、langeage-rangeが回収できたとする
+		//次は、オプションの有無を確かめる
+		if (*itr == ';') //オプションのチェック
+		{
+			++itr;
+			if (!isMatchOption(itr))
+				return (false);
+		}
+		//オプションまで見たので、ブレイクを取り除く処理
+		skipBreak(itr);
+	}
+	return (true);
+}
+
+void getAcceptCharset(std::map<std::string, std::vector<std::string> >& AcceptCharsetMap, std::string::iterator &itr)
+{
+	std::string Charset;
+	std::string qValue = "1";
+	while(isdigit(*itr) || isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
+				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
+	{
+		Charset.push_back(*itr);
+		++itr;
+	}
+	if (*itr == ';')
+	{
+		qValue.clear();
+		++itr;
+		++itr;
+		++itr;
+		while (isdigit(*itr) || *itr == '.')
+		{
+			qValue.push_back(*itr);
+			++itr;
+		}
+	}
+	AcceptCharsetMap[qValue].push_back(Charset);
+	skipBreak(itr);
+}
+
+
+std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(std::string src)
+{
+	//ここに入ってくる時点で、Accept-Languageの形式は満たしていることが決定している
+	std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while (itr != last)
+	{
+		getAcceptCharset(AcceptLanguageMap, itr);
+	}
+	return AcceptLanguageMap;
+}
+
+
+/**
+ * Accept-Charset = 1#( ( charset / "*" ) [ weight ] )
+ * charset == 1*tchar
+
+	tchar          = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+				/ "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+				/ DIGIT / ALPHA
+               ; 区切子を除く，任意の VCHAR
+ * **/
+
 Response::Response(Client &client, Config &config) : client(client), config(config)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
@@ -585,9 +676,17 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	/* メソッドが許可されているかを判断 */
 	if (isMethodAllowed())
 	{
+		if (isAcceptCharsetSet())
+		{
+			std::string AcceptCharsetValue = client.hmp.headers_[std::string("accept-charset")];
+			if(isMatchAcceptCharsetFromat(AcceptCharsetValue))
+			{
+				AcceptCharsetMap = parseAcceptCharset(AcceptCharsetValue);
+			}
+		}
 		if (isAcceptLanguageSet())
 		{
-			std::string AcceptLanguageValue = client.hmp.headers_[std::string("Accept-Language")];
+			std::string AcceptLanguageValue = client.hmp.headers_[std::string("accept-language")];
 			if(isMatchAcceptLanguageFromat(AcceptLanguageValue))
 			{
 				AcceptLanguageMap = parseAcceptLanguage(AcceptLanguageValue);
@@ -642,7 +741,7 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 
 bool Response::isAcceptLanguageSet()
 {
-	return (client.hmp.headers_[std::string("Accept-Language")].size() != 0);
+	return (client.hmp.headers_[std::string("accept-language")].size() != 0);
 }
 
 bool	Response::isMethodAllowed()
@@ -777,6 +876,8 @@ int isTheFileExist(std::string targetFile)
 	}
 }
 
+//先にc
+
 int Response::isLanguageFileExist(std::string SerachFileAbsolutePath)
 {
 	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptLanguageMap.rbegin();
@@ -821,14 +922,101 @@ void Response::setContentLanguage()
 	return ;
 }
 
+int Response::isCharsetFileExist(std::string SerachFileAbsolutePath)
+{
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptCharsetMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptCharsetMap.rend();
+	while(first != last)
+	{
+		int statusNo;
+		std::string targetFile;
+		std::vector<std::string> Charset = first->second;
+		for(int i = 0; i < Charset.size(); i++)
+		{
+			targetFile = SerachFileAbsolutePath + "." + Charset[i];
+			statusNo = isTheFileExist(targetFile);
+			switch (statusNo)
+			{
+			case 200:
+				this->targetFilePath = targetFile; //見つかったら、filePath変更してreturn
+				return (statusNo);
+				break;
+			case 403: //Permittion Denied だったらreturn
+				return (statusNo);
+			default:
+				continue;
+				break;
+			}
+		}
+		++first;
+	}
+	return (406); //見つからなかったら406
+}
+int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
+{
+	std::map<std::string, std::vector<std::string> >::reverse_iterator Cfirst = AcceptCharsetMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator Clast = AcceptCharsetMap.rend();
+
+	while (Cfirst != Clast)
+	{
+		int statusNo;
+		std::vector<std::string> Charset = Cfirst->second;
+		std::string targetFileWithCharset;
+
+		for(int i = 0; i < Charset.size(); i++)
+		{
+			targetFileWithCharset = SerachFileAbsolutePath + "." + Charset[i]; // Charsetつけた
+
+			std::map<std::string, std::vector<std::string> >::reverse_iterator Lfirst = AcceptLanguageMap.rbegin();
+			std::map<std::string, std::vector<std::string> >::reverse_iterator Llast = AcceptLanguageMap.rend();
+			while(Lfirst != Llast)
+			{
+				std::vector<std::string> Languages = Lfirst->second;
+				for(int i = 0; i < Languages.size(); i++)
+				{
+					std::string targetFile;
+					if (Languages[i] == "*")
+						targetFile = targetFileWithCharset;
+					else
+						targetFile = targetFileWithCharset + "." + Languages[i];
+					statusNo = isTheFileExist(targetFile);
+					switch (statusNo)
+					{
+					case 200:
+						this->targetFilePath = targetFile; //見つかったら、filePath変更してreturn
+						return (statusNo);
+						break;
+					case 403: //Permittion Denied だったらreturn
+						return (statusNo);
+					default:
+						continue;
+					}
+				}
+				++Lfirst;
+			}
+		}
+		++Cfirst;
+	}
+	return (406); //見つからなかったら406
+}
+
+
 int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
 {
 	/**
 	 * Accept-Language を回していく、それで発見できなかったら406
 	 * **/
-	if (AcceptLanguageMap.size() != 0) //AcceptLanguageがあったらその要素分回して、returnさせる
+	if (AcceptLanguageMap.size() != 0 && AcceptCharsetMap.size() == 0) //AcceptLanguageはあるけど、AcceptCharsetはない
 	{
 		return(isLanguageFileExist(SerachFileAbsolutePath));
+	}
+	else if (AcceptLanguageMap.size() == 0 && AcceptCharsetMap.size() != 0) //AcceptLanguageはないけど、AcceptCharsetはある
+	{
+		return(isCharsetFileExist(SerachFileAbsolutePath));
+	}
+	else if (AcceptLanguageMap.size() != 0 && AcceptCharsetMap.size() != 0) //AcceptLanguageもあるし、AcceptCharsetもある
+	{
+		return (isCharsetAndLanguageFileExist(SerachFileAbsolutePath));
 	}
 	this->targetFilePath = SerachFileAbsolutePath;
 	return(isTheFileExist(SerachFileAbsolutePath));
@@ -953,6 +1141,70 @@ bool Response::isLanguageFile(std::string FilePath, std::string fileExtention)
 	return (false);
 }
 
+bool Response::isCharsetFile(std::string FilePath, std::string fileExtention)
+{
+	if(AcceptCharsetMap.size() == 0)
+		return(false);
+
+	//LanguageFile だったら、AcceptLanguageMapに該当する奴がいないかチェックしていって、あったらtrueを返す
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptCharsetMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptCharsetMap.rend();
+	while (first != last)
+	{
+		std::vector<std::string> values = first->second;
+		for(int i = 0; i < values.size(); i++)
+		{
+			if (values[i] == fileExtention)
+			{
+				return (true);
+			}
+		}
+		++first;
+	}
+	return (false);
+}
+std::string Response::removeLanguageAndCharsetFileExtention()
+{
+	std::string fileExtention = getFileExtention(targetFilePath);
+	//このsubに該当する言語が入っているかを確認する。いたら切り取って、もう一個拡張子取りに行く
+
+	if (isLanguageFile(targetFilePath, fileExtention))
+	{
+		std::string LanguageRemoved = targetFilePath.substr(0, targetFilePath.size() - fileExtention.size() - 1);
+		fileExtention = getFileExtention(LanguageRemoved);
+		if (isCharsetFile(LanguageRemoved, fileExtention))
+		{
+			std::string CharsetRemoved = LanguageRemoved.substr(0, LanguageRemoved.size() - fileExtention.size() - 1);
+			fileExtention = getFileExtention(CharsetRemoved);
+		}
+	}
+	else if (isCharsetFile(targetFilePath, fileExtention))
+	{
+		std::string CharsetRemoved = targetFilePath.substr(0, targetFilePath.size() - fileExtention.size() - 1);
+		fileExtention = getFileExtention(CharsetRemoved);
+	}
+	return (fileExtention);
+}
+
+std::string Response::getCharsetExtention()
+{
+	std::string fileExtention = getFileExtention(targetFilePath);
+	if (isLanguageFile(targetFilePath, fileExtention))
+	{
+		std::string LanguageRemoved = targetFilePath.substr(0, targetFilePath.size() - fileExtention.size() - 1);
+		fileExtention = getFileExtention(LanguageRemoved);
+		if (isCharsetFile(targetFilePath, fileExtention))
+			return fileExtention;
+		else
+			return "";
+	}
+	else if (isCharsetFile(targetFilePath, fileExtention))
+	{
+		fileExtention = getFileExtention(targetFilePath);
+		return fileExtention;
+	}
+	return ("");
+}
 
 void Response::setContenType()
 {
@@ -962,21 +1214,24 @@ void Response::setContenType()
 	 * **/
 	std::map<int, std::string> ContentTypeMap;
 	setResponseMap(ContentTypeMap);
-	std::string fileExtention = getFileExtention(targetFilePath);
 
-	//このsubに該当する言語が入っているかを確認する。いたら切り取って、もう一個拡張子取りに行く
-	if (isLanguageFile(targetFilePath, fileExtention))
-	{
-		std::string LanguageRemoved = targetFilePath.substr(0, targetFilePath.size() - fileExtention.size() - 1);
-		fileExtention = getFileExtention(LanguageRemoved);
-	}
+	std::string charsetFileExtention = getCharsetExtention();
+
+	std::string fileExtention = removeLanguageAndCharsetFileExtention();
+
 	responseMessege.append("Content-Type: ");
 	std::string ContentType = GetContentType(fileExtention);
 	if (ContentType == "")
-		responseMessege.append(std::string("application/octet-stream") + "\r\n");
+		responseMessege.append(std::string("application/octet-stream"));
 	else
-		responseMessege.append(ContentType + "\r\n");
-
+		responseMessege.append(ContentType);
+	//AcceptCharset を考えようか
+	if (charsetFileExtention != "")
+	{
+		responseMessege.append(std::string("; "));
+		responseMessege.append(std::string("charset=") + charsetFileExtention);
+	}
+	responseMessege.append(std::string("\r\n"));
 }
 
 void Response::setContentLength()

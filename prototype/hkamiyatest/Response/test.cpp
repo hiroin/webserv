@@ -8,7 +8,7 @@ https://docs.google.com/spreadsheets/d/1LNw2mvutl0X-ehI2lNGltf06Z1zOF04SorS-GIM8
 
 int main()
 {
-  const char* configfile = "../../googletest/testcase/018_basicauth.conf";
+  const char* configfile = "/home/user42/42/webserv/yiwasa/webserv/prototype/googletest/testcase/018_basicauth.conf";
 	Config config_;
   Client client_;
   parseConfig(configfile, config_);
