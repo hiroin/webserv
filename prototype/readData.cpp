@@ -54,6 +54,44 @@ void readData::setReadData(std::string data)
   readData_ = data;
 }
 
+bool readData::cutOutRecvDataToEol()
+{
+  std::string::size_type pos;
+
+  for (std::string::iterator itr = readData_.begin(); itr != readData_.end(); itr++)
+  {
+    if (*itr == '\n')
+    {
+      pos = readData_.find("\n");
+      extractedData_ = readData_.substr(0, pos);
+      readData_ = readData_.substr(pos + 1);
+      return SUCCESS;
+    }
+    else if (*itr == '\r')
+    {
+      pos = readData_.find("\r");
+      if (readData_.size() >= pos && readData_[pos + 1] == '\n')
+      {
+        extractedData_ = readData_.substr(0, pos);
+        readData_ = readData_.substr(pos + 2);
+        return SUCCESS;
+      }
+      else
+      {
+        extractedData_ = readData_.substr(0, pos);
+        readData_ = readData_.substr(pos + 1);
+        return SUCCESS;
+      }
+    }
+  }
+  return FAILURE;
+}
+
+std::string readData::getExtractedData() const
+{
+  return extractedData_;
+}
+
 readData::readData() : completeRead_(false)
 {
 

@@ -19,6 +19,8 @@ class readData {
   bool readFromFd();
   bool isCompleteRead() const;
   std::string getReadData() const;
+  bool cutOutRecvDataToEol();
+  std::string getExtractedData() const;
 
   // デバッグ用
   void setReadData(std::string data);
@@ -31,6 +33,7 @@ class readData {
   int fd_;
   bool completeRead_;
   std::string readData_;
+  std::string extractedData_;
 
 };
 
