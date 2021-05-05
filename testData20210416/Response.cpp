@@ -464,7 +464,7 @@ std::string Base64Encode(std::string szStr)
 	char *szEnc;
 	int iLen, i, j;
 	iLen = szStr.size();
-	szEnc = new char [(int)((float)iLen * 1.5)];
+	szEnc = new char [(int)((float)iLen * 1.5 + 4)];
 
 	j = 0;
 	for(i = 0; i < (iLen - (iLen % 3));  i+=3)
@@ -498,7 +498,7 @@ std::string Base64Encode(std::string szStr)
 	}
 	szEnc[j + 4] = '\0';
 	std::string ret = std::string(szEnc);
-	delete szEnc;
+	delete [] szEnc;
 	return (ret);
 
 }
