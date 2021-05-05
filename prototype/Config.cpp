@@ -82,6 +82,7 @@ void Config::printConfig()
   std::cout << "コンフィグ設定" << std::endl;
   std::cout << "Global" << std::endl;
   std::cout << " phpCgiPath        : " << configGlobal.phpCgiPath << std::endl;
+  std::cout << " cgitesterPath     : " << configGlobal.cgitesterPath << std::endl;
   printCommonConfig(configGlobal.configCommon);
   std::cout << std::endl;
 

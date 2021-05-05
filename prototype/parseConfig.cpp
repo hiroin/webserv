@@ -397,6 +397,21 @@ bool parseConfig::insertToConfigClass(Config& c)
       if (itr->values.at(0).value.size() >= 2)
         throw std::runtime_error("Config Error : invalid php-cgi_path");
       c.configGlobal.phpCgiPath = itr->values.at(0).value.at(0);
+      int fp = open(c.configGlobal.phpCgiPath.c_str(), O_RDONLY);
+      if (fp == -1)
+        throw std::runtime_error("Config Error : cannot open php-cgi");
+      close(fp);
+      continue;
+    }
+    if (itr->key == "cgi_tester_path")
+    {
+      if (itr->values.at(0).value.size() >= 2)
+        throw std::runtime_error("Config Error : cgi_tester_path");
+      c.configGlobal.cgitesterPath = itr->values.at(0).value.at(0);
+      int fp = open(c.configGlobal.cgitesterPath.c_str(), O_RDONLY);
+      if (fp == -1)
+        throw std::runtime_error("Config Error : cannot open cgi_tester");
+      close(fp);
       continue;
     }
     if (insertAutoindex(itr, tmpConfigCommon.autoindex))

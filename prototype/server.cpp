@@ -1,40 +1,36 @@
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <iostream>
-#include <algorithm>
-#include <errno.h>
-#include <string>
-#include <vector>
-#include <ctime>
-#include <cstring>
+#include "server.hpp"
 
-#include "Socket.hpp"
-#include "recvData.hpp"
-#include "HTTPMessageParser.hpp"
-#include "Client.hpp"
-#include "Config.hpp"
-#include "parseConfig.hpp"
-#include "getChunked.hpp"
-#include "ft.hpp"
-#include "Response.hpp"
+// 第一引数と第二引数で与えられるポートとホストの組み合わせがportAndHostCombinationにいない場合trueを返す
+static bool notBeCreatedSocket(int port, std::string host, std::vector<portAndHost>& portAndHostCombination)
+{
+  for (std::vector<portAndHost>::iterator itrPortAndHost = portAndHostCombination.begin();
+    itrPortAndHost != portAndHostCombination.end();
+    itrPortAndHost++
+  )
+  {
+    if (port == itrPortAndHost->port && host == itrPortAndHost->host)
+      return false;
+  }
+  portAndHost tmp;
+  tmp.port = port;
+  tmp.host = host;
+  portAndHostCombination.push_back(tmp);
+  return true;
+}
 
 int http1(Config& c)
 {
-  
   std::vector<Socket> servers;
   try
   {
+    std::vector<portAndHost> portAndHostCombination;
     for (std::vector<s_ConfigServer>::iterator itr = c.configGlobal.servers.begin();
       itr != c.configGlobal.servers.end();
       itr++
     )
     {
-      servers.push_back(Socket(itr->port, itr->host));
+      if (notBeCreatedSocket(itr->port, itr->host, portAndHostCombination))
+        servers.push_back(Socket(itr->port, itr->host));
     }
   }
   catch(const std::exception& e)

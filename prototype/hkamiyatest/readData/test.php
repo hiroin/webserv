@@ -1,0 +1,1 @@
+<?php echo "php-script" . PHP_EOL;
