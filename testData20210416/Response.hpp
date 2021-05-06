@@ -61,6 +61,8 @@ class Response
 
 		std::string responseMessege;
 		std::string targetFilePath;
+		std::string AutoIndexContent;
+		bool isAutoIndexApply;
 		// std::string errorFilePath;
 		/**
 		 * Accept-Language
@@ -127,6 +129,13 @@ class Response
 		bool isCharsetFile(std::string FilePath, std::string fileExtention);
 		int isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath);
 		std::string getCharsetExtention();
+		bool isAutoIndex();
+		bool isDirectoryAvailable();
+		void getAutoIndexContent();
+		bool isDirectory(std::string name);
+		std::vector<std::string> getDirectoryContents();
+		std::string makeATag(std::string dataName);
+		void	makeAutoIndexResponse();
 		/*===============HTTPstatus===============*/
 
 
