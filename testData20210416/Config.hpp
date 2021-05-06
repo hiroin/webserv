@@ -20,6 +20,7 @@ struct s_ConfigCommon
   int clientMaxBodySize;
   std::map<std::string, std::string> errorPages;
   std::vector<std::string> indexs;
+  std::string uploadPath;
   s_ConfigCommon();
   bool operator==(const s_ConfigCommon&) const;
   bool operator!=(const s_ConfigCommon&) const;
