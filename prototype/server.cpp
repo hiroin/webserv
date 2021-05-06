@@ -40,14 +40,12 @@ int http1(Config& c)
   }
   Client clients[MAX_SESSION];
   Response *responses[MAX_SESSION];
-
   fd_set readFds;
   fd_set writeFds;
   int maxFd = 0; // [やること]起動時fdの上限をチェックする
-  // selectのタイムアウト用
-  int selectReturn;
+  int selectReturn; // selectのタイムアウト用
   struct timeval tvForSelect;
-  long j = 0; // 動作確認用
+  unsigned long j = 0; // DEBUG用カウンタ動作確認用
   while (1)
   {
     std::cout << "[DEBUG]" << j++ << "回目\n";
@@ -457,13 +455,28 @@ int http1(Config& c)
 
 int main(int argc, char *argv[])
 {
-  if (argc != 2)
+  if (argc != 2 && argc != 3)
   {
     std::cout << "Usage: ./server [configfile]" << std::endl;
     return 1;
   }
   Config c;
-  // c.printConfig(); // Config内容の出力
+  if (argc == 3 && (std::string(argv[2]) == "1" || std::string(argv[2]) == "2"))
+  {
+    switch (argv[2][0])
+    {
+    case '1':
+      c.setDebugLevel(1);
+      break;
+    case '2':
+      c.setDebugLevel(1);
+      break;
+    default:
+      break;
+    }
+  }
+  if (c.getDebugLevel() == 1)
+    c.printConfig();
   try
   {
     parseConfig(argv[1], c);

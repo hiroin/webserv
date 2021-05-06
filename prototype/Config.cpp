@@ -108,7 +108,17 @@ void Config::printConfig()
   }
 }
 
-Config::Config()
+void Config::setDebugLevel(int level)
+{
+  debugLevel_ = level;
+}
+
+int Config::getDebugLevel() const
+{
+  return debugLevel_;
+}
+
+Config::Config() : debugLevel_(0)
 {
 
 };

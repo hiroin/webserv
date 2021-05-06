@@ -64,6 +64,8 @@ class Config
 {
  public:
   s_ConfigGlobal configGlobal;
+  void setDebugLevel(int level);
+  int getDebugLevel() const;
   void printConfig(); // Output for debugging
   Config();
   Config(int testPattern);
@@ -72,6 +74,7 @@ class Config
 
  private:
   char *configFile_;
+  int debugLevel_;
   Config(const Config&);
   Config& operator=(const Config&);
   void printCommonConfig(s_ConfigCommon& c) const;
