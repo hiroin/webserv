@@ -566,6 +566,7 @@ void Response::setWWWAuthenticate()
 	responseMessege.append(std::string("basic "));
 	responseMessege.append(std::string("realm=") + "\"" + getConfigCommon().authBasicRealm + "\"");
 	responseMessege.append(std::string("\r\n"));
+	responseMessege.append(std::string("Content-Length: 0\r\n"));
 }
 
 bool Response::isAcceptCharsetSet()

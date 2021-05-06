@@ -142,7 +142,7 @@ int http1(Config& c)
       }
       if (FD_ISSET(clients[i].readFd, &readFds))
       {
-        if (!clients[i].readData.readFromFd())
+        if (!clients[i].readDataFromFd.readFromFd())
         {
           clients[i].initClient();
           continue;
@@ -150,7 +150,7 @@ int http1(Config& c)
         {
           // デバッグ
           std::cout << "--readData-----------------------------" << std::endl;
-          std::cout << clients[i].readData.getReadData();
+          std::cout << clients[i].readDataFromFd.getReadData();
           std::cout << "---------------------------------------" << std::endl;
         }
       }
@@ -171,7 +171,7 @@ int http1(Config& c)
             if (clients[i].status == READ)
             {
               clients[i].readFd = responses[i]->getTargetFileFd();
-              clients[i].readData.setFd(clients[i].readFd);
+              clients[i].readDataFromFd.setFd(clients[i].readFd);
             }
             else if (clients[i].status == SEND)
             {
@@ -210,7 +210,7 @@ int http1(Config& c)
             if (clients[i].status == READ)
             {
               clients[i].readFd = responses[i]->getTargetFileFd();
-              clients[i].readData.setFd(clients[i].readFd);
+              clients[i].readDataFromFd.setFd(clients[i].readFd);
               clients[i].responseCode = 400;
             }
             else if (clients[i].status == SEND)
@@ -269,19 +269,28 @@ int http1(Config& c)
             {
               // Responseクラスを組み込み
               responses[i] = new Response(clients[i], c);
-              clients[i].responseCode = responses[i]->ResponseStatus;
-              clients[i].readFd = responses[i]->getTargetFileFd();
-              clients[i].readData.setFd(clients[i].readFd);
               {
                 // デバッグ
                 std::cout << "--responceData-------------------------" << std::endl;
-                std::cout << "response_code  : " << clients[i].responseCode << std::endl;
+                std::cout << "response_code  : " << responses[i]->ResponseStatus << std::endl;
                 std::cout << "file_path      : " << responses[i]->targetFilePath << std::endl;
                 std::cout << "file_length    : " << responses[i]->getContentLength() << std::endl;
-                std::cout << "open_fd        : " << clients[i].readFd << std::endl;
+                std::cout << "open_fd        : " << responses[i]->getTargetFileFd();
                 std::cout << "client_status  : " << clients[i].status << std::endl;
                 std::cout << "responseMessege  " << std::endl << responses[i]->responseMessege << std::endl;
                 std::cout << "---------------------------------------" << std::endl;
+              }
+              clients[i].responseCode = responses[i]->ResponseStatus;
+              if (clients[i].status == READ)
+              {
+                clients[i].readFd = responses[i]->getTargetFileFd();
+                clients[i].readDataFromFd.setFd(clients[i].readFd);
+              }
+              else if (clients[i].status == SEND)
+              {
+                clients[i].responseMessege = responses[i]->responseMessege;
+                delete responses[i];
+                clients[i].sc.setSendData(const_cast<char *>(clients[i].responseMessege.c_str()), responses[i]->responseMessege.size());              
               }
               // delete responses[i];
               // responses[i] = NULL;
@@ -382,7 +391,7 @@ int http1(Config& c)
       }
       if (clients[i].status == READ)
       {
-        if (clients[i].readData.isCompleteRead())
+        if (clients[i].readDataFromFd.isCompleteRead())
         {
           close(clients[i].readFd);
           clients[i].readFd = -1;          
@@ -392,17 +401,17 @@ int http1(Config& c)
             std::cout << responses[i]->responseMessege << std::endl;
             std::cout << "----------------------------------------" << std::endl;
             std::cout << "--append body---------------------------" << std::endl;
-            std::cout << clients[i].readData.getReadData() << std::endl;
+            std::cout << clients[i].readDataFromFd.getReadData() << std::endl;
             std::cout << "----------------------------------------" << std::endl;
           }
-          responses[i]->AppendBodyOnResponseMessage(clients[i].readData.getReadData());
+          responses[i]->AppendBodyOnResponseMessage(clients[i].readDataFromFd.getReadData());
           {
             // デバッグ
             std::cout << "--responseMessege(after append)--------" << std::endl;
             std::cout << responses[i]->responseMessege << std::endl;
             std::cout << "---------------------------------------" << std::endl;
           }
-          clients[i].readData.clearData();
+          clients[i].readDataFromFd.clearData();
           clients[i].responseMessege = responses[i]->responseMessege;
           clients[i].sc.setSendData(const_cast<char *>(clients[i].responseMessege.c_str()), responses[i]->responseMessege.size());
           clients[i].status = SEND;

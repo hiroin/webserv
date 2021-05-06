@@ -12,12 +12,12 @@ int main()
 	Config config_;
   Client client_;
   parseConfig(configfile, config_);
-  client_.port = 8080;
+  client_.port = 8082;
   client_.host = "*";
   client_.hmp.method_ = httpMessageParser::GET;
   client_.hmp.absolutePath_ = "/index.html";
   client_.hmp.headers_["host"] = "127.0.0.1";
-  client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
+  client_.hmp.headers_["authorization"] = "Basic dXNlcjrjgYI=";
   Response Response(client_, config_);
      
   int ResponseStatus = Response.ResponseStatus;

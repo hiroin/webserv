@@ -17,6 +17,7 @@ struct s_ConfigCommon
   std::string autoindex;
   std::vector<std::string> allowMethods;
   bool allowMethodsBool[METHOD_NUM];
+  std::string authBasicFile;
   std::string authBasicRealm;
   std::string authBasicUid;
   std::string authBasicPassword;

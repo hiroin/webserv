@@ -105,7 +105,7 @@ void parseConfig::printToken()
       }
       std::cout << "token: " << itr->token.c_str();
     }
-    // std::cout << std::endl;
+    std::cout << std::endl;
   }
 }
 
@@ -418,10 +418,12 @@ bool parseConfig::insertToConfigClass(Config& c)
       continue;
     if (insertAllowMethods(itr, tmpConfigCommon.allowMethods, tmpConfigCommon.allowMethodsBool))
       continue;
-    if (insertAuthBasicInfo(itr, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
+    if (insertAuthBasicFile(itr, tmpConfigCommon.authBasicFile, tmpConfigCommon.authBasicRealm, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
       continue;
-    if (insertAuthBasicRealm(itr, tmpConfigCommon.authBasicRealm))
-      continue;
+    // if (insertAuthBasicInfo(itr, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
+    //   continue;
+    // if (insertAuthBasicRealm(itr, tmpConfigCommon.authBasicRealm))
+    //   continue;
     if (insertCgiScript(itr, tmpConfigCommon.cgiScripts))
       continue;
     if (insertClientMaxBodySize(itr, tmpConfigCommon.clientMaxBodySize))
@@ -455,10 +457,12 @@ bool parseConfig::insertToConfigClass(Config& c)
         continue;
       if (insertAllowMethods(itr, tmpConfigServer.configCommon.allowMethods, tmpConfigServer.configCommon.allowMethodsBool))
         continue;
-      if (insertAuthBasicInfo(itr, tmpConfigServer.configCommon.authBasicUid, tmpConfigServer.configCommon.authBasicPassword))
+      if (insertAuthBasicFile(itr, tmpConfigCommon.authBasicFile, tmpConfigCommon.authBasicRealm, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
         continue;
-      if (insertAuthBasicRealm(itr, tmpConfigServer.configCommon.authBasicRealm))
-        continue;
+      // if (insertAuthBasicInfo(itr, tmpConfigServer.configCommon.authBasicUid, tmpConfigServer.configCommon.authBasicPassword))
+      //   continue;
+      // if (insertAuthBasicRealm(itr, tmpConfigServer.configCommon.authBasicRealm))
+      //   continue;
       if (insertCgiScript(itr, tmpConfigServer.configCommon.cgiScripts))
         continue;
       if (insertClientMaxBodySize(itr, tmpConfigServer.configCommon.clientMaxBodySize))
@@ -488,10 +492,12 @@ bool parseConfig::insertToConfigClass(Config& c)
           continue;
         if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods, tmpConfigLocation.configCommon.allowMethodsBool))
           continue;
-        if (insertAuthBasicInfo(itr, tmpConfigLocation.configCommon.authBasicUid, tmpConfigLocation.configCommon.authBasicPassword))
+        if (insertAuthBasicFile(itr, tmpConfigCommon.authBasicFile, tmpConfigCommon.authBasicRealm, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
           continue;
-        if (insertAuthBasicRealm(itr, tmpConfigLocation.configCommon.authBasicRealm))
-          continue;          
+        // if (insertAuthBasicInfo(itr, tmpConfigLocation.configCommon.authBasicUid, tmpConfigLocation.configCommon.authBasicPassword))
+        //   continue;
+        // if (insertAuthBasicRealm(itr, tmpConfigLocation.configCommon.authBasicRealm))
+        //   continue;          
         if (insertCgiScript(itr, tmpConfigLocation.configCommon.cgiScripts))
           continue;
         if (insertClientMaxBodySize(itr, tmpConfigLocation.configCommon.clientMaxBodySize))
@@ -648,6 +654,89 @@ bool parseConfig::insertAllowMethods(contextIterator itr, std::vector<std::strin
   return false;
 }
 
+bool parseConfig::insertAuthBasicFile(
+  contextIterator itr, std::string& authBasicFile, \
+  std::string& authBasicRealm, std::string& authBasicUid, std::string& authBasicPassword)
+{
+  if (itr->key == "auth_basic_file")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie auth_basic_file");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid auth_basic_file");
+    authBasicFile = itr->values.at(0).value.at(0);
+    // std::cout << "[DEBUG]auth_file : " << authBasicFile << std::endl;
+    int fd = open(authBasicFile.c_str(), O_RDONLY);
+    if (fd == -1)
+    {
+      std::string errorMessage = "Config Error : cannot open auth_basic_file ";
+      errorMessage += authBasicFile;
+      throw std::runtime_error(errorMessage);
+    }
+    int r;
+    std::string contentsOfFile;
+    char buf[1024];
+    int i_for_buf = 0;
+    while (i_for_buf < 1024)
+      buf[i_for_buf++] = 0;
+    while ((r = read(fd, buf, 1023)) > 0)
+    {
+      contentsOfFile.append(buf);
+      i_for_buf = 0;
+      while (i_for_buf < 1024)
+        buf[i_for_buf++] = 0;
+    }
+    if (r == -1)
+    {
+      std::string errorMessage = "Config Error : cannot read auth_basic_file ";
+      errorMessage += authBasicFile;
+      r = close(fd);
+      throw std::runtime_error(errorMessage);
+    }
+    r = close(fd);
+    if (r == -1)
+    {
+      std::string errorMessage = "Config Error : cannot close auth_basic_file ";
+      errorMessage += authBasicFile;
+      throw std::runtime_error(errorMessage);
+    }    
+    size_t pos = contentsOfFile.find("\n");
+    if (pos == std::string::npos)
+    {
+      std::string errorMessage = "Config Error : not found realm or user_id:password in auth_basic_file ";
+      errorMessage += authBasicFile;
+      throw std::runtime_error(errorMessage);
+    }
+    authBasicRealm = contentsOfFile.substr(0, pos);
+    // std::cout << "[DEBUG]authBasicRealm : " << authBasicRealm << std::endl;
+    if (authBasicRealm == "")
+    {
+      std::string errorMessage = "Config Error : realm is empty in auth_basic_file ";
+      errorMessage += authBasicFile;
+      throw std::runtime_error(errorMessage);
+    }
+    contentsOfFile = contentsOfFile.substr(pos + 1);
+    pos = contentsOfFile.find("\n");
+    if (pos != std::string::npos)
+    {
+      contentsOfFile = contentsOfFile.substr(0, pos);
+    }
+    pos = contentsOfFile.find(":");
+    if (pos == std::string::npos || pos == 0)
+   {
+      std::string errorMessage = "Config Error : invalid user_id:password of auth_basic_file ";
+      errorMessage += authBasicFile;
+      throw std::runtime_error(errorMessage);
+    }
+    authBasicUid = contentsOfFile.substr(0, pos);
+    authBasicPassword = contentsOfFile.substr(pos + 1);    
+    // std::cout << "[DEBUG]authBasicUid : [" << authBasicUid << "]" << std::endl;
+    // std::cout << "[DEBUG]authBasicPassword : [" << authBasicPassword << "]" << std::endl;
+    return true;
+  }
+  return false;
+}
+
 bool parseConfig::insertAuthBasicRealm(contextIterator itr, std::string& authBasicRealm)
 {
   if (itr->key == "auth_basic")
@@ -671,6 +760,7 @@ bool parseConfig::insertAuthBasicInfo(contextIterator itr, std::string& authBasi
       throw std::runtime_error("Config Error : duplicatie auth_basic");
     if (itr->values.at(0).value.size() >= 2)
       throw std::runtime_error("Config Error : invalid auth_basic");
+    // std::cout << "[DEBUG]authBasicUidPassword : " << itr->values.at(0).value.at(0) << std::endl;
     size_t pos = itr->values.at(0).value.at(0).find(":");
     if (pos == std::string::npos || pos == 0)
       throw std::runtime_error("Config Error : invalid auth_basic");
@@ -1005,7 +1095,7 @@ parseConfig::parseConfig(const char *configFile, Config& c)
   }
   {
     // デバッグ用出力
-    // c.printConfig();
+    c.printConfig();
   }
 }
 

@@ -18,7 +18,8 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../getChunked.cpp \
 	../Response.cpp \
   ../Config.cpp \
-	../parseConfig.cpp
+	../parseConfig.cpp \
+	../readData.cpp
 
 .PHONY: all clean
 

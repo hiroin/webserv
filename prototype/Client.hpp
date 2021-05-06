@@ -31,7 +31,7 @@ class Client
 
   // 各種処理をするためのclass
   recvData receivedData;
-  readData readData;
+  readData readDataFromFd;
   HTTPMessageParser hmp;
   getChunked gc;
   SendController sc;

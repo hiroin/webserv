@@ -46,7 +46,7 @@ void Client::initClient()
   host.clear();
   ip.clear();
   receivedData.clearData();
-  readData.clearData();
+  readDataFromFd.clearData();
   hmp.clearData();
   gc.clear();
   status = PARSE_STARTLINE;

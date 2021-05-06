@@ -110,6 +110,13 @@ class parseConfig
   bool insertAutoindex(contextIterator itr, std::string& autoindex);
   bool insertAlias(contextIterator itr, std::string& alias);
   bool insertAllowMethods(contextIterator itr, std::vector<std::string>& allowMethods, bool* allowMethodsBool);
+  bool insertAuthBasicFile( \
+    contextIterator itr, \
+    std::string& authBasicFile, \
+    std::string& authBasicRealm, \
+    std::string& authBasicUid, \
+    std::string& authBasicPassword \
+    );
   bool insertAuthBasicInfo(contextIterator itr, std::string& authBasicUid, std::string& authBasicPassword);
   bool insertAuthBasicRealm(contextIterator itr, std::string& authBasicRealm);
   bool insertCgiScript(contextIterator itr, std::vector<std::string>& cgiScripts);
