@@ -1093,7 +1093,7 @@ std::vector<std::string> Response::getDirectoryContents()
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
 	DIR *dir = opendir(SerachFileAbsolutePath.c_str());
 
-	while ((rdir = readdir(dir)) != nullptr)
+	while ((rdir = readdir(dir)) != NULL)
 	{
 		std::string dateName = std::string(rdir->d_name);
 		if (dateName == std::string("."))
