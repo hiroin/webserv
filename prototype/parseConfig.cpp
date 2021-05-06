@@ -461,6 +461,8 @@ bool parseConfig::insertToConfigClass(Config& c)
         continue;
       if (insertIndexs(itr, tmpConfigServer.configCommon.indexs))
         continue;
+      if (insertUploadPath(itr, tmpConfigServer.configCommon.uploadPath))
+        continue;
       std::string errorMessage = "Config Error : invalid directive ";
       errorMessage +=  itr->key ;
       throw std::runtime_error(errorMessage);
@@ -492,6 +494,8 @@ bool parseConfig::insertToConfigClass(Config& c)
           continue;
         if (insertIndexs(itr, tmpConfigLocation.configCommon.indexs))
           continue;
+        if (insertUploadPath(itr, tmpConfigLocation.configCommon.uploadPath))
+          continue;          
         std::string errorMessage = "Config Error : invalid directive ";
         errorMessage +=  itr->key ;
         throw std::runtime_error(errorMessage);          
@@ -920,6 +924,21 @@ bool parseConfig::insertServerNames(contextIterator itr, std::vector<std::string
       serverNames.push_back(*itrValues);
       // std::cout << "[DEBUG]server_name : " << *itrValues << std::endl;
     }
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertUploadPath(contextIterator itr, std::string& uploadPath)
+{
+  if (itr->key == "upload_path")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie upload_path");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid upload_path");
+    uploadPath = itr->values.at(0).value.at(0);
+    // std::cout << "[DEBUG]root : " << root << std::endl;
     return true;
   }
   return false;

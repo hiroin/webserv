@@ -127,6 +127,7 @@ class parseConfig
   bool insertListen(contextIterator itr, std::string& host, int& port);
   bool insertRoot(contextIterator itr, std::string& root);
   bool insertServerNames(contextIterator itr, std::vector<std::string>& serverNames);
+  bool insertUploadPath(contextIterator itr, std::string& uploadPath);
 
   parseConfig(const parseConfig&);
   parseConfig& operator=(const parseConfig&);  

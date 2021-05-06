@@ -53,6 +53,7 @@ void Config::printCommonConfig(s_ConfigCommon& c) const
     std::cout << *itr << " " ;
   }
   std::cout << std::endl;
+  std::cout << " uploadPath        : " << c.uploadPath << std::endl;
 }
 
 void Config::printLocationConfig(s_ConfigLocation& c) const
