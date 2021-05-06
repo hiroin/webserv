@@ -82,6 +82,7 @@ class parseConfig
 
   std::vector<parseconfig::token> vtoken_;
   parseconfig::configHttp configHttp_;
+  std::vector<std::string> realms;
 
   parseConfig();
   parseConfig(const char *configFile, Config& c);

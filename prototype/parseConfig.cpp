@@ -418,12 +418,6 @@ bool parseConfig::insertToConfigClass(Config& c)
       continue;
     if (insertAllowMethods(itr, tmpConfigCommon.allowMethods, tmpConfigCommon.allowMethodsBool))
       continue;
-    if (insertAuthBasicFile(itr, tmpConfigCommon.authBasicFile, tmpConfigCommon.authBasicRealm, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
-      continue;
-    // if (insertAuthBasicInfo(itr, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
-    //   continue;
-    // if (insertAuthBasicRealm(itr, tmpConfigCommon.authBasicRealm))
-    //   continue;
     if (insertCgiScript(itr, tmpConfigCommon.cgiScripts))
       continue;
     if (insertClientMaxBodySize(itr, tmpConfigCommon.clientMaxBodySize))
@@ -457,12 +451,8 @@ bool parseConfig::insertToConfigClass(Config& c)
         continue;
       if (insertAllowMethods(itr, tmpConfigServer.configCommon.allowMethods, tmpConfigServer.configCommon.allowMethodsBool))
         continue;
-      if (insertAuthBasicFile(itr, tmpConfigCommon.authBasicFile, tmpConfigCommon.authBasicRealm, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
+      if (insertAuthBasicFile(itr, tmpConfigServer.configCommon.authBasicFile, tmpConfigServer.configCommon.authBasicRealm, tmpConfigServer.configCommon.authBasicUid, tmpConfigServer.configCommon.authBasicPassword))
         continue;
-      // if (insertAuthBasicInfo(itr, tmpConfigServer.configCommon.authBasicUid, tmpConfigServer.configCommon.authBasicPassword))
-      //   continue;
-      // if (insertAuthBasicRealm(itr, tmpConfigServer.configCommon.authBasicRealm))
-      //   continue;
       if (insertCgiScript(itr, tmpConfigServer.configCommon.cgiScripts))
         continue;
       if (insertClientMaxBodySize(itr, tmpConfigServer.configCommon.clientMaxBodySize))
@@ -492,12 +482,8 @@ bool parseConfig::insertToConfigClass(Config& c)
           continue;
         if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods, tmpConfigLocation.configCommon.allowMethodsBool))
           continue;
-        if (insertAuthBasicFile(itr, tmpConfigCommon.authBasicFile, tmpConfigCommon.authBasicRealm, tmpConfigCommon.authBasicUid, tmpConfigCommon.authBasicPassword))
+        if (insertAuthBasicFile(itr, tmpConfigLocation.configCommon.authBasicFile, tmpConfigLocation.configCommon.authBasicRealm, tmpConfigLocation.configCommon.authBasicUid, tmpConfigLocation.configCommon.authBasicPassword))
           continue;
-        // if (insertAuthBasicInfo(itr, tmpConfigLocation.configCommon.authBasicUid, tmpConfigLocation.configCommon.authBasicPassword))
-        //   continue;
-        // if (insertAuthBasicRealm(itr, tmpConfigLocation.configCommon.authBasicRealm))
-        //   continue;          
         if (insertCgiScript(itr, tmpConfigLocation.configCommon.cgiScripts))
           continue;
         if (insertClientMaxBodySize(itr, tmpConfigLocation.configCommon.clientMaxBodySize))
@@ -1095,7 +1081,7 @@ parseConfig::parseConfig(const char *configFile, Config& c)
   }
   {
     // デバッグ用出力
-    c.printConfig();
+    // c.printConfig();
   }
 }
 

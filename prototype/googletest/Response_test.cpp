@@ -1657,56 +1657,82 @@ TEST(Response_test, Authorization)
   parseConfig(configfile, config_);
   {
     // 0090
-    {
-      Client client_;
-      client_.port = 8080;
-      client_.host = "*";
-      client_.hmp.method_ = httpMessageParser::GET;
-      client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["host"] = "127.0.0.1";
-      client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
 
-      Response Response(client_, config_);
-      int ResponseStatus = Response.ResponseStatus;
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
-    }
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
   }
   {
     // 0091
-    {
-      Client client_;
-      client_.port = 8081;
-      client_.host = "*";
-      client_.hmp.method_ = httpMessageParser::GET;
-      client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["host"] = "127.0.0.1";
-      client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
+    Client client_;
+    client_.port = 8081;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    // user:password
+    client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
 
-      Response Response(client_, config_);
-      int ResponseStatus = Response.ResponseStatus;
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
-    }
-  }
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+}
   {
     // 0092
-    {
-      Client client_;
-      client_.port = 8082;
-      client_.host = "*";
-      client_.hmp.method_ = httpMessageParser::GET;
-      client_.hmp.absolutePath_ = "/";
-      client_.hmp.headers_["host"] = "127.0.0.1";
-      client_.hmp.headers_["authorization"] = "Basic dXNlcjrjgYI=";
+    Client client_;
+    client_.port = 8082;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    // ユーザー:パスワード
+    client_.hmp.headers_["authorization"] = "Basic 44Om44O844K244O8OuODkeOCueODr+ODvOODiQ==";
 
-      Response Response(client_, config_);
-      int ResponseStatus = Response.ResponseStatus;
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
-    }
-  }  
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  {
+    // 0093
+    Client client_;
+    client_.port = 8081;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    // user:none
+    client_.hmp.headers_["authorization"] = "Basic dXNlcjpub25l";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(401, ResponseStatus);
+  }
+  {
+    // 0094
+    Client client_;
+    client_.port = 8081;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(401, ResponseStatus);
+  }
 }
