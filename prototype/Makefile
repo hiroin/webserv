@@ -1,6 +1,6 @@
 CC = clang++
 HTTP1 = server
-HTTP1_SOURCE = server.cpp \
+HTTP1_SOURCE = main.cpp \
                Socket.cpp \
                recvData.cpp \
                HTTPMessageParser.cpp \
@@ -26,7 +26,8 @@ HTTP1_SOURCE = server.cpp \
 							 ft_make_dummy_response.cpp \
 							 Response.cpp \
 							 ft_inet_ntoa.cpp \
-							 readData.cpp
+							 readData.cpp \
+							 Webserv.cpp
 .PHONY: all clean
 
 all: $(HTTP1)

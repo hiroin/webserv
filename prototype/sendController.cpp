@@ -16,14 +16,13 @@ void SendController::setSendData(char *buf, size_t len)
 {
   ResponseMessage = buf;
   LeftLength = len;
-  std::cout << "ResponseMessage : " << ResponseMessage << std::endl;
 }
 
 bool SendController::SendMessage(size_t len)
 {
 	if (LeftLength <= len)
 	{
-    std::cout << "ResponseMessage : " << ResponseMessage << std::endl;
+    // std::cout << "ResponseMessage : " << ResponseMessage << std::endl;
 		int r = write(CliantFd, ResponseMessage, LeftLength);
     if (r == -1)
       throw std::runtime_error("write error.");

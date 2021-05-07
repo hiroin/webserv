@@ -18,9 +18,8 @@ static bool notBeCreatedSocket(int port, std::string host, std::vector<portAndHo
   return true;
 }
 
-int http1(Config& c)
+static void setupServers(std::vector<Socket>& servers, Config& c)
 {
-  std::vector<Socket> servers;
   try
   {
     std::vector<portAndHost> portAndHostCombination;
@@ -38,48 +37,75 @@ int http1(Config& c)
     std::cerr << e.what() << '\n';
     exit(1);
   }
+}
+
+static void initFD(fd_set& readFds, fd_set& writeFds, int& maxFd, std::vector<Socket>& servers, Client* clients)
+{
+  FD_ZERO(&readFds);
+  FD_ZERO(&writeFds);
+  for (std::vector<Socket>::iterator itrServer = servers.begin();
+    itrServer != servers.end();
+    itrServer++)
+  {
+    FD_SET(itrServer->get_listenfd(), &readFds);
+    if (maxFd < (itrServer->get_listenfd() + 1))
+      maxFd = itrServer->get_listenfd() + 1;
+  }
+  for (int i = 0; i < MAX_SESSION; i++)
+  {
+    if (clients[i].socketFd != -1)
+    {
+      FD_SET(clients[i].socketFd, &readFds);
+      if (clients[i].status == SEND)
+        FD_SET(clients[i].socketFd, &writeFds);
+      if (maxFd < (clients[i].socketFd + 1))
+        maxFd = clients[i].socketFd + 1;
+    }
+    if (clients[i].readFd != -1)
+    {
+      FD_SET(clients[i].readFd, &readFds);
+      if (maxFd < (clients[i].readFd + 1))
+        maxFd = clients[i].readFd + 1;
+    }
+  }
+}
+
+static bool isNotKeepConnectionCode(int code)
+{
+  switch (code)
+  {
+  case 400:
+  case 500:
+  case 501:
+  case 502:
+  case 504:
+  case 505:
+    return true;
+  }
+  return false;
+}
+
+int http1(Config& c)
+{
+  std::vector<Socket> servers;
+  setupServers(servers, c);
   Client clients[MAX_SESSION];
   Response *responses[MAX_SESSION];
   fd_set readFds;
   fd_set writeFds;
-  int maxFd = 0; // [やること]起動時fdの上限をチェックする
-  int selectReturn; // selectのタイムアウト用
+  int maxFd = 0;
+  int selectReturn;
   struct timeval tvForSelect;
-  unsigned long j = 0; // DEBUG用カウンタ動作確認用
+  unsigned long mainLoopCounter = 0;
   while (1)
   {
-    std::cout << "[DEBUG]" << j++ << "回目\n";
-    FD_ZERO(&readFds);
-    FD_ZERO(&writeFds);
-    for (std::vector<Socket>::iterator itrServer = servers.begin();
-      itrServer != servers.end();
-      itrServer++)
-    {
-      FD_SET(itrServer->get_listenfd(), &readFds);
-      if (maxFd < (itrServer->get_listenfd() + 1))
-        maxFd = itrServer->get_listenfd() + 1;
-    }
-    for (int i = 0; i < MAX_SESSION; i++)
-    {
-      if (clients[i].socketFd != -1)
-      {
-        FD_SET(clients[i].socketFd, &readFds);
-        if (clients[i].status == SEND)
-          FD_SET(clients[i].socketFd, &writeFds);
-        if (maxFd < (clients[i].socketFd + 1))
-          maxFd = clients[i].socketFd + 1;
-      }
-      if (clients[i].readFd != -1)
-      {
-        FD_SET(clients[i].readFd, &readFds);
-        if (maxFd < (clients[i].readFd + 1))
-          maxFd = clients[i].readFd + 1;
-      }
-    }
+    if (c.getDebugLevel() >= 1)
+      std::cout << "[DEBUG]Loop : " << mainLoopCounter++ << "time" << std::endl;
+    initFD(readFds, writeFds, maxFd, servers, clients);
     tvForSelect.tv_sec = SELECT_TIMEOUT;
     tvForSelect.tv_usec = 0;   
     if (select(maxFd, &readFds, &writeFds, NULL, &tvForSelect) == -1)
-      std::cout << "select() failed.(" << strerror(errno) << ")" << std::endl;
+      std::cout << "[EMERG]select() failed.(" << strerror(errno) << ")" << std::endl;
     for (std::vector<Socket>::iterator itrServer = servers.begin();
       itrServer != servers.end();
       itrServer++)
@@ -92,11 +118,12 @@ int http1(Config& c)
         int r = fcntl(acceptFd, F_SETFL, O_NONBLOCK);
         if (r == -1)
         {
-          std::cout << "fcntl() failed." << std::endl;
+          std::cout << "[EMERG]fcntl() failed." << std::endl;
           close(acceptFd);
           continue;
         }
-        std::cout << "accept[to " << itrServer->get_host() << ":" << itrServer->get_port() << " from " << ft_inet_ntos(clienSockaddrIn.sin_addr) << "]" << std::endl;
+        if (c.getDebugLevel() >= 1)
+          std::cout << "[DEBUG]accept[to " << itrServer->get_host() << ":" << itrServer->get_port() << " from " << ft_inet_ntos(clienSockaddrIn.sin_addr) << "]" << std::endl;
         bool limit_over = true;
         for (int i = 0; i < MAX_SESSION; i++)
         {
@@ -114,8 +141,8 @@ int http1(Config& c)
         }
         if (limit_over)
         {
+          std::cout << "[ERR]over MAX_SESSION." << std::endl;
           close(acceptFd);
-          std::cout << "over max connection." << std::endl;
         }
       }
     }
@@ -273,7 +300,7 @@ int http1(Config& c)
                 std::cout << "response_code  : " << responses[i]->ResponseStatus << std::endl;
                 std::cout << "file_path      : " << responses[i]->targetFilePath << std::endl;
                 std::cout << "file_length    : " << responses[i]->getContentLength() << std::endl;
-                std::cout << "open_fd        : " << responses[i]->getTargetFileFd();
+                std::cout << "open_fd        : " << responses[i]->getTargetFileFd() << std::endl;
                 std::cout << "client_status  : " << clients[i].status << std::endl;
                 std::cout << "responseMessege  " << std::endl << responses[i]->responseMessege << std::endl;
                 std::cout << "---------------------------------------" << std::endl;
@@ -423,7 +450,7 @@ int http1(Config& c)
           bool isFinish = clients[i].sc.SendMessage(1024);
           if (isFinish)
           {
-            if (clients[i].responseCode != 200)
+            if (isNotKeepConnectionCode(clients[i].responseCode))
             {
               clients[i].initClient();
             }
@@ -475,7 +502,7 @@ int main(int argc, char *argv[])
       break;
     }
   }
-  if (c.getDebugLevel() == 1)
+  if (c.getDebugLevel() >= 1)
     c.printConfig();
   try
   {

@@ -650,7 +650,7 @@ std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(st
 }
 
 
-Response::Response(Client &client, Config &config) : client(client), config(config)
+Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
@@ -703,6 +703,8 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		else
 		{
 			client.status = SEND;
+      std::string ContentLength = "Content-Length: 0\r\n";
+      responseMessege.append(ContentLength);       
 			responseMessege.append(std::string("\r\n"));
 			return ;
 		}
@@ -734,6 +736,8 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 		client.status = READ;
 		return ;
 	}
+	std::string ContentLength = "Content-Length: 0\r\n\r\n";
+	responseMessege.append(ContentLength);  
 	client.status = SEND;
 }
 
