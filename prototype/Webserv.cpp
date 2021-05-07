@@ -1,208 +1,5 @@
 #include "Webserv.hpp"
 
-// 第一引数と第二引数で与えられるポートとホストの組み合わせがportAndHostCombinationにいない場合trueを返す
-bool Wevserv::notBeCreatedSocket(int port, std::string host, \
-                                  std::vector<portAndHost>& portAndHostCombination)
-{
-  for (std::vector<portAndHost>::iterator itrPortAndHost = portAndHostCombination.begin();
-    itrPortAndHost != portAndHostCombination.end();
-    itrPortAndHost++
-  )
-  {
-    if (port == itrPortAndHost->port && host == itrPortAndHost->host)
-      return false;
-  }
-  portAndHost tmp;
-  tmp.port = port;
-  tmp.host = host;
-  portAndHostCombination.push_back(tmp);
-  return true;
-}
-
-void Wevserv::setupServers()
-{
-  try
-  {
-    std::vector<portAndHost> portAndHostCombination;
-    for (std::vector<s_ConfigServer>::iterator itr = c_.configGlobal.servers.begin();
-      itr != c_.configGlobal.servers.end();
-      itr++
-    )
-    {
-      if (notBeCreatedSocket(itr->port, itr->host, portAndHostCombination))
-        servers_.push_back(Socket(itr->port, itr->host));
-    }
-  }
-  catch(const std::exception& e)
-  {
-    std::cerr << e.what() << '\n';
-    exit(1);
-  }
-}
-
-void Wevserv::initFD()
-{
-  FD_ZERO(&readFds_);
-  FD_ZERO(&writeFds_);
-  for (std::vector<Socket>::iterator itrServer = servers_.begin();
-    itrServer != servers_.end();
-    itrServer++)
-  {
-    FD_SET(itrServer->get_listenfd(), &readFds_);
-    if (maxFd_ < (itrServer->get_listenfd() + 1))
-      maxFd_ = itrServer->get_listenfd() + 1;
-  }
-  for (int i = 0; i < MAX_SESSION; i++)
-  {
-    if (clients_[i].socketFd != -1)
-    {
-      FD_SET(clients_[i].socketFd, &readFds_);
-      if (clients_[i].status == SEND)
-        FD_SET(clients_[i].socketFd, &writeFds_);
-      if (maxFd_ < (clients_[i].socketFd + 1))
-        maxFd_ = clients_[i].socketFd + 1;
-    }
-    if (clients_[i].readFd != -1)
-    {
-      FD_SET(clients_[i].readFd, &readFds_);
-      if (maxFd_ < (clients_[i].readFd + 1))
-        maxFd_ = clients_[i].readFd + 1;
-    }
-  }
-}
-
-bool Wevserv::isNotKeepConnectionCode(int code)
-{
-  switch (code)
-  {
-  case 400:
-  case 500:
-  case 501:
-  case 502:
-  case 504:
-  case 505:
-    return true;
-  }
-  return false;
-}
-
-void Wevserv::responseNot200(int i, int code)
-{
-  responses_[i] = new Response(code ,clients_[i], c_);
-  if (clients_[i].status == READ)
-  {
-    clients_[i].readFd = responses_[i]->getTargetFileFd();
-    clients_[i].readDataFromFd.setFd(clients_[i].readFd);
-    clients_[i].responseCode = code;
-  }
-  else if (clients_[i].status == SEND)
-  {
-    clients_[i].responseMessege = responses_[i]->responseMessege;
-    delete responses_[i];
-    clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
-  }
-  else
-  {
-    std::cout << "[emerg] Irregularity status in Response" << std::endl;
-    delete responses_[i];
-    std::string response = ft_make_dummy_response(400);
-    clients_[i].sc.setSendData(const_cast<char *>(response.c_str()), response.size());
-    clients_[i].responseCode = 400;
-    clients_[i].status = SEND;
-  }
-}
-
-void Wevserv::debugPrintGetRecvData(int i)
-{
-  if (c_.getDebugLevel() >= 2)
-  {
-    std::cout << "--recvData-----------------------------" << std::endl;
-    std::cout << clients_[i].receivedData.getRecvData();
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
-void Wevserv::debugPrintGetReadData(int i)
-{
-  if (c_.getDebugLevel() >= 2)
-  {
-    std::cout << "--readData-----------------------------" << std::endl;
-    std::cout << clients_[i].readDataFromFd.getReadData();
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
-void Wevserv::debugPrintExtractedData(int i)
-{
-  if (c_.getDebugLevel() >= 2)
-  {
-    std::cout << "--extractedData_-----------------------" << std::endl;
-    std::cout << clients_[i].receivedData.getExtractedData() << std::endl;
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
-void Wevserv::debugPrintStartLine(int i)
-{
-  if (c_.getDebugLevel() >= 1)
-  {
-    std::cout << "--startLine----------------------------" << std::endl;
-    std::cout << "method = " << clients_[i].hmp.getMethod() << std::endl;
-    std::cout << "request-target = " << clients_[i].hmp.getRequestTarget() << std::endl;
-    std::cout << "HTTP-version = " << clients_[i].hmp.getHTTPVersion() << std::endl;
-    std::cout << "absolute-path = " << clients_[i].hmp.getAbsolutePath() << std::endl;
-    std::cout << "query = " << clients_[i].hmp.getQuery() << std::endl;
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
-void Wevserv::debugPrintHeaders(int i)
-{
-  if (c_.getDebugLevel() >= 1)
-  {
-    std::map<std::string, std::string> headers = clients_[i].hmp.getHeaders();
-    std::cout << "--headers------------------------------" << std::endl;
-    for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
-      std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
-void Wevserv::debugPrintResponceData(int i)
-{
-  if (c_.getDebugLevel() >= 1)
-  {
-    std::cout << "--responceData-------------------------" << std::endl;
-    std::cout << "response_code  : " << responses_[i]->ResponseStatus << std::endl;
-    std::cout << "file_path      : " << responses_[i]->targetFilePath << std::endl;
-    std::cout << "file_length    : " << responses_[i]->getContentLength() << std::endl;
-    std::cout << "open_fd        : " << responses_[i]->getTargetFileFd() << std::endl;
-    std::cout << "client_status  : " << clients_[i].status << std::endl;
-    std::cout << "responseMessege  " << std::endl << responses_[i]->responseMessege << std::endl;
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
-void Wevserv::debugPrintRequestBody(int i)
-{
-  if (c_.getDebugLevel() >= 2)
-  {
-    std::cout << "--body---------------------------------" << std::endl;
-    std::cout << clients_[i].body << std::endl;
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
-void Wevserv::debugPrintResponseMessege(int i)
-{
-  if (c_.getDebugLevel() >= 2)
-  {
-    std::cout << "--responseMessege----------------------" << std::endl;
-    std::cout << responses_[i]->responseMessege << std::endl;
-    std::cout << "---------------------------------------" << std::endl;
-  }
-}
-
 Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
 {
   setupServers();
@@ -227,7 +24,9 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         struct sockaddr_in clienSockaddrIn;
         socklen_t clienSockaddrInLen = sizeof(clienSockaddrIn);
-        int acceptFd = accept(itrServer->get_listenfd(), (struct sockaddr*)&clienSockaddrIn, &clienSockaddrInLen);
+        int acceptFd = accept(itrServer->get_listenfd(), \
+                              (struct sockaddr*)&clienSockaddrIn, \
+                              &clienSockaddrInLen);
         if (acceptFd == -1)
         {
           std::cout << "[EMERG]accept() failed." << std::endl;
@@ -242,7 +41,8 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         }
         if (c.getDebugLevel() >= 1)
           std::cout << "[DEBUG]accept[to " << itrServer->get_host() << ":" << itrServer->get_port() << " from " << ft_inet_ntos(clienSockaddrIn.sin_addr) << "]" << std::endl;
-        bool limit_over = true;
+        bool limitOver = false;
+        int limitOverI;
         for (int i = 0; i < MAX_SESSION; i++)
         {
           if (clients_[i].socketFd == -1)
@@ -253,14 +53,18 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             clients_[i].port = itrServer->get_port();
             clients_[i].host = itrServer->get_host();
             clients_[i].ip = ft_inet_ntos(clienSockaddrIn.sin_addr);
-            limit_over = false;
+            if (i > SESSION_LIMIT - 1)
+            {
+              limitOverI = i;
+              limitOver = true;
+            }
             break;
           }
         }
-        if (limit_over)
+        if (limitOver)
         {
           std::cout << "[ERR]over MAX_SESSION." << std::endl;
-          close(acceptFd);
+          responseNot200(limitOverI, 503);
         }
       }
     }
@@ -460,5 +264,210 @@ Wevserv::~Wevserv()
   for (int i = 0; i < MAX_SESSION; i++)
   {
     clients_[i].initClient();
+  }
+}
+
+// 第一引数と第二引数で与えられるポートとホストの組み合わせがportAndHostCombinationにいない場合trueを返す
+bool Wevserv::notBeCreatedSocket(int port, std::string host, \
+                                  std::vector<portAndHost>& portAndHostCombination)
+{
+  for (std::vector<portAndHost>::iterator itrPortAndHost = portAndHostCombination.begin();
+    itrPortAndHost != portAndHostCombination.end();
+    itrPortAndHost++
+  )
+  {
+    if (port == itrPortAndHost->port && host == itrPortAndHost->host)
+      return false;
+  }
+  portAndHost tmp;
+  tmp.port = port;
+  tmp.host = host;
+  portAndHostCombination.push_back(tmp);
+  return true;
+}
+
+void Wevserv::setupServers()
+{
+  try
+  {
+    std::vector<portAndHost> portAndHostCombination;
+    for (std::vector<s_ConfigServer>::iterator itr = c_.configGlobal.servers.begin();
+      itr != c_.configGlobal.servers.end();
+      itr++
+    )
+    {
+      if (notBeCreatedSocket(itr->port, itr->host, portAndHostCombination))
+        servers_.push_back(Socket(itr->port, itr->host));
+    }
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+    exit(1);
+  }
+}
+
+void Wevserv::initFD()
+{
+  FD_ZERO(&readFds_);
+  FD_ZERO(&writeFds_);
+  for (std::vector<Socket>::iterator itrServer = servers_.begin();
+    itrServer != servers_.end();
+    itrServer++)
+  {
+    FD_SET(itrServer->get_listenfd(), &readFds_);
+    if (maxFd_ < (itrServer->get_listenfd() + 1))
+      maxFd_ = itrServer->get_listenfd() + 1;
+  }
+  for (int i = 0; i < MAX_SESSION; i++)
+  {
+    if (clients_[i].socketFd != -1)
+    {
+      FD_SET(clients_[i].socketFd, &readFds_);
+      if (clients_[i].status == SEND)
+        FD_SET(clients_[i].socketFd, &writeFds_);
+      if (maxFd_ < (clients_[i].socketFd + 1))
+        maxFd_ = clients_[i].socketFd + 1;
+    }
+    if (clients_[i].readFd != -1)
+    {
+      FD_SET(clients_[i].readFd, &readFds_);
+      if (maxFd_ < (clients_[i].readFd + 1))
+        maxFd_ = clients_[i].readFd + 1;
+    }
+  }
+}
+
+bool Wevserv::isNotKeepConnectionCode(int code)
+{
+  switch (code)
+  {
+  case 400:
+  case 500:
+  case 501:
+  case 502:
+  case 503:
+  case 504:
+  case 505:
+    return true;
+  }
+  return false;
+}
+
+void Wevserv::responseNot200(int i, int code)
+{
+  responses_[i] = new Response(code ,clients_[i], c_);
+  if (clients_[i].status == READ)
+  {
+    clients_[i].readFd = responses_[i]->getTargetFileFd();
+    clients_[i].readDataFromFd.setFd(clients_[i].readFd);
+    clients_[i].responseCode = code;
+  }
+  else if (clients_[i].status == SEND)
+  {
+    clients_[i].responseMessege = responses_[i]->responseMessege;
+    delete responses_[i];
+    clients_[i].responseCode = code;
+    clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
+  }
+  else
+  {
+    std::cout << "[emerg] Irregularity status in Response" << std::endl;
+    delete responses_[i];
+    std::string response = ft_make_dummy_response(400);
+    clients_[i].sc.setSendData(const_cast<char *>(response.c_str()), response.size());
+    clients_[i].responseCode = 400;
+    clients_[i].status = SEND;
+  }
+}
+
+void Wevserv::debugPrintGetRecvData(int i)
+{
+  if (c_.getDebugLevel() >= 2)
+  {
+    std::cout << "--recvData-----------------------------" << std::endl;
+    std::cout << clients_[i].receivedData.getRecvData();
+    std::cout << "---------------------------------------" << std::endl;
+  }
+}
+
+void Wevserv::debugPrintGetReadData(int i)
+{
+  if (c_.getDebugLevel() >= 2)
+  {
+    std::cout << "--readData-----------------------------" << std::endl;
+    std::cout << clients_[i].readDataFromFd.getReadData();
+    std::cout << "---------------------------------------" << std::endl;
+  }
+}
+
+void Wevserv::debugPrintExtractedData(int i)
+{
+  if (c_.getDebugLevel() >= 2)
+  {
+    std::cout << "--extractedData_-----------------------" << std::endl;
+    std::cout << clients_[i].receivedData.getExtractedData() << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
+  }
+}
+
+void Wevserv::debugPrintStartLine(int i)
+{
+  if (c_.getDebugLevel() >= 1)
+  {
+    std::cout << "--startLine----------------------------" << std::endl;
+    std::cout << "method = " << clients_[i].hmp.getMethod() << std::endl;
+    std::cout << "request-target = " << clients_[i].hmp.getRequestTarget() << std::endl;
+    std::cout << "HTTP-version = " << clients_[i].hmp.getHTTPVersion() << std::endl;
+    std::cout << "absolute-path = " << clients_[i].hmp.getAbsolutePath() << std::endl;
+    std::cout << "query = " << clients_[i].hmp.getQuery() << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
+  }
+}
+
+void Wevserv::debugPrintHeaders(int i)
+{
+  if (c_.getDebugLevel() >= 1)
+  {
+    std::map<std::string, std::string> headers = clients_[i].hmp.getHeaders();
+    std::cout << "--headers------------------------------" << std::endl;
+    for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
+      std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
+    std::cout << "---------------------------------------" << std::endl;
+  }
+}
+
+void Wevserv::debugPrintResponceData(int i)
+{
+  if (c_.getDebugLevel() >= 1)
+  {
+    std::cout << "--responceData-------------------------" << std::endl;
+    std::cout << "response_code  : " << responses_[i]->ResponseStatus << std::endl;
+    std::cout << "file_path      : " << responses_[i]->targetFilePath << std::endl;
+    std::cout << "file_length    : " << responses_[i]->getContentLength() << std::endl;
+    std::cout << "open_fd        : " << responses_[i]->getTargetFileFd() << std::endl;
+    std::cout << "client_status  : " << clients_[i].status << std::endl;
+    std::cout << "responseMessege  " << std::endl << responses_[i]->responseMessege << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
+  }
+}
+
+void Wevserv::debugPrintRequestBody(int i)
+{
+  if (c_.getDebugLevel() >= 2)
+  {
+    std::cout << "--body---------------------------------" << std::endl;
+    std::cout << clients_[i].body << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
+  }
+}
+
+void Wevserv::debugPrintResponseMessege(int i)
+{
+  if (c_.getDebugLevel() >= 2)
+  {
+    std::cout << "--responseMessege----------------------" << std::endl;
+    std::cout << responses_[i]->responseMessege << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
   }
 }
