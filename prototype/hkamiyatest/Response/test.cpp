@@ -8,16 +8,15 @@ https://docs.google.com/spreadsheets/d/1LNw2mvutl0X-ehI2lNGltf06Z1zOF04SorS-GIM8
 
 int main()
 {
-  const char* configfile = "/home/user42/42/webserv/yiwasa/webserv/prototype/googletest/testcase/018_basicauth.conf";
+  const char* configfile = "/home/user42/42/webserv/yiwasa/webserv/prototype/googletest/testcase/019_autoindex.conf";
 	Config config_;
   Client client_;
   parseConfig(configfile, config_);
-  client_.port = 8082;
+  client_.port = 8080;
   client_.host = "*";
   client_.hmp.method_ = httpMessageParser::GET;
-  client_.hmp.absolutePath_ = "/index.html";
+  client_.hmp.absolutePath_ = "/";
   client_.hmp.headers_["host"] = "127.0.0.1";
-  client_.hmp.headers_["authorization"] = "Basic dXNlcjrjgYI=";
   Response Response(client_, config_);
      
   int ResponseStatus = Response.ResponseStatus;

@@ -10,6 +10,8 @@
 #include <fcntl.h>
 #include <string>
 #include <errno.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <ctime>
 #include <algorithm>
 
@@ -566,7 +568,6 @@ void Response::setWWWAuthenticate()
 	responseMessege.append(std::string("basic "));
 	responseMessege.append(std::string("realm=") + "\"" + getConfigCommon().authBasicRealm + "\"");
 	responseMessege.append(std::string("\r\n"));
-	responseMessege.append(std::string("Content-Length: 0\r\n"));
 }
 
 bool Response::isAcceptCharsetSet()
@@ -649,16 +650,6 @@ std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(st
 }
 
 
-/**
- * Accept-Charset = 1#( ( charset / "*" ) [ weight ] )
- * charset == 1*tchar
-
-	tchar          = "!" / "#" / "$" / "%" / "&" / "'" / "*"
-				/ "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
-				/ DIGIT / ALPHA
-               ; 区切子を除く，任意の VCHAR
- * **/
-
 Response::Response(Client &client, Config &config) : client(client), config(config)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
@@ -715,6 +706,12 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 			responseMessege.append(std::string("\r\n"));
 			return ;
 		}
+	}
+	if (isAutoIndexApply)
+	{
+		makeAutoIndexResponse();
+		client.status = SEND;
+		return ;
 	}
 	setContenType(); //Languageを考えて選択する。
 	setContentLength();
@@ -1034,7 +1031,6 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 		indexs = configCommon.indexs;
 		for(int i = 0; i < indexs.size(); i++)
 		{
-
 			this->targetFilePath = SerachFileAbsolutePath + indexs[i]; //indexファイルを見ていく
 			statusNo = isTargetFileAbailable(this->targetFilePath);
 			if (statusNo == 200 || statusNo == 403) //403 と 200が発生したらそのままreturn
@@ -1045,6 +1041,19 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 		}
 		// indexディレクティブがなかったら403
 		ResponseStatus = statusNo; //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
+		if (ResponseStatus == 404)
+		{
+			if (isAutoIndex() && isDirectoryAvailable()) //autoindex の時はここに入ってくる。
+			{
+				isAutoIndexApply = true;
+				getAutoIndexContent(); //AutoIndex のBody を作る。
+				ResponseStatus = 200;
+				//autoindex の情報入れる
+
+			}
+			return ;
+
+		}
 		this->targetFilePath = "";
 		return ;
 	}
@@ -1056,7 +1065,114 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 	}
 }
 
+bool Response::isDirectoryAvailable()
+{
+	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
+	DIR *ret = opendir(SerachFileAbsolutePath.c_str());
+	if (ret == NULL)
+		return false;
+	closedir(ret);
+	return true;
+}
+
+bool Response::isDirectory(std::string name)
+{
+	std::string pathname = GetSerachAbsolutePath() + name;
+	struct stat sb;
+	stat(pathname.c_str(), &sb);
+	if (S_ISDIR(sb.st_mode))
+		return true;
+	else
+		return false;
+}
+
+std::vector<std::string> Response::getDirectoryContents()
+{
+	struct dirent* rdir;
+	std::vector<std::string> directoryContents;
+	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
+	DIR *dir = opendir(SerachFileAbsolutePath.c_str());
+
+	while ((rdir = readdir(dir)) != NULL)
+	{
+		std::string dateName = std::string(rdir->d_name);
+		if (dateName == std::string("."))
+			continue;
+		if (isDirectory(dateName))
+		{
+			directoryContents.push_back(std::string(dateName) + "/");
+		}
+		else
+		{
+			directoryContents.push_back(std::string(dateName));
+		}
+	}
+	closedir(dir);
+	return (directoryContents);
+}
+
+std::string Response::makeATag(std::string dataName)
+{
+	std::string aTag;
+	aTag.append(std::string("<a href="));
+	aTag.append(std::string("\"" + dataName + "\">"));
+	aTag.append(std::string(dataName));
+	aTag.append(std::string("</a>"));
+	if (dataName[dataName.size() - 1] == '/')
+	{
+		aTag.append(std::string("\r\n"));
+		return aTag;
+	}
+	else
+	{
+		aTag.append(std::string("                                             "));
+		struct stat buf;
+		stat(dataName.c_str(), &buf);
+		aTag.append(std::string(ctime(&(buf.st_ctime))) + "\r\n");
+		return aTag;
+	}
+
+}
+
+void Response::getAutoIndexContent()
+{
+	std::vector<std::string> directoryContents = getDirectoryContents();
+	AutoIndexContent.append(std::string("<html>\r\n"));
+	AutoIndexContent.append(std::string("<head><title>Index of "));
+	AutoIndexContent.append(client.hmp.absolutePath_);
+	AutoIndexContent.append(std::string("</title></head>\r\n"));
+	AutoIndexContent.append(std::string("<body>\n"));
+	AutoIndexContent.append(std::string("<h1>Index of "));
+	AutoIndexContent.append(std::string(client.hmp.absolutePath_));
+	AutoIndexContent.append(std::string("</h1><hr><pre>"));
+	for(int i = 0; i < directoryContents.size(); i++)
+	{
+		std::string aTag;
+		aTag = makeATag(directoryContents[i]);
+		AutoIndexContent.append(aTag);
+	}
+	AutoIndexContent.append(std::string("</pre><hr></body>\r\n"));
+	AutoIndexContent.append(std::string("</html>"));
+}
+
+void	Response::makeAutoIndexResponse()
+{
+	std::string autoIndexSize = ft_itos(AutoIndexContent.size());
+	responseMessege.append(std::string("Content-Type: text/html\r\n"));
+	responseMessege.append(std::string("Content-Length: "));
+	responseMessege.append(autoIndexSize + "\r\n");
+	responseMessege.append(std::string("\r\n"));
+	responseMessege.append(AutoIndexContent);
+}
+
+bool Response::isAutoIndex()
+{
+	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
+	return SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/' && getConfigCommon().autoindex.size() != 0;
+}
+
 size_t	Response::getContentLength()
+
 {
 	struct stat buf;
 	stat(targetFilePath.c_str(), &buf);
