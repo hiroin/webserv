@@ -1041,18 +1041,12 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 		}
 		// indexディレクティブがなかったら403
 		ResponseStatus = statusNo; //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
-		if (ResponseStatus == 404)
+		if (isAutoIndex() && isDirectoryAvailable()) //autoindex の時はここに入ってくる。
 		{
-			if (isAutoIndex() && isDirectoryAvailable()) //autoindex の時はここに入ってくる。
-			{
-				isAutoIndexApply = true;
-				getAutoIndexContent(); //AutoIndex のBody を作る。
-				ResponseStatus = 200;
-				//autoindex の情報入れる
-
-			}
-			return ;
-
+			isAutoIndexApply = true;
+			getAutoIndexContent(); //AutoIndex のBody を作る。
+			ResponseStatus = 200;
+			//autoindex の情報入れる
 		}
 		this->targetFilePath = "";
 		return ;
