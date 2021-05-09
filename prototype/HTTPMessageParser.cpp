@@ -65,6 +65,27 @@ enum httpMessageParser::method HTTPMessageParser::getMethod() const
   return method_;
 }
 
+std::string HTTPMessageParser::getMethodString() const
+{
+  if (method_ == httpMessageParser::GET)
+    return "GET";
+  else if (method_ == httpMessageParser::HEAD)
+    return "HEAD";
+  else if (method_ == httpMessageParser::POST)
+    return "POST";
+  else if (method_ == httpMessageParser::PUT)
+    return "PUT";
+  else if (method_ == httpMessageParser::DELETE)
+    return "DELETE";
+  else if (method_ == httpMessageParser::CONNECT)
+    return "CONNECT";
+  else if (method_ == httpMessageParser::OPTIONS)
+    return "OPTIONS";
+  else if (method_ == httpMessageParser::TRACE)
+    return "TRACE";
+  return "";
+}
+
 std::string HTTPMessageParser::getRequestTarget() const
 {
   return requestTarget_;

@@ -40,6 +40,8 @@ class Wevserv
   void initFD();
   bool isNotKeepConnectionCode(int code);
   void responseNot200(int i, int code);
+  std::map<int, std::string> getMonth();
+  std::string getTime();
   void debugPrintGetRecvData(int i);
   void debugPrintGetReadData(int i);
   void debugPrintExtractedData(int i);

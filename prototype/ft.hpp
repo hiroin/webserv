@@ -22,6 +22,7 @@ bool ft_istspecials(char c);
 bool ft_isunreserved(char c);
 bool ft_isvchar(char c);
 bool ft_istchar(char c);
+std::string ft_itos(int nu);
 void *ft_memcpy(void *dest, const void *src, size_t n);
 void *ft_memset(void *s, int c, size_t n);
 void ft_print_vector_string(std::vector<std::string> vs);

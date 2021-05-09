@@ -28,6 +28,8 @@ int ft_pow(int n, int times)
 std::string ft_itos(int nu)
 {
 	std::string ret;
+  if (nu == 0)
+    ret = "0";
 	while (nu > 0)
 	{
 		char c[2];
@@ -37,7 +39,6 @@ std::string ft_itos(int nu)
 		nu /= 10;
 	}
 	return (ret);
-
 }
 
 std::string ft_ltos(long nu)

@@ -221,6 +221,21 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           clients_[i].responseMessege = responses_[i]->responseMessege;
           clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
           clients_[i].status = SEND;
+          std::string log;
+          log += clients_[i].ip;
+          log += " ";
+          log += getTime();
+          log += " \"";
+          log += clients_[i].hmp.getMethodString();
+          log += " ";
+          log += clients_[i].hmp.getRequestTarget();
+          log += " ";
+          log += clients_[i].hmp.getHTTPVersion();
+          log += "\" ";
+          log += clients_[i].hmp.headers_["referer"];
+          log += " ";
+          log += clients_[i].hmp.headers_["user-agent"];
+          std::cout << log << std::endl;
           delete responses_[i];
         }
       }
@@ -379,6 +394,39 @@ void Wevserv::responseNot200(int i, int code)
     clients_[i].responseCode = 400;
     clients_[i].status = SEND;
   }
+}
+
+std::map<int, std::string> Wevserv::getMonth()
+{
+	std::map<int, std::string> month;
+	month[0] = "Jan";
+	month[1] = "Feb";
+	month[2] = "Mar";
+	month[3] = "Apr";
+	month[4] = "May";
+	month[5] = "Jun";
+	month[6] = "Jul";
+	month[7] = "Aug";
+	month[8] = "Sep";
+	month[9] = "Oct";
+	month[10] = "Nov";
+	month[11] = "Dec";
+	return (month);
+}
+
+std::string Wevserv::getTime()
+{
+  std::string timestamp;
+	time_t timer;
+	struct tm *gmt;
+	time(&timer);
+	gmt = gmtime(&timer);
+	timestamp.append("[");
+	timestamp.append(ft_itos(gmt->tm_mday) + "/");
+	timestamp.append(getMonth()[gmt->tm_mon] + "/");
+	timestamp.append(ft_itos(gmt->tm_year + 1900) + " ");
+	timestamp.append(ft_itos(gmt->tm_hour) + ":" + ft_itos(gmt->tm_min) + ":" + ft_itos(gmt->tm_sec) + "]");
+  return timestamp;
 }
 
 void Wevserv::debugPrintGetRecvData(int i)
