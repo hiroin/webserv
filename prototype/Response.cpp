@@ -37,7 +37,6 @@ std::string ft_itos(int nu)
 		nu /= 10;
 	}
 	return (ret);
-
 }
 
 std::string ft_ltos(long nu)

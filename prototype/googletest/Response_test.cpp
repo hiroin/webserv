@@ -1687,7 +1687,7 @@ TEST(Response_test, Authorization)
 
     EXPECT_EQ(200, ResponseStatus);
     EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
-}
+  }
   {
     // 0092
     Client client_;
@@ -1734,5 +1734,556 @@ TEST(Response_test, Authorization)
     int ResponseStatus = Response.ResponseStatus;
 
     EXPECT_EQ(401, ResponseStatus);
+  }
+}
+
+TEST(Response_test, AcceptLanguageAndAcceptCharset)
+{
+  const char* configfile = "testcase/020_acceptcharaset.conf";
+  Config config_;
+  parseConfig(configfile, config_);  
+  // 0095
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-language"] = "en";
+    client_.hmp.headers_["accept-charset"] = "iso-8859-15;q=0.9, utf-8, *;q=0.5";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8.en", Response.targetFilePath);
+  }
+  // 0096
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "iso-8859-15;q=0.8, utf-8;q=0.9, *";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.iso-8859-15", Response.targetFilePath);
+  }
+  // 0097
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8, iso-8859-15;q=0.9, *;q=0.5";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0098
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0099
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "*";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  // 0100
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "iso-8859-15";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.iso-8859-15", Response.targetFilePath);
+  }
+  // 0101
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8, iso-8859-15;q=0.9";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0102
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "iso-8859-15;q=0.9";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.iso-8859-15", Response.targetFilePath);
+  }
+  // 0103
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "EUC_JP";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(406, ResponseStatus);
+  }
+  // 0104
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "iso-8859-15;q=0.9, utf-8";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0105
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "EUC_JP, utf-8";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0106
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "EUC_JP, *";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  // 0107
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "EUC_JP, utf-8, iso-8859-15";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0108
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=1.000";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0109
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=1.00";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0110
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=1.0";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0111
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=1.";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0112
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0113
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=1.0000";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  // 0114
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=1.2";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  // 0115
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=2";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  // 0116
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8,";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0117
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=0.999";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0118
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=0.99";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0119
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=0.9";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0120
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=0.";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0121
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=0";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+  // 0122
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "zz";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(406, ResponseStatus);
+  }
+  // 0123
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=2, iso-8859-15";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.iso-8859-15", Response.targetFilePath);
+  }
+  // 0124
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=2, iso-8859-15,";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  // 0125
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=2, iso-8859-15;,";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+  }
+  // 0126
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=0.11, iso-8859-15;q=0.11, *;q=0.11";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }  
+  // 0127
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "utf-8;q=0.111, iso-8859-15;q=0.11, *;q=0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html.utf-8", Response.targetFilePath);
+  }
+
+  // 0128
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["accept-charset"] = "EUC_JP,de;q=0.5,el;q=0.3";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(406, ResponseStatus);
+    EXPECT_EQ("", Response.targetFilePath);
   }
 }

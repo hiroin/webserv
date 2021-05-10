@@ -135,10 +135,12 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
               {
                 clients_[i].readFd = responses_[i]->getTargetFileFd();
                 clients_[i].readDataFromFd.setFd(clients_[i].readFd);
+                coutLog(i);
               }
               else if (clients_[i].status == SEND)
               {
                 clients_[i].responseMessege = responses_[i]->responseMessege;
+                coutLog(i);
                 delete responses_[i];
                 clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
               }
@@ -221,21 +223,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           clients_[i].responseMessege = responses_[i]->responseMessege;
           clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
           clients_[i].status = SEND;
-          std::string log;
-          log += clients_[i].ip;
-          log += " ";
-          log += getTime();
-          log += " \"";
-          log += clients_[i].hmp.getMethodString();
-          log += " ";
-          log += clients_[i].hmp.getRequestTarget();
-          log += " ";
-          log += clients_[i].hmp.getHTTPVersion();
-          log += "\" ";
-          log += clients_[i].hmp.headers_["referer"];
-          log += " ";
-          log += clients_[i].hmp.headers_["user-agent"];
-          std::cout << log << std::endl;
           delete responses_[i];
         }
       }
@@ -377,10 +364,12 @@ void Wevserv::responseNot200(int i, int code)
     clients_[i].readFd = responses_[i]->getTargetFileFd();
     clients_[i].readDataFromFd.setFd(clients_[i].readFd);
     clients_[i].responseCode = code;
+    coutLog(i);
   }
   else if (clients_[i].status == SEND)
   {
     clients_[i].responseMessege = responses_[i]->responseMessege;
+    coutLog(i);
     delete responses_[i];
     clients_[i].responseCode = code;
     clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
@@ -394,6 +383,41 @@ void Wevserv::responseNot200(int i, int code)
     clients_[i].responseCode = 400;
     clients_[i].status = SEND;
   }
+}
+
+void Wevserv::coutLog(int i)
+{
+  std::string log;
+  log += clients_[i].ip;
+  log += " [";
+  log += getTime();
+  log += "] ";
+  log += ft_itos(clients_[i].responseCode);
+  log += " \"";
+  log += clients_[i].hmp.getMethodString();
+  log += " ";
+  log += clients_[i].hmp.getRequestTarget();
+  log += " ";
+  log += clients_[i].hmp.getHTTPVersion();
+  log += "\" ";
+  if (clients_[i].hmp.headers_["referer"] == "")
+    log += "-";
+  else
+  {
+    log += "\"";
+    log += clients_[i].hmp.headers_["referer"];
+    log += "\"";
+  }
+  log += " ";
+  if (clients_[i].hmp.headers_["user-agent"] == "")
+    log += "-";
+  else
+  {
+    log += "\"";
+    log += clients_[i].hmp.headers_["user-agent"];
+    log += "\"";
+  }
+  std::cout << log << std::endl;
 }
 
 std::map<int, std::string> Wevserv::getMonth()
@@ -414,6 +438,26 @@ std::map<int, std::string> Wevserv::getMonth()
 	return (month);
 }
 
+std::string Wevserv::ft_ito00(int n)
+{
+  std::string ret;
+  if (n <= 9)
+  {
+    ret += '0';
+    ret += '0' + n;
+    return ret;
+  }
+  while (n > 0)
+  {
+    char c[2];
+    c[0] = '0' + n % 10;
+    c[1] = '\0';
+    ret.insert(0, std::string(c));
+    n /= 10;
+  }
+  return (ret);
+}
+
 std::string Wevserv::getTime()
 {
   std::string timestamp;
@@ -421,11 +465,10 @@ std::string Wevserv::getTime()
 	struct tm *gmt;
 	time(&timer);
 	gmt = gmtime(&timer);
-	timestamp.append("[");
-	timestamp.append(ft_itos(gmt->tm_mday) + "/");
+	timestamp.append(ft_ito00(gmt->tm_mday) + "/");
 	timestamp.append(getMonth()[gmt->tm_mon] + "/");
-	timestamp.append(ft_itos(gmt->tm_year + 1900) + " ");
-	timestamp.append(ft_itos(gmt->tm_hour) + ":" + ft_itos(gmt->tm_min) + ":" + ft_itos(gmt->tm_sec) + "]");
+	timestamp.append(ft_ito00(gmt->tm_year + 1900) + " ");
+	timestamp.append(ft_ito00(gmt->tm_hour) + ":" + ft_ito00(gmt->tm_min) + ":" + ft_ito00(gmt->tm_sec));
   return timestamp;
 }
 
