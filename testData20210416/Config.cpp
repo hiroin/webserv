@@ -201,12 +201,13 @@ Config::Config(int testPattern)
     configGlobal.servers[0].locations.push_back(tmpConfigLocation);
     configGlobal.servers[0].locations[1].path = "/aa";
     configGlobal.servers[0].locations[1].alias = "/tmp/webserv/0aa";
-    configGlobal.servers[0].locations[1].configCommon.indexs.push_back("index.html");
+    configGlobal.servers[0].locations[1].configCommon.indexs.push_back("index.htm");
     configGlobal.servers[0].locations[1].configCommon.errorPages["404"] = "/404.html";
     configGlobal.servers[0].locations.push_back(tmpConfigLocation);
     configGlobal.servers[0].locations[2].path = "/";
-    configGlobal.servers[0].locations[2].configCommon.indexs.push_back("index.html");
+    configGlobal.servers[0].locations[2].configCommon.indexs.push_back("index.htm");
     configGlobal.servers[0].locations[2].configCommon.errorPages["404"] = "/404.html";
+    configGlobal.servers[0].locations[2].configCommon.autoindex = "on";
     configGlobal.servers[0].host = "*";
     configGlobal.servers[0].port = 5000;
     configGlobal.servers.push_back(tmpConfigServer);
