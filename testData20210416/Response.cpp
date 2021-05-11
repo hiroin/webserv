@@ -4,6 +4,7 @@
 #endif
 #include "Response.hpp"
 #include "Config.hpp"
+#include "HTTPMessageParser.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -14,6 +15,7 @@
 #include <sys/types.h>
 #include <ctime>
 #include <algorithm>
+int isTheFileExist(std::string targetFile);
 
 int ft_pow(int n, int times)
 {
@@ -649,6 +651,15 @@ std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(st
 	return AcceptLanguageMap;
 }
 
+bool Response::isTransferEncodingChunked()
+{
+	return (client.hmp.headers_["transfer-encoding"] == std::string("chunked"));
+}
+
+bool Response::isContentLength()
+{
+	return (client.hmp.headers_["content-length"].size() != 0);
+}
 
 Response::Response(Client &client, Config &config) : client(client), config(config)
 {
@@ -668,27 +679,67 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	/* メソッドが許可されているかを判断 */
 	if (isMethodAllowed())
 	{
-		if (isAcceptCharsetSet())
+		//ここから、メソッド毎に処理を分けて書いていく
+		if (client.hmp.method_ == httpMessageParser::GET)
 		{
-			std::string AcceptCharsetValue = client.hmp.headers_[std::string("accept-charset")];
-			if(isMatchAcceptCharsetFromat(AcceptCharsetValue))
+			if (isAcceptCharsetSet())
 			{
-				AcceptCharsetMap = parseAcceptCharset(AcceptCharsetValue);
+				std::string AcceptCharsetValue = client.hmp.headers_[std::string("accept-charset")];
+				if(isMatchAcceptCharsetFromat(AcceptCharsetValue))
+				{
+					AcceptCharsetMap = parseAcceptCharset(AcceptCharsetValue);
+				}
+			}
+			if (isAcceptLanguageSet())
+			{
+				std::string AcceptLanguageValue = client.hmp.headers_[std::string("accept-language")];
+				if(isMatchAcceptLanguageFromat(AcceptLanguageValue))
+				{
+					AcceptLanguageMap = parseAcceptLanguage(AcceptLanguageValue);
+				}
+			}
+			setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
+		}
+		else if (client.hmp.method_ == httpMessageParser::PUT || client.hmp.method_ == httpMessageParser::POST)
+		{
+			if (isTransferEncodingChunked() || isContentLength())
+			{
+				std::string SearchAbsolutePath = GetSerachAbsolutePath();
+				PutPostBody = client.hmp.body_;
+				if (client.hmp.method_ == httpMessageParser::PUT)
+				{
+					if (isDirectoryAvailable() && SearchAbsolutePath[SearchAbsolutePath.size() - 1] != '/') //directory がOKだったらこの下で書き込み
+					{
+						//指定されたリソースが作成できるかをチェック
+						this->targetFilePath = SearchAbsolutePath;
+						int isExist = isTheFileExist(this->targetFilePath);
+						int fd = open(this->targetFilePath.c_str(), O_RDWR | O_CREAT, S_IRWXU);
+						if (fd == -1)
+						{
+							ResponseStatus = 400;
+							return;
+						}
+						close(fd);
+						if (isExist == 200)
+							ResponseStatus = 204;
+						else
+							ResponseStatus = 201;
+					}
+				}
+				else //CGI にリクエストをだす
+				{
+
+				}
+			}
+			else
+			{
+				ResponseStatus = 400;
 			}
 		}
-		if (isAcceptLanguageSet())
-		{
-			std::string AcceptLanguageValue = client.hmp.headers_[std::string("accept-language")];
-			if(isMatchAcceptLanguageFromat(AcceptLanguageValue))
-			{
-				AcceptLanguageMap = parseAcceptLanguage(AcceptLanguageValue);
-			}
-		}
-		setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
 	}
 	setResponseLine(); //responseStatus と serverNameヘッダを設定
 	setDate();
-	if (ResponseStatus != 200)
+	if (ResponseStatus != 200 && ResponseStatus != 201 && ResponseStatus != 204)
 	{
 		if (ResponseStatus == 405)
 			setAllow();
@@ -713,11 +764,19 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		client.status = SEND;
 		return ;
 	}
-	setContenType(); //Languageを考えて選択する。
-	setContentLength();
-	if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
-		setContentLanguage();
-	client.status = READ;
+	if (client.hmp.method_ == httpMessageParser::GET)
+	{
+		setContenType(); //Languageを考えて選択する。
+		setContentLength();
+		if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
+			setContentLanguage();
+		client.status = READ;
+	}
+	if (client.hmp.method_ == httpMessageParser::PUT)
+	{
+		setLocation();
+		client.status = WRITE;
+	}
 }
 
 Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config)
@@ -736,6 +795,12 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 	}
 	client.status = SEND;
 }
+
+int	Response::getFileFdForWrite()
+{
+	return (open(targetFilePath.c_str(), O_RDWR));
+}
+
 
 bool Response::isAcceptLanguageSet()
 {
@@ -1059,9 +1124,27 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 	}
 }
 
+void removeFilePart(std::string &SerachFileAbsolutePath)
+{
+	std::string::reverse_iterator first = SerachFileAbsolutePath.rbegin();
+	std::string::reverse_iterator last = SerachFileAbsolutePath.rend();
+	int count = 0;
+	while(first != last)
+	{
+		if (*first == '/')
+			break ;
+		++first;
+		count++;
+	}
+	size_t size = SerachFileAbsolutePath.size();
+	SerachFileAbsolutePath = SerachFileAbsolutePath.substr(0, size - count);
+}
+
 bool Response::isDirectoryAvailable()
 {
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
+	if (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] != '/')
+		removeFilePart(SerachFileAbsolutePath);
 	DIR *ret = opendir(SerachFileAbsolutePath.c_str());
 	if (ret == NULL)
 		return false;
@@ -1122,6 +1205,7 @@ std::string Response::makeATag(std::string dataName)
 		aTag.append(std::string("                                             "));
 		struct stat buf;
 		stat(dataName.c_str(), &buf);
+		// std::cout << "=====================" << ctime(&(buf.st_ctime)) << "==============================" << std::endl;
 		aTag.append(std::string(ctime(&(buf.st_ctime))) + "\r\n");
 		return aTag;
 	}
@@ -1206,6 +1290,11 @@ void Response::setDate()
 	responseMessege.append("GMT\r\n");
 }
 
+void	Response::setLocation()
+{
+	responseMessege.append(std::string("Location: "));
+	responseMessege.append(this->targetFilePath + "\r\n");
+}
 
 bool Response::isErrorFilePathExist()
 {
