@@ -48,8 +48,12 @@ class Client
   std::string body;
   
   // クライアントからの接続タイムアウト用
-  struct timeval lastTv;
-  struct timeval nowTv;
+  struct timeval lastTvForClient;
+  struct timeval nowTvForClient;
+
+  // CGIの実行タイムアウト用
+  struct timeval lastTvForCGI;
+  struct timeval nowTvForCGI;
 
   // ヘッダの内容を見てボディを受信するかを返す
   // ヘッダに「Transfer-Encoding: chunked」があった場合、bChunkedをtrueに変更する
