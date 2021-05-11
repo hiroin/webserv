@@ -6,11 +6,26 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
 
   int selectReturn;
   struct timeval tvForSelect;
+  struct timeval nowTv;
   unsigned long mainLoopCounter = 0;
   while (1)
   {
     if (c.getDebugLevel() >= 1)
       std::cout << "[DEBUG]Loop : " << mainLoopCounter++ << "time" << std::endl;
+    gettimeofday(&nowTv, NULL);
+    for (int i = 0; i < MAX_SESSION; i++)
+    {
+      if (clients_[i].socketFd != -1)
+      {
+        std::cout << "nowTv.tv_sec           " << nowTv.tv_sec << std::endl;
+        std::cout << "lastTvForClient.tv_sec " << clients_[i].lastTvForClient.tv_sec  << std::endl;
+        if (nowTv.tv_sec - clients_[i].lastTvForClient.tv_sec > SESSION_TIMEOUT)
+        {
+          // std::cout << "session " << i << " timeout." << std::endl;
+          clients_[i].initClient();
+        }
+      }
+    }
     initFD();
     tvForSelect.tv_sec = SELECT_TIMEOUT;
     tvForSelect.tv_usec = 0;   
@@ -53,6 +68,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             clients_[i].port = itrServer->get_port();
             clients_[i].host = itrServer->get_host();
             clients_[i].ip = ft_inet_ntos(clienSockaddrIn.sin_addr);
+            clients_[i].lastTvForClient.tv_sec = nowTv.tv_sec;
             if (i > SESSION_LIMIT - 1)
             {
               limitOverI = i;
@@ -94,6 +110,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         if (clients_[i].receivedData.cutOutRecvDataToEol() \
           && clients_[i].receivedData.getExtractedData() != "")
         {
+          clients_[i].lastTvForClient.tv_sec = nowTv.tv_sec;
           debugPrintExtractedData(i);
           int code = clients_[i].hmp.parseRequestLine(clients_[i].receivedData.getExtractedData());
           if (code != 200)
