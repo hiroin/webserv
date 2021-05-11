@@ -44,7 +44,7 @@ class HTTPMessageParser {
 
   // headerを格納
   std::map<std::string, std::string> headers_;
-
+  std::string body_;
 };
 
 /*

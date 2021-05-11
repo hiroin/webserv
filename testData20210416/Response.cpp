@@ -132,7 +132,7 @@ bool isMatchQvalue(std::string::iterator &itr)
 				++itr;
 				count++;
 			}
-			if (count > 3) return false;
+			if (count > 3 || (isnumber(*itr))) return false;
 		}
 		return true;
 	} //qValue まで確認してreturn;
@@ -661,7 +661,7 @@ bool Response::isContentLength()
 	return (client.hmp.headers_["content-length"].size() != 0);
 }
 
-Response::Response(Client &client, Config &config) : client(client), config(config)
+Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
@@ -682,6 +682,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		//ここから、メソッド毎に処理を分けて書いていく
 		if (client.hmp.method_ == httpMessageParser::GET)
 		{
+
 			if (isAcceptCharsetSet())
 			{
 				std::string AcceptCharsetValue = client.hmp.headers_[std::string("accept-charset")];
@@ -689,6 +690,8 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 				{
 					AcceptCharsetMap = parseAcceptCharset(AcceptCharsetValue);
 				}
+				else
+					ResponseStatus = 406;
 			}
 			if (isAcceptLanguageSet())
 			{
@@ -697,6 +700,8 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 				{
 					AcceptLanguageMap = parseAcceptLanguage(AcceptLanguageValue);
 				}
+				else
+					ResponseStatus = 406;
 			}
 			setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
 		}
@@ -996,7 +1001,10 @@ int Response::isCharsetFileExist(std::string SerachFileAbsolutePath)
 		std::vector<std::string> Charset = first->second;
 		for(int i = 0; i < Charset.size(); i++)
 		{
-			targetFile = SerachFileAbsolutePath + "." + Charset[i];
+			if (Charset[i] == "*")
+				targetFile = SerachFileAbsolutePath;
+			else
+				targetFile = SerachFileAbsolutePath + "." + Charset[i];
 			statusNo = isTheFileExist(targetFile);
 			switch (statusNo)
 			{
@@ -1087,6 +1095,7 @@ int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
 
 void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返してくる物をみて、ファイルがそもそも存在するかをチェック
 {
+	if (ResponseStatus == 406) return;
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
 	if (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/')
 	{

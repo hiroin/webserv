@@ -14,9 +14,9 @@ int main()
     client.port = 5000;
     client.host = "*";
     client.hmp.method_ = httpMessageParser::GET;
-    client.hmp.absolutePath_ = "/index.html.en";
+    client.hmp.absolutePath_ = "/";
     client.hmp.headers_["host"] = "127.0.0.1";
-    client.hmp.headers_["Accept-Language"] = "en;q=0.8, ja;q=0.9, *";
+    client.hmp.headers_["accept-charset"] = "utf-8;q=1.0";
     Config config(1);
 
     Response Response(client, config);
