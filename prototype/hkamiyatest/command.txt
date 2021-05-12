@@ -1,0 +1,12 @@
+curl -v -XPUT http://127.0.0.1:8080/putdata.txt -d "putdata"
+curl -v -XPUT http://127.0.0.1:8080/putdata.txt -d "putdata"
+rm putdata.txt
+curl -v -XPUT http://127.0.0.1:8080/putdata.txt -d "putdata" --header "Transfer-Encoding: chunked"
+curl -v -XPUT http://127.0.0.1:8080/putdata.txt -d "putdata" --header "Transfer-Encoding: chunked"
+rm putdata.txt
+curl -v -XPUT http://127.0.0.1:8080/2.jpg.en -T 1.jpg
+curl -v -XPUT http://127.0.0.1:8080/2.jpg.en -T 1.jpg
+rm 2.jpg.en
+curl -v -XPUT http://127.0.0.1:8080/2.jpg.en -T 1.jpg --header "Transfer-Encoding: chunked"
+curl -v -XPUT http://127.0.0.1:8080/2.jpg.en -T 1.jpg --header "Transfer-Encoding: chunked"
+rm 2.jpg.en

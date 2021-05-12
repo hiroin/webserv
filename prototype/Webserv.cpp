@@ -286,6 +286,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         {
           if (close(clients_[i].readFd) == -1)
             std::cout << "[EMERG] cannot close clients_[" << i << "]readFd : " << clients_[i].readFd << std::endl;
+          clients_[i].readFd = -1;
           responses_[i]->AppendBodyOnResponseMessage(clients_[i].readDataFromFd.getReadData());
           debugPrintResponseMessege(i);
           clients_[i].readDataFromFd.clearData();
@@ -394,28 +395,27 @@ void Wevserv::initFD()
   {
     if (clients_[i].socketFd != -1)
     {
-      std::cout << "[DEBUG]" << clients_[i].socketFd << std::endl;
       FD_SET(clients_[i].socketFd, &readFds_);
       if (clients_[i].status == SEND && clients_[i].socketFd != -1)
         FD_SET(clients_[i].socketFd, &writeFds_);
       if (maxFd_ < (clients_[i].socketFd + 1))
         maxFd_ = clients_[i].socketFd + 1;
     }
-    // if (clients_[i].writeFd != -1)
-    // {
-    //   if (clients_[i].status == WRITE && clients_[i].writeFd != -1)
-    //     FD_SET(clients_[i].writeFd, &writeFds_);
-    //   if (maxFd_ < (clients_[i].writeFd + 1))
-    //     maxFd_ = clients_[i].writeFd + 1;
-    // }
+    if (clients_[i].writeFd != -1)
+    {
+      if (clients_[i].status == WRITE && clients_[i].writeFd != -1)
+        FD_SET(clients_[i].writeFd, &writeFds_);
+      if (maxFd_ < (clients_[i].writeFd + 1))
+        maxFd_ = clients_[i].writeFd + 1;
+    }
     if (clients_[i].readFd != -1)
     {
-      std::cout << "[DEBUG]" << clients_[i].readFd << std::endl;
       FD_SET(clients_[i].readFd, &readFds_);
       if (maxFd_ < (clients_[i].readFd + 1))
         maxFd_ = clients_[i].readFd + 1;
     }
-    std::cout << "[DEBUG]" << maxFd_ << std::endl;
+    if (c_.getDebugLevel() >= 1)
+      std::cout << "[DEBUG]maxFd : " << maxFd_ << std::endl;
   }
 }
 
