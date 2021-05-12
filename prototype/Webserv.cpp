@@ -17,11 +17,10 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
     {
       if (clients_[i].socketFd != -1)
       {
-        std::cout << "nowTv.tv_sec           " << nowTv.tv_sec << std::endl;
-        std::cout << "lastTvForClient.tv_sec " << clients_[i].lastTvForClient.tv_sec  << std::endl;
         if (nowTv.tv_sec - clients_[i].lastTvForClient.tv_sec > SESSION_TIMEOUT)
         {
-          // std::cout << "session " << i << " timeout." << std::endl;
+          if (c.getDebugLevel() >= 1)
+            std::cout << "[DEBUG]clients_[" << i << "] session timeout." << std::endl;
           clients_[i].initClient();
         }
       }
@@ -223,6 +222,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           }
         }
         // 未完成部分 PUTができたら稼働させる
+        std::cout << "[DEBUG]PUT!" << std::endl;
         ft_dummy_response(200, clients_[i].socketFd);
         clients_[i].status = PARSE_STARTLINE;
         clients_[i].hmp.clearData();

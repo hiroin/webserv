@@ -86,6 +86,7 @@ class Response
 
 		std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
 		std::map<std::string, std::vector<std::string> > AcceptCharsetMap;
+		std::string PutPostBody;
 
 		/**
 		 * クライアントと、リクエストからどのサーバーを使うのかきめる
@@ -136,6 +137,10 @@ class Response
 		std::vector<std::string> getDirectoryContents();
 		std::string makeATag(std::string dataName);
 		void	makeAutoIndexResponse();
+		bool	isTransferEncodingChunked();
+		bool	isContentLength();
+		int		getFileFdForWrite();
+		void	setLocation();
 		/*===============HTTPstatus===============*/
 
 

@@ -11,7 +11,7 @@ TEST(HTTPMessageParserEvenTest, parseRequestLine) {
   EXPECT_EQ(200, c.parseRequestLine("GET / HTTP/1.1"));
   EXPECT_EQ(200, c.parseRequestLine("HEAD / HTTP/1.1"));
   EXPECT_EQ(200, c.parseRequestLine("POST / HTTP/1.1"));
-  EXPECT_EQ(200, c.parseRequestLine("PUT / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("PUT /putdata.html HTTP/1.1"));
   EXPECT_EQ(200, c.parseRequestLine("DELETE / HTTP/1.1"));
   EXPECT_EQ(200, c.parseRequestLine("CONNECT / HTTP/1.1"));
   EXPECT_EQ(200, c.parseRequestLine("OPTIONS / HTTP/1.1"));
@@ -30,8 +30,8 @@ TEST(HTTPMessageParserEvenTest, parseRequestLine) {
   EXPECT_EQ(400, c.parseRequestLine(" GET / HTTP/1.1"));
   EXPECT_EQ(414, c.parseRequestLine("GET /00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.html HTTP/1.1"));
 
-  EXPECT_EQ(200, c.parseRequestLine("PUT / HTTP/1.1"));
-  EXPECT_EQ(400, c.parseRequestLine("PUT /i HTTP/1.1"));
+  EXPECT_EQ(400, c.parseRequestLine("PUT / HTTP/1.1"));
+  EXPECT_EQ(200, c.parseRequestLine("PUT /i HTTP/1.1"));
 }
 
 TEST(HTTPMessageParserEvenTest, getAfterParseRequestLine) {
