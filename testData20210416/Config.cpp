@@ -208,6 +208,8 @@ Config::Config(int testPattern)
     configGlobal.servers[0].locations[2].configCommon.indexs.push_back("index.htm");
     configGlobal.servers[0].locations[2].configCommon.errorPages["404"] = "/404.html";
     configGlobal.servers[0].locations[2].configCommon.autoindex = "on";
+    configGlobal.servers[0].locations[2].configCommon.authBasicUid="dafdfasd";
+    configGlobal.servers[0].locations[2].configCommon.authBasicPassword="dafdfasd";
     configGlobal.servers[0].host = "*";
     configGlobal.servers[0].port = 5000;
     configGlobal.servers.push_back(tmpConfigServer);
