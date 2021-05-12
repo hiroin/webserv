@@ -666,7 +666,7 @@ bool Response::isContentLength()
 	return (client.hmp.headers_["content-length"].size() != 0);
 }
 
-Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false)
+Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
@@ -810,7 +810,13 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 
 int	Response::getFileFdForWrite()
 {
-	return (open(targetFilePath.c_str(), O_RDWR));
+	if (writeFd == -1)
+	{
+		writeFd = open(targetFilePath.c_str(), O_RDWR| O_CREAT, S_IRWXU);
+		if (writeFd == -1)
+			return (-1);
+	}
+	return (writeFd);
 }
 
 
@@ -1275,9 +1281,13 @@ size_t	Response::getContentLength()
 
 int	Response::getTargetFileFd()
 {
-	int fd;
-	fd = open(targetFilePath.c_str(), O_RDONLY);
-	return fd;
+	if (readFd == -1)
+	{
+		readFd = open(targetFilePath.c_str(), O_RDONLY);
+		if (readFd == -1)
+			return (-1);
+	}
+	return readFd;
 }
 
 

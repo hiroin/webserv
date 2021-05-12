@@ -13,41 +13,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-struct ResponseHeaderField
-{
-	std::string Location; /*サーバーでリダイレクトされるパス*/
-	std::string Retry_After; /*いつ送信し直すか*/
-	std::string Server;
-	std::string WWW_Authenticate; /* 401 Unauthorized 応答と共に送られる
-									ベーシック認証ができるかどうかをチェック?*/
-};
 
-struct GeneralHeaderField
-{
-	std::string Date;
-	std::string Transfer_Encoding; /*どうやって決めよう*/
-
-};
-
-struct EntityHeaderField
-{
-	std::string Allow;
-	std::string Content_Language;
-	std::string Content_Length;
-	std::string Content_Location;
-	std::string Content_Type;
-	std::string Last_Modified;
-};
-
-struct ResponseInfo
-{
-	std::string RequestLine;
-	ResponseHeaderField rhf;
-	GeneralHeaderField ghf;
-	EntityHeaderField ehf;
-	std::string MessageBody;
-};
-/**とりあえず、200 ok をかえせるように**/
 class Response
 {
 
@@ -63,6 +29,8 @@ class Response
 		std::string targetFilePath;
 		std::string AutoIndexContent;
 		bool isAutoIndexApply;
+		int readFd;
+		int writeFd;
 		// std::string errorFilePath;
 		/**
 		 * Accept-Language
