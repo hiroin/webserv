@@ -16,7 +16,7 @@ int main()
     client.hmp.method_ = httpMessageParser::GET;
     client.hmp.absolutePath_ = "/";
     client.hmp.headers_["host"] = "127.0.0.1";
-    client.hmp.headers_["accept-charset"] = "utf-8;q=1.0";
+    client.hmp.headers_["authorization"] = "1234:tyuio";
     Config config(1);
 
     Response Response(client, config);
