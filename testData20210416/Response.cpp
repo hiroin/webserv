@@ -91,7 +91,7 @@ std::string getFileExtention(std::string FilePath)
 bool isEightAlphas(std::string::iterator &itr)
 {
 	int count = 0;
-	while(isalpha(*itr)) //language-rangeを回収
+	while(std::isalpha(*itr)) //language-rangeを回収
 	{
 		itr++;
 		count++;
@@ -111,7 +111,7 @@ bool isMatchQvalue(std::string::iterator &itr)
 		{
 			++itr;
 			int count = 0;
-			while(isdigit(*itr))
+			while(std::isdigit(*itr))
 			{
 				++itr;
 				count++;
@@ -133,7 +133,11 @@ bool isMatchQvalue(std::string::iterator &itr)
 				++itr;
 				count++;
 			}
+<<<<<<< HEAD
 			if (count > 3 || (isdigit(*itr))) return false;
+=======
+			if (count > 3 || (std::isdigit(*itr))) return false;
+>>>>>>> 82f7dfa1f157a71351abdf18d149b124e791429c
 		}
 		return true;
 	} //qValue まで確認してreturn;
@@ -215,7 +219,7 @@ float ft_stof(std::string str)
 	}
 	++itr;
     int count = 0;
-    while(isdigit(*itr))
+    while(std::isdigit(*itr))
 	{
 		ret *= 10;
 		ret += *itr - '0';
@@ -230,7 +234,7 @@ void getAcceptLanguages(std::map<std::string, std::vector<std::string> >& Accept
 {
 	std::string LanguageRange;
 	std::string qValue = "1";
-	while(isalpha(*itr) || *itr == '*')
+	while(std::isalpha(*itr) || *itr == '*')
 	{
 		LanguageRange.push_back(*itr);
 		++itr;
@@ -239,7 +243,7 @@ void getAcceptLanguages(std::map<std::string, std::vector<std::string> >& Accept
 	{
 		LanguageRange.push_back(*itr);
 		++itr;
-		while(isalpha(*itr))
+		while(std::isalpha(*itr))
 		{
 			LanguageRange.push_back(*itr);
 			++itr;
@@ -251,7 +255,7 @@ void getAcceptLanguages(std::map<std::string, std::vector<std::string> >& Accept
 		++itr;
 		++itr;
 		++itr;
-		while (isdigit(*itr) || *itr == '.')
+		while (std::isdigit(*itr) || *itr == '.')
 		{
 			qValue.push_back(*itr);
 			++itr;
@@ -580,12 +584,12 @@ bool Response::isAcceptCharsetSet()
 
 bool isMatchCharset(std::string::iterator &itr)
 {
-	while(isdigit(*itr) || isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
+	while(std::isdigit(*itr) || std::isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
 				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
 	{
 		++itr;
 	}
-	if (!(isprint(*itr)) && *itr != '\0') return false; //非表示文字が入ってたらreturn
+	if (!(std::isprint(*itr)) && *itr != '\0') return false; //非表示文字が入ってたらreturn
 	return true;
 }
 
@@ -616,7 +620,7 @@ void getAcceptCharset(std::map<std::string, std::vector<std::string> >& AcceptCh
 {
 	std::string Charset;
 	std::string qValue = "1";
-	while(isdigit(*itr) || isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
+	while(std::isdigit(*itr) || std::isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
 				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
 	{
 		Charset.push_back(*itr);
@@ -628,7 +632,7 @@ void getAcceptCharset(std::map<std::string, std::vector<std::string> >& AcceptCh
 		++itr;
 		++itr;
 		++itr;
-		while (isdigit(*itr) || *itr == '.')
+		while (std::isdigit(*itr) || *itr == '.')
 		{
 			qValue.push_back(*itr);
 			++itr;
@@ -673,6 +677,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		setResponseLine(); //responseStatus と serverNameヘッダを設定
 		setDate();
 		setWWWAuthenticate();
+		responseMessege.append(std::string("Content-Length: 0\r\n"));
 		responseMessege.append(std::string("\r\n"));
 		client.status = SEND;
 		return ;
@@ -759,8 +764,9 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		}
 		else
 		{
-			client.status = SEND;
+			responseMessege.append(std::string("Content-Length: 0\r\n"));
 			responseMessege.append(std::string("\r\n"));
+			client.status = SEND;
 			return ;
 		}
 	}
