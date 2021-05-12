@@ -1,4 +1,4 @@
-CC = clang++
+CXX		= clang++
 HTTP1 = server
 HTTP1_SOURCE = main.cpp \
                Socket.cpp \
@@ -29,11 +29,13 @@ HTTP1_SOURCE = main.cpp \
 							 readData.cpp \
 							 Webserv.cpp
 .PHONY: all clean
-
+OBJS	= $(HTTP1_SOURCE:.cpp=.o)
 all: $(HTTP1)
-
-$(HTTP1): $(HTTP1_SOURCE)
-	clang++ $(HTTP1_SOURCE) -o $(HTTP1) -g -D_GLIBCXX_DEBUG -std=c++98 -O0
+$(HTTP1): $(OBJS)
+	clang++ $(OBJS) -o $(HTTP1) -g -D_GLIBCXX_DEBUG -std=c++98 -O0
 
 clean:
-	rm -rf *.o $(HTTP1)
+	rm -rf *.o 
+fclean: clean
+	rm -rf $(HTTP1)
+re: fclean all

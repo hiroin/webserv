@@ -16,7 +16,8 @@ int getChunked::parseChunkedData()
       if (r_->cutOutRecvDataToEol() == 0)
         return -1;
       chunksize_chunkext = r_->getExtractedData();
-      std::cout << "chunksize_chunkext : [" << chunksize_chunkext << "]" << std::endl;
+      if (debugLevel_ >= 1)
+        std::cout << "[DEBUG]chunksize_chunkext : [" << chunksize_chunkext << "]" << std::endl;
       std::string::size_type pos = chunksize_chunkext.find(";");
       if (pos != std::string::npos)
         chunksize_ = chunksize_chunkext.substr(0, pos);
@@ -27,8 +28,11 @@ int getChunked::parseChunkedData()
         bNotDone = false;
         break;
       }
-      std::cout << "chunksize(hex)     : [" << chunksize_ << "]" << std::endl;
-      std::cout << "chunksize(dec)     : [" << hexstring2int(chunksize_) << "]" << std::endl;
+      if (debugLevel_ >= 1)
+      {
+        std::cout << "[DEBUG]chunksize(hex)     : [" << chunksize_ << "]" << std::endl;
+        std::cout << "[DEBUG]chunksize(dec)     : [" << hexstring2int(chunksize_) << "]" << std::endl;
+      }
       if (hexstring2int(chunksize_) == -1)
         return 400;
       status_ = GET_CHUNK_DATA;
@@ -37,7 +41,8 @@ int getChunked::parseChunkedData()
     {
       if (r_->cutOutRecvDataBySpecifyingBytes(hexstring2int(chunksize_)) == 0)
         return -1;
-      std::cout << "chunk-data         : [" << r_->getExtractedData() << "]" << std::endl;
+      if (debugLevel_ >= 2)
+        std::cout << "[DEBUG]chunk-data         : [" << r_->getExtractedData() << "]" << std::endl;
       *clientBody_ += r_->getExtractedData();
       status_ = GET_CHUNK_CRLF;
     }
@@ -128,7 +133,12 @@ void getChunked::clear()
   chunksize_.clear();
 }
 
-getChunked::getChunked() : status_(GET_CHUNK_SIZE), clientBody_(NULL), r_(NULL)
+void getChunked::setDebugLevel(int level)
+{
+  debugLevel_ = level;
+}
+
+getChunked::getChunked() : status_(GET_CHUNK_SIZE), clientBody_(NULL), r_(NULL), debugLevel_(0)
 {
 }
 

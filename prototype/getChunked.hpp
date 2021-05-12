@@ -21,6 +21,7 @@ class getChunked {
   void setRecvData(recvData *r);
   int parseChunkedData();
   void clear();
+  void setDebugLevel(int level);
 
  public:
   getChunked();
@@ -37,6 +38,7 @@ class getChunked {
 
  private:
    std::string chunksize_;
+   int debugLevel_;
 
 };
 

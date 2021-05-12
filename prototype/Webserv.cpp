@@ -3,7 +3,8 @@
 Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
 {
   setupServers();
-
+  for (int i = 0; i < MAX_SESSION; i++)
+    clients_[i].gc.setDebugLevel(c.getDebugLevel());
   int selectReturn;
   struct timeval tvForSelect;
   struct timeval nowTv;
@@ -176,64 +177,115 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           }
         }
       }
-      if (clients_[i].status == RESV_BODY)
+      if (clients_[i].status == RESV_BODY && clients_[i].bChunked == false)
       {
-        if (clients_[i].bChunked == true)
+        if (clients_[i].receivedData.cutOutRecvDataBySpecifyingBytes(ft_stoi(clients_[i].hmp.headers_["content-length"])))
         {
-          clients_[i].gc.setRecvData(&clients_[i].receivedData);
-          clients_[i].gc.setClientBody(&clients_[i].body);
-          int code = clients_[i].gc.parseChunkedData();
-          if (code == 200)
-          {
-            debugPrintRequestBody(i);
-            while (clients_[i].receivedData.cutOutRecvDataToEol())
-            {
-              if (clients_[i].receivedData.getExtractedData() == "")
-              {
-                debugPrintHeaders(i);
-                int code = clients_[i].hmp.isInvalidHeaderValue();
-                if (code != 200)
-                  responseNot200(i, code);
-                break;
-              }
-              else
-              {
-                if (clients_[i].hmp.isIllegalValueOfHostHeader(clients_[i].receivedData.getExtractedData())
-                  || clients_[i].hmp.parseHeader(clients_[i].receivedData.getExtractedData()) == 400)
-                {
-                  responseNot200(i, code);
-                  break;
-                }
-              }
-            }
-          }
-          else if (code == 400)
-          {
-            responseNot200(i, code);
-            continue;
-          }
+          clients_[i].body = clients_[i].receivedData.getExtractedData();
+          debugPrintRequestBody(i);
+          clients_[i].status = CREATE_RESPONSE;
         }
         else
+          continue;
+      }
+      if (clients_[i].status == RESV_BODY && clients_[i].bChunked == true)
+      {
+        clients_[i].gc.setRecvData(&clients_[i].receivedData);
+        clients_[i].gc.setClientBody(&clients_[i].body);
+        int code = clients_[i].gc.parseChunkedData();
+        if (code == -1)
+          continue;
+        if (code == 200)
         {
-          if (clients_[i].receivedData.cutOutRecvDataBySpecifyingBytes(ft_stoi(clients_[i].hmp.headers_["content-length"])))
+          debugPrintRequestBody(i);
+          clients_[i].status = PARSE_HEADER_AFTER_CHUNKD;
+        }
+        else if (code == 400)
+        {
+          responseNot200(i, code);
+        }
+      }
+      if (clients_[i].status == PARSE_HEADER_AFTER_CHUNKD)
+      {
+        while (clients_[i].receivedData.cutOutRecvDataToEol())
+        {
+          if (clients_[i].receivedData.getExtractedData() == "")
           {
-            clients_[i].body = clients_[i].receivedData.getExtractedData();
-            debugPrintRequestBody(i);
+            debugPrintHeaders(i);
+            int code = clients_[i].hmp.isInvalidHeaderValue();
+            if (code != 200)
+              responseNot200(i, code);
+            clients_[i].status = CREATE_RESPONSE;
+            break;
+          }
+          else
+          {
+            if (clients_[i].hmp.isIllegalValueOfHostHeader(clients_[i].receivedData.getExtractedData())
+              || clients_[i].hmp.parseHeader(clients_[i].receivedData.getExtractedData()) == 400)
+            {
+              responseNot200(i, 400);
+              break;
+            }
           }
         }
-        // 未完成部分 PUTができたら稼働させる
-        std::cout << "[DEBUG]PUT!" << std::endl;
-        ft_dummy_response(200, clients_[i].socketFd);
-        clients_[i].status = PARSE_STARTLINE;
-        clients_[i].hmp.clearData();
-        clients_[i].body.clear();
+      }
+      if (clients_[i].status == CREATE_RESPONSE)
+      {
+        responses_[i] = new Response(clients_[i], c);
+        debugPrintResponceData(i);
+        clients_[i].responseCode = responses_[i]->ResponseStatus;
+        if (clients_[i].status == WRITE)
+        {
+          std::cout << "[DEBUG]write_fd   : " << responses_[i]->getFileFdForWrite() << std::endl;
+          clients_[i].writeFd = responses_[i]->getFileFdForWrite();
+          clients_[i].wc.setFd(clients_[i].writeFd);
+          clients_[i].wc.setSendData(const_cast<char *>(clients_[i].body.c_str()), clients_[i].body.size());
+          clients_[i].responseMessege = responses_[i]->responseMessege;
+          delete responses_[i];
+          clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
+          coutLog(i);
+        }
+        else if (clients_[i].status == READ)
+        {
+          clients_[i].readFd = responses_[i]->getTargetFileFd();
+          clients_[i].readDataFromFd.setFd(clients_[i].readFd);
+          coutLog(i);
+        }
+        else if (clients_[i].status == SEND)
+        {
+          clients_[i].responseMessege = responses_[i]->responseMessege;
+          coutLog(i);
+          delete responses_[i];
+          clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
+        }
+        else
+          std::cout << "[EMERG] Irregularity status in Response" << std::endl;
+      }
+      if (FD_ISSET(clients_[i].writeFd, &writeFds_) && clients_[i].status == WRITE)
+      {
+        try
+        {
+          bool isFinish = clients_[i].wc.SendMessage(1000000);
+          if (isFinish)
+          {
+            if (close(clients_[i].writeFd) == -1)
+              std::cout << "[emerg] cannot close clients_[" << i << "]writeFd : " << clients_[i].writeFd << std::endl;
+            clients_[i].writeFd = -1;
+            clients_[i].status = SEND;
+          }
+        }
+        catch(const std::exception& e)
+        {
+          clients_[i].initClient();
+          std::cerr << e.what() << '\n';
+        }
       }
       if (clients_[i].status == READ)
       {
         if (clients_[i].readDataFromFd.isCompleteRead())
         {
-          close(clients_[i].readFd);
-          clients_[i].readFd = -1;
+          if (close(clients_[i].readFd) == -1)
+            std::cout << "[EMERG] cannot close clients_[" << i << "]readFd : " << clients_[i].readFd << std::endl;
           responses_[i]->AppendBodyOnResponseMessage(clients_[i].readDataFromFd.getReadData());
           debugPrintResponseMessege(i);
           clients_[i].readDataFromFd.clearData();
@@ -342,18 +394,28 @@ void Wevserv::initFD()
   {
     if (clients_[i].socketFd != -1)
     {
+      std::cout << "[DEBUG]" << clients_[i].socketFd << std::endl;
       FD_SET(clients_[i].socketFd, &readFds_);
-      if (clients_[i].status == SEND)
+      if (clients_[i].status == SEND && clients_[i].socketFd != -1)
         FD_SET(clients_[i].socketFd, &writeFds_);
       if (maxFd_ < (clients_[i].socketFd + 1))
         maxFd_ = clients_[i].socketFd + 1;
     }
+    // if (clients_[i].writeFd != -1)
+    // {
+    //   if (clients_[i].status == WRITE && clients_[i].writeFd != -1)
+    //     FD_SET(clients_[i].writeFd, &writeFds_);
+    //   if (maxFd_ < (clients_[i].writeFd + 1))
+    //     maxFd_ = clients_[i].writeFd + 1;
+    // }
     if (clients_[i].readFd != -1)
     {
+      std::cout << "[DEBUG]" << clients_[i].readFd << std::endl;
       FD_SET(clients_[i].readFd, &readFds_);
       if (maxFd_ < (clients_[i].readFd + 1))
         maxFd_ = clients_[i].readFd + 1;
     }
+    std::cout << "[DEBUG]" << maxFd_ << std::endl;
   }
 }
 

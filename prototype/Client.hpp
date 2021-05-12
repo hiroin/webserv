@@ -10,7 +10,7 @@
 #include "getChunked.hpp"
 #include "sendController.hpp"
 
-enum clientStatus {PARSE_STARTLINE, PARSE_HEADER, RESV_BODY, CREATE_RESPONSE, READ, WRITE, SEND, NUM_OF_CLIENTSTATUS};
+enum clientStatus {PARSE_STARTLINE, PARSE_HEADER, RESV_BODY, CREATE_RESPONSE, READ, WRITE, SEND, PARSE_HEADER_AFTER_CHUNKD, NUM_OF_CLIENTSTATUS};
 
 class Client
 {
@@ -34,6 +34,7 @@ class Client
   readData readDataFromFd;
   HTTPMessageParser hmp;
   getChunked gc;
+  SendController wc;
   SendController sc;
 
   // 処理状態とフラグ
