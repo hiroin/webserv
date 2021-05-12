@@ -60,6 +60,11 @@ int HTTPMessageParser::parseRequestLine(const std::string requestLine)
   return 400;
 }
 
+std::string HTTPMessageParser::getRequestLine() const
+{
+  return requestLine_;
+}
+
 enum httpMessageParser::method HTTPMessageParser::getMethod() const
 {
   return method_;

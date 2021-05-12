@@ -145,24 +145,25 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             }
             else
             {
-              responses_[i] = new Response(clients_[i], c);
-              debugPrintResponceData(i);
-              clients_[i].responseCode = responses_[i]->ResponseStatus;
-              if (clients_[i].status == READ)
-              {
-                clients_[i].readFd = responses_[i]->getTargetFileFd();
-                clients_[i].readDataFromFd.setFd(clients_[i].readFd);
-                coutLog(i);
-              }
-              else if (clients_[i].status == SEND)
-              {
-                clients_[i].responseMessege = responses_[i]->responseMessege;
-                coutLog(i);
-                delete responses_[i];
-                clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
-              }
-              else
-                std::cout << "[emerg] Irregularity status in Response" << std::endl;
+              clients_[i].status = CREATE_RESPONSE;
+              // responses_[i] = new Response(clients_[i], c);
+              // debugPrintResponceData(i);
+              // clients_[i].responseCode = responses_[i]->ResponseStatus;
+              // if (clients_[i].status == READ)
+              // {
+              //   clients_[i].readFd = responses_[i]->getTargetFileFd();
+              //   clients_[i].readDataFromFd.setFd(clients_[i].readFd);
+              //   coutLog(i);
+              // }
+              // else if (clients_[i].status == SEND)
+              // {
+              //   clients_[i].responseMessege = responses_[i]->responseMessege;
+              //   coutLog(i);
+              //   delete responses_[i];
+              //   clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
+              // }
+              // else
+              //   std::cout << "[emerg] Irregularity status in Response" << std::endl;
             }
             break;
           }
@@ -236,7 +237,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         clients_[i].responseCode = responses_[i]->ResponseStatus;
         if (clients_[i].status == WRITE)
         {
-          std::cout << "[DEBUG]write_fd   : " << responses_[i]->getFileFdForWrite() << std::endl;
           clients_[i].writeFd = responses_[i]->getFileFdForWrite();
           clients_[i].wc.setFd(clients_[i].writeFd);
           clients_[i].wc.setSendData(const_cast<char *>(clients_[i].body.c_str()), clients_[i].body.size());
@@ -448,10 +448,10 @@ void Wevserv::responseNot200(int i, int code)
   else if (clients_[i].status == SEND)
   {
     clients_[i].responseMessege = responses_[i]->responseMessege;
-    coutLog(i);
     delete responses_[i];
     clients_[i].responseCode = code;
     clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
+    coutLog(i);
   }
   else
   {
@@ -473,11 +473,7 @@ void Wevserv::coutLog(int i)
   log += "] ";
   log += ft_itos(clients_[i].responseCode);
   log += " \"";
-  log += clients_[i].hmp.getMethodString();
-  log += " ";
-  log += clients_[i].hmp.getRequestTarget();
-  log += " ";
-  log += clients_[i].hmp.getHTTPVersion();
+  log += clients_[i].hmp.getRequestLine();
   log += "\" ";
   if (clients_[i].hmp.headers_["referer"] == "")
     log += "-";

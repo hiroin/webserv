@@ -20,6 +20,7 @@ class HTTPMessageParser {
   int parseRequestLine(const std::string requestLine);
   std::string getMessageHeader() const;
   enum httpMessageParser::method getMethod() const;
+  std::string getRequestLine() const;
   std::string getMethodString() const;
   std::string getRequestTarget() const;
   std::string getHTTPVersion() const;

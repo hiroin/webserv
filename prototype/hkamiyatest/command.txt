@@ -10,3 +10,6 @@ rm 2.jpg.en
 curl -v -XPUT http://127.0.0.1:8080/2.jpg.en -T 1.jpg --header "Transfer-Encoding: chunked"
 curl -v -XPUT http://127.0.0.1:8080/2.jpg.en -T 1.jpg --header "Transfer-Encoding: chunked"
 rm 2.jpg.en
+
+curl -v -XPUT http://127.0.0.1:8080/1.exe -T dcp-j515n-inst-B1-jpn.EXE --header "Transfer-Encoding: chunked"
+
