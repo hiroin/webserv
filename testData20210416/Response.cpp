@@ -271,6 +271,7 @@ std::map<std::string, std::vector<std::string> > Response::parseAcceptLanguage(s
 	{
 		getAcceptLanguages(AcceptLanguageMap, itr);
 	}
+	AcceptLanguageMap[std::string("-")].push_back(std::string("*"));
 	return AcceptLanguageMap;
 }
 
@@ -723,7 +724,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 						int fd = open(this->targetFilePath.c_str(), O_RDWR | O_CREAT, S_IRWXU);
 						if (fd == -1)
 						{
-							ResponseStatus = 400;
+							ResponseStatus = 403;
 							return;
 						}
 						close(fd);
@@ -740,7 +741,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 			}
 			else
 			{
-				ResponseStatus = 400;
+				ResponseStatus = 403;
 			}
 		}
 	}
@@ -783,6 +784,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	if (client.hmp.method_ == httpMessageParser::PUT)
 	{
 		setLocation();
+		responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
 		client.status = WRITE;
 	}
 }
@@ -801,6 +803,7 @@ Response::Response(int ErrorCode ,Client &client, Config &config) : client(clien
 		client.status = READ;
 		return ;
 	}
+	responseMessege.append("Content-Length: 0\r\n");
 	client.status = SEND;
 }
 
