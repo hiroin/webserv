@@ -1411,7 +1411,6 @@ TEST(Response_test, AcceptLanguage)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(406, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
   {
@@ -1555,7 +1554,6 @@ TEST(Response_test, AcceptLanguage)
       int ResponseStatus = Response.ResponseStatus;
 
       EXPECT_EQ(406, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
   {
