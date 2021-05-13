@@ -1198,8 +1198,8 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(406, ResponseStatus);
-      EXPECT_EQ("", Response.targetFilePath);
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
   {
@@ -1378,8 +1378,7 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
+      EXPECT_EQ(406, ResponseStatus);
     }
   }
   {
@@ -1395,8 +1394,7 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
+      EXPECT_EQ(406, ResponseStatus);
     }
   }
   {
@@ -1412,7 +1410,7 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ(406, ResponseStatus);
       EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
@@ -1538,7 +1536,8 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(406, ResponseStatus);
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
   {
@@ -1555,7 +1554,7 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ(406, ResponseStatus);
       EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
@@ -1573,8 +1572,7 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
+      EXPECT_EQ(406, ResponseStatus);
     }
   }
   {
@@ -1591,8 +1589,7 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(200, ResponseStatus);
-      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
+      EXPECT_EQ(406, ResponseStatus);
     }
   }
   {
@@ -1645,7 +1642,8 @@ TEST(Response_test, AcceptLanguage)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(406, ResponseStatus);
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
 }
@@ -1773,7 +1771,7 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     int ResponseStatus = Response.ResponseStatus;
 
     EXPECT_EQ(200, ResponseStatus);
-    EXPECT_EQ("/tmp/webserv/base/index.html.iso-8859-15", Response.targetFilePath);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
   }
   // 0097
   {
@@ -1884,7 +1882,8 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(406, ResponseStatus);
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
   }
   // 0104
   {
@@ -2043,8 +2042,7 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(200, ResponseStatus);
-    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+    EXPECT_EQ(406, ResponseStatus);
   }
   // 0114
   {
@@ -2059,8 +2057,7 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(200, ResponseStatus);
-    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+    EXPECT_EQ(406, ResponseStatus);
   }
   // 0115
   {
@@ -2075,8 +2072,7 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(200, ResponseStatus);
-    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+    EXPECT_EQ(406, ResponseStatus);
   }
   // 0116
   {
@@ -2187,7 +2183,8 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(406, ResponseStatus);
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
   }
   // 0123
   {
@@ -2218,8 +2215,7 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(200, ResponseStatus);
-    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+    EXPECT_EQ(406, ResponseStatus);
   }
   // 0125
   {
@@ -2234,8 +2230,7 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(200, ResponseStatus);
-    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
+    EXPECT_EQ(406, ResponseStatus);
   }
   // 0126
   {
@@ -2283,8 +2278,8 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(406, ResponseStatus);
-    EXPECT_EQ("", Response.targetFilePath);
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_EQ("/tmp/webserv/base/index.html", Response.targetFilePath);
   }
 }
 
@@ -2448,6 +2443,6 @@ TEST(Response_test, PUT)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(400, ResponseStatus);
+    EXPECT_EQ(403, ResponseStatus);
   }
 }
