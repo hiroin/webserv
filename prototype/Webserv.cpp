@@ -128,7 +128,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         while (clients_[i].receivedData.cutOutRecvDataToEol())
         {
-          // \r\nのみが来た場合、MessageHeaderが終了
           if (clients_[i].receivedData.getExtractedData() == "")
           {
             debugPrintHeaders(i);
@@ -144,27 +143,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
               debugPrintGetRecvData(i);
             }
             else
-            {
               clients_[i].status = CREATE_RESPONSE;
-              // responses_[i] = new Response(clients_[i], c);
-              // debugPrintResponceData(i);
-              // clients_[i].responseCode = responses_[i]->ResponseStatus;
-              // if (clients_[i].status == READ)
-              // {
-              //   clients_[i].readFd = responses_[i]->getTargetFileFd();
-              //   clients_[i].readDataFromFd.setFd(clients_[i].readFd);
-              //   coutLog(i);
-              // }
-              // else if (clients_[i].status == SEND)
-              // {
-              //   clients_[i].responseMessege = responses_[i]->responseMessege;
-              //   coutLog(i);
-              //   delete responses_[i];
-              //   clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
-              // }
-              // else
-              //   std::cout << "[emerg] Irregularity status in Response" << std::endl;
-            }
             break;
           }
           else
@@ -173,7 +152,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
               || clients_[i].hmp.parseHeader(clients_[i].receivedData.getExtractedData()) == 400)
             {
               responseNot200(i, 400);
-              continue;
+              break;
             }
           }
         }
