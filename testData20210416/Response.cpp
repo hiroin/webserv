@@ -134,8 +134,6 @@ bool isMatchQvalue(std::string::iterator &itr)
 				count++;
 			}
 			if (count > 3 || (std::isdigit(*itr))) return false;
-
-			if (count > 3 || (std::isdigit(*itr))) return false;
 		}
 		return true;
 	} //qValue まで確認してreturn;
