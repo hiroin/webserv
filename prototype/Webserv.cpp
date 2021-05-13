@@ -238,17 +238,31 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         if (clients_[i].status == WRITE)
         {
           clients_[i].writeFd = responses_[i]->getFileFdForWrite();
-          clients_[i].wc.setFd(clients_[i].writeFd);
-          clients_[i].wc.setSendData(const_cast<char *>(clients_[i].body.c_str()), clients_[i].body.size());
-          clients_[i].responseMessege = responses_[i]->responseMessege;
-          delete responses_[i];
-          clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
+          if (clients_[i].writeFd == -1)
+          {
+            delete responses_[i];
+            responseNot200(i, 500);
+          }
+          else
+          {
+            clients_[i].wc.setFd(clients_[i].writeFd);
+            clients_[i].wc.setSendData(const_cast<char *>(clients_[i].body.c_str()), clients_[i].body.size());
+            clients_[i].responseMessege = responses_[i]->responseMessege;
+            delete responses_[i];
+            clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
+          }
           coutLog(i);
         }
         else if (clients_[i].status == READ)
         {
           clients_[i].readFd = responses_[i]->getTargetFileFd();
-          clients_[i].readDataFromFd.setFd(clients_[i].readFd);
+          if (clients_[i].readFd == -1)
+          {
+            delete responses_[i];
+            responseNot200(i, 500);
+          }
+          else
+            clients_[i].readDataFromFd.setFd(clients_[i].readFd);
           coutLog(i);
         }
         else if (clients_[i].status == SEND)
