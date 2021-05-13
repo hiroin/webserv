@@ -650,6 +650,7 @@ std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(st
 	{
 		getAcceptCharset(AcceptLanguageMap, itr);
 	}
+	AcceptLanguageMap[std::string("-")].push_back(std::string("*"));
 	return AcceptLanguageMap;
 }
 
@@ -685,7 +686,6 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		//ここから、メソッド毎に処理を分けて書いていく
 		if (client.hmp.method_ == httpMessageParser::GET)
 		{
-
 			if (isAcceptCharsetSet())
 			{
 				std::string AcceptCharsetValue = client.hmp.headers_[std::string("accept-charset")];
