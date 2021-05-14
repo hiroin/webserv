@@ -716,23 +716,27 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 				PutPostBody = client.hmp.body_;
 				if (client.hmp.method_ == httpMessageParser::PUT)
 				{
-					if (isDirectoryAvailable() && SearchAbsolutePath[SearchAbsolutePath.size() - 1] != '/') //directory がOKだったらこの下で書き込み
+					if (isDirectoryAvailable())
 					{
-						//指定されたリソースが作成できるかをチェック
-						this->targetFilePath = SearchAbsolutePath;
-						int isExist = isTheFileExist(this->targetFilePath);
-						int fd = open(this->targetFilePath.c_str(), O_RDWR | O_CREAT, S_IRWXU);
-						if (fd == -1)
+						if (SearchAbsolutePath[SearchAbsolutePath.size() - 1] != '/') //directory がOKだったらこの下で書き込み
 						{
-							ResponseStatus = 403;
-							return;
+							//指定されたリソースが作成できるかをチェック
+							this->targetFilePath = SearchAbsolutePath;
+							int isExist = isTheFileExist(this->targetFilePath);
+							int fd = open(this->targetFilePath.c_str(), O_RDWR | O_CREAT, S_IRWXU);
+							if (fd == -1)
+							{
+								ResponseStatus = 403;
+								return;
+							}
+							close(fd);
+							if (isExist == 200)
+								ResponseStatus = 204;
+							else
+								ResponseStatus = 201;
 						}
-						close(fd);
-						if (isExist == 200)
-							ResponseStatus = 204;
-						else
-							ResponseStatus = 201;
 					}
+					else ResponseStatus = 403;
 				}
 				else //CGI にリクエストをだす
 				{
