@@ -2197,8 +2197,7 @@ TEST(Response_test, AcceptLanguageAndAcceptCharset)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(200, ResponseStatus);
-    EXPECT_EQ("/tmp/webserv/base/index.html.iso-8859-15", Response.targetFilePath);
+    EXPECT_EQ(406, ResponseStatus);
   }
   // 0124
   {
@@ -2437,6 +2436,21 @@ TEST(Response_test, PUT)
     client_.hmp.method_ = httpMessageParser::PUT;
     client_.hmp.absolutePath_ = "/index.html";
     client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(403, ResponseStatus);
+  }
+  // 0139
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::PUT;
+    client_.hmp.absolutePath_ = "/none/index.htm";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["transfer-encoding"] = "chunked";
 
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;

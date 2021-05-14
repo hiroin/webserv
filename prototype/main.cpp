@@ -1,7 +1,14 @@
 #include <iostream>
+#include <signal.h>
 #include "Config.hpp"
 #include "parseConfig.hpp"
 #include "Webserv.hpp"
+
+void stop(int sig)
+{
+  (void)sig;
+  exit(0);
+}
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +17,9 @@ int main(int argc, char *argv[])
     std::cout << "Usage: ./server [configfile]" << std::endl;
     return 1;
   }
+  signal(SIGABRT, stop);
+  signal(SIGINT, stop);
+  signal(SIGTERM, stop);
   Config c;
   if (argc == 3 && (std::string(argv[2]) == "1" || std::string(argv[2]) == "2"))
   {

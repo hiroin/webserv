@@ -4,7 +4,10 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
 {
   setupServers();
   for (int i = 0; i < MAX_SESSION; i++)
+  {
+    responses_[i] = NULL;
     clients_[i].gc.setDebugLevel(c.getDebugLevel());
+  }
   int selectReturn;
   struct timeval tvForSelect;
   struct timeval nowTv;
@@ -91,6 +94,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         if (!clients_[i].receivedData.recvFromSocket())
         {
+          deleteResponses(i);
           clients_[i].initClient();
           continue;
         }
@@ -100,6 +104,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         if (!clients_[i].readDataFromFd.readFromFd())
         {
+          deleteResponses(i);
           clients_[i].initClient();
           continue;
         }
@@ -219,7 +224,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           clients_[i].writeFd = responses_[i]->getFileFdForWrite();
           if (clients_[i].writeFd == -1)
           {
-            delete responses_[i];
+            deleteResponses(i);
             responseNot200(i, 500);
           }
           else
@@ -227,8 +232,8 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             clients_[i].wc.setFd(clients_[i].writeFd);
             clients_[i].wc.setSendData(const_cast<char *>(clients_[i].body.c_str()), clients_[i].body.size());
             clients_[i].responseMessege = responses_[i]->responseMessege;
-            delete responses_[i];
-            clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
+            deleteResponses(i);
+            clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), clients_[i].responseMessege.size());
           }
           coutLog(i);
         }
@@ -237,7 +242,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           clients_[i].readFd = responses_[i]->getTargetFileFd();
           if (clients_[i].readFd == -1)
           {
-            delete responses_[i];
+            deleteResponses(i);
             responseNot200(i, 500);
           }
           else
@@ -248,8 +253,8 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         {
           clients_[i].responseMessege = responses_[i]->responseMessege;
           coutLog(i);
-          delete responses_[i];
-          clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
+          deleteResponses(i);
+          clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), clients_[i].responseMessege.size());
         }
         else
           std::cout << "[EMERG] Irregularity status in Response" << std::endl;
@@ -284,9 +289,9 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           debugPrintResponseMessege(i);
           clients_[i].readDataFromFd.clearData();
           clients_[i].responseMessege = responses_[i]->responseMessege;
-          clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());
+          clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), clients_[i].responseMessege.size());
           clients_[i].status = SEND;
-          delete responses_[i];
+          deleteResponses(i);
         }
       }
       if (FD_ISSET(clients_[i].socketFd, &writeFds_) && clients_[i].status == SEND)
@@ -407,7 +412,7 @@ void Wevserv::initFD()
       if (maxFd_ < (clients_[i].readFd + 1))
         maxFd_ = clients_[i].readFd + 1;
     }
-    if (c_.getDebugLevel() >= 1)
+    if (c_.getDebugLevel() >= 2)
       std::cout << "[DEBUG]maxFd : " << maxFd_ << std::endl;
   }
 }
@@ -441,15 +446,15 @@ void Wevserv::responseNot200(int i, int code)
   else if (clients_[i].status == SEND)
   {
     clients_[i].responseMessege = responses_[i]->responseMessege;
-    delete responses_[i];
+    deleteResponses(i);
     clients_[i].responseCode = code;
-    clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), responses_[i]->responseMessege.size());              
+    clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), clients_[i].responseMessege.size());
     coutLog(i);
   }
   else
   {
     std::cout << "[emerg] Irregularity status in Response" << std::endl;
-    delete responses_[i];
+    deleteResponses(i);
     std::string response = ft_make_dummy_response(400);
     clients_[i].sc.setSendData(const_cast<char *>(response.c_str()), response.size());
     clients_[i].responseCode = 400;
@@ -486,6 +491,12 @@ void Wevserv::coutLog(int i)
     log += "\"";
   }
   std::cout << log << std::endl;
+}
+
+void Wevserv::deleteResponses(int i)
+{
+  delete responses_[i];
+  responses_[i] = NULL;
 }
 
 std::map<int, std::string> Wevserv::getMonth()

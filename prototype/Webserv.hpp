@@ -45,6 +45,7 @@ class Wevserv
   std::string ft_ito00(int n);
   std::string getTime();
   void coutLog(int i);
+  void deleteResponses(int i);
   void debugPrintGetRecvData(int i);
   void debugPrintGetReadData(int i);
   void debugPrintExtractedData(int i);
