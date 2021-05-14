@@ -142,7 +142,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             {
               responseNot200(i, code);
               break;
-              // clients_[i].initClient();
             }
             if (clients_[i].isNeedBody(headers))
             {
@@ -276,6 +275,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         }
         catch(const std::exception& e)
         {
+          deleteResponses(i);
           clients_[i].initClient();
           std::cerr << e.what() << '\n';
         }
@@ -335,6 +335,7 @@ Wevserv::~Wevserv()
   }
   for (int i = 0; i < MAX_SESSION; i++)
   {
+    deleteResponses(i);
     clients_[i].initClient();
   }
 }
