@@ -258,7 +258,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         try
         {
-          bool isFinish = clients_[i].wc.SendMessage(1000000);
+          bool isFinish = clients_[i].wc.SendMessage(SEND_BUFFER_SIZE);
           if (isFinish)
           {
             if (close(clients_[i].writeFd) == -1)
@@ -293,7 +293,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         try
         {
-          bool isFinish = clients_[i].sc.SendMessage(1000000);
+          bool isFinish = clients_[i].sc.SendMessage(SEND_BUFFER_SIZE);
           if (isFinish)
           {
             if (isNotKeepConnectionCode(clients_[i].responseCode))
