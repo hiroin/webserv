@@ -664,7 +664,7 @@ bool Response::isContentLength()
 	return (client.hmp.headers_["content-length"].size() != 0);
 }
 
-Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1)
+Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1), ResponseStatus(-1)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
@@ -793,7 +793,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 }
 
-Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config)
+Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config), ResponseStatus(-1)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
