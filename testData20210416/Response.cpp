@@ -664,8 +664,32 @@ bool Response::isContentLength()
 	return (client.hmp.headers_["content-length"].size() != 0);
 }
 
+bool isExtention(std::string absolutePath)
+{
+	std::string::reverse_iterator first = absolutePath.rbegin();
+	std::string::reverse_iterator last = absolutePath.rend();
+	while(first != last)
+	{
+		if (*first == '.') //拡張子あったらtrue
+			return true;
+		if (*first == '/') //次に "/" が出てくるまで見にいく
+			break;
+		++first;
+	}
+	return false;
+}
+
+void Response::addSlashOnAbsolutePath()
+{
+	if (!isExtention(client.hmp.absolutePath_))
+	{
+		client.hmp.absolutePath_ += std::string("/");
+	}
+}
+
 Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1)
 {
+	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
 	/*Authorization をチェック*/
@@ -793,30 +817,8 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 }
 
-bool isExtention(std::string absolutePath)
-{
-	std::string::reverse_iterator first = absolutePath.rbegin();
-	std::string::reverse_iterator last = absolutePath.rend();
-	while(first != last)
-	{
-		if (*first == '.') //拡張子あったらtrue
-			return true;
-		if (*first == '/') //次に "/" が出てくるまで見にいく
-			break;
-		++first;
-	}
-	return false;
-}
 
-void Response::addSlashOnAbsolutePath()
-{
-	if (!isExtention(client.hmp.absolutePath_))
-	{
-		client.hmp.absolutePath_ += std::string("/");
-	}
-}
-
-Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config)
+Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config) , ResponseStatus(-1)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
