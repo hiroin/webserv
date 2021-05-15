@@ -650,6 +650,7 @@ std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(st
 	{
 		getAcceptCharset(AcceptLanguageMap, itr);
 	}
+	AcceptLanguageMap[std::string("-")].push_back(std::string("*"));
 	return AcceptLanguageMap;
 }
 
@@ -663,7 +664,7 @@ bool Response::isContentLength()
 	return (client.hmp.headers_["content-length"].size() != 0);
 }
 
-Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1)
+Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1), ResponseStatus(-1)
 {
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
@@ -685,7 +686,6 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		//ここから、メソッド毎に処理を分けて書いていく
 		if (client.hmp.method_ == httpMessageParser::GET)
 		{
-
 			if (isAcceptCharsetSet())
 			{
 				std::string AcceptCharsetValue = client.hmp.headers_[std::string("accept-charset")];

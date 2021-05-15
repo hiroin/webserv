@@ -687,7 +687,7 @@ void Response::addSlashOnAbsolutePath()
 	}
 }
 
-Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1)
+Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1), ResponseStatus(-1)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
@@ -817,8 +817,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 }
 
-
-Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config) , ResponseStatus(-1)
+Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config), ResponseStatus(-1)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定

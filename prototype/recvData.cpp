@@ -29,7 +29,7 @@ bool recvData::recvFromSocket()
   }
   if (read_size == -1)
   {
-    std::cout << "[EMERG]read() failed." << "ERROR: " << errno << std::endl;
+    // std::cout << "[EMERG]recvData::recvFromSocket() read() failed." << "ERROR: " << errno << std::endl;
     recvData_.erase();
     extractedData_.erase();
     return FAILURE;
@@ -50,7 +50,7 @@ bool recvData::readFromFd()
   read_size = read(fd_, buf, sizeof(buf));
   if (read_size == -1)
   {
-    std::cout << "[EMERG]read() failed." << "ERROR: " << errno << std::endl;
+    std::cout << "[EMERG]recvData::readFromFd() read() failed." << "ERROR: " << errno << std::endl;
     recvData_.erase();
     extractedData_.erase();
     return FAILURE;

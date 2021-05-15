@@ -6,8 +6,8 @@
 #include <map>
 
 #define CLIENTMAXBODYSIZE 1048576
-#define MAX_SESSION 2
-#define SESSION_LIMIT 1
+#define MAX_SESSION 50
+#define SESSION_LIMIT 45
 #define SELECT_TIMEOUT 60
 #define SESSION_TIMEOUT 1200
 #define CGI_TIMEOUT 1200

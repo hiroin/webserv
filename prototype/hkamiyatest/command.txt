@@ -13,3 +13,5 @@ rm 2.jpg.en
 
 curl -v -XPUT http://127.0.0.1:8080/1.exe -T dcp-j515n-inst-B1-jpn.EXE --header "Transfer-Encoding: chunked"
 
+valgrind --leak-check=full --show-leak-kinds=all ./server googletest/testcase/020_acceptcharaset.co
+
