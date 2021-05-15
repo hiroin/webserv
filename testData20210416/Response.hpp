@@ -109,6 +109,7 @@ class Response
 		bool	isContentLength();
 		int		getFileFdForWrite();
 		void	setLocation();
+		void	addSlashOnAbsolutePath();
 		/*===============HTTPstatus===============*/
 
 
