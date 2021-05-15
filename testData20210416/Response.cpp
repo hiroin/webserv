@@ -793,8 +793,32 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 }
 
+bool isExtention(std::string absolutePath)
+{
+	std::string::reverse_iterator first = absolutePath.rbegin();
+	std::string::reverse_iterator last = absolutePath.rend();
+	while(first != last)
+	{
+		if (*first == '.') //拡張子あったらtrue
+			return true;
+		if (*first == '/') //次に "/" が出てくるまで見にいく
+			break;
+		++first;
+	}
+	return false;
+}
+
+void Response::addSlashOnAbsolutePath()
+{
+	if (!isExtention(client.hmp.absolutePath_))
+	{
+		client.hmp.absolutePath_ += std::string("/");
+	}
+}
+
 Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config)
 {
+	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
 	ResponseStatus = ErrorCode;
@@ -925,7 +949,7 @@ bool Response::DecideConfigLocation()
 	return false;
 }
 
-std::string Response::GetSerachAbsolutePath() //出来上がったpathに"/"が付いていなかったらindexを採用していく
+std::string Response::GetSerachAbsolutePath()
 {
 	std::string SerachAbsolutePath = "";
 	std::string AbsolutePath = client.hmp.absolutePath_;
