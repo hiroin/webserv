@@ -15,7 +15,10 @@
 #include <sys/types.h>
 #include <ctime>
 #include <algorithm>
-int isTheFileExist(std::string targetFile);
+
+/*******************************************************/
+/**********************Util Fanctions*******************/
+
 
 int ft_pow(int n, int times)
 {
@@ -74,19 +77,6 @@ std::string getFileExtention(std::string FilePath)
 	}
 	return (FilePath.substr(i + 1, count));
 }
-
-
-
-/**
-	 *
-		Accept-Language = "Accept-Language" ":"
-			1#( language-range [ ";" "q" "=" qvalue ] )
-			language-range  = ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) | "*" )
-			qvalue         = ( "0" [ "." 0*3DIGIT ] )
-                | ( "1" [ "." 0*3("0") ] )
-	 *
-	* **/
-// Accept-Language: da , en-EU
 
 bool isEightAlphas(std::string::iterator &itr)
 {
@@ -172,35 +162,6 @@ bool isMatchLanguageRange(std::string::iterator &itr)
 	return true;
 }
 
-
-bool Response::isMatchAcceptLanguageFromat(std::string src)
-{
-	std::string::iterator itr = src.begin();
-	std::string::iterator last = src.end();
-	while(itr != last)
-	{
-		int count = 0;
-		if (*itr == '*')
-		{
-			++itr;
-		}
-		else if (!isMatchLanguageRange(itr))
-			return false;
-		//ここまでで、langeage-rangeが回収できたとする
-		//次は、オプションの有無を確かめる
-		if (*itr == ';') //オプションのチェック
-		{
-			++itr;
-			if (!isMatchOption(itr))
-				return (false);
-		}
-		//オプションまで見たので、ブレイクを取り除く処理
-		skipBreak(itr);
-	}
-	return (true);
-}
-
-
 float ft_stof(std::string str)
 {
 	float ret = 0;
@@ -261,21 +222,6 @@ void getAcceptLanguages(std::map<std::string, std::vector<std::string> >& Accept
 	skipBreak(itr);
 }
 
-std::map<std::string, std::vector<std::string> > Response::parseAcceptLanguage(std::string src)
-{
-	//ここに入ってくる時点で、Accept-Languageの形式は満たしていることが決定している
-	std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
-	std::string::iterator itr = src.begin();
-	std::string::iterator last = src.end();
-	while (itr != last)
-	{
-		getAcceptLanguages(AcceptLanguageMap, itr);
-	}
-	AcceptLanguageMap[std::string("-")].push_back(std::string("*"));
-	return AcceptLanguageMap;
-}
-
-
 void setResponseMap(std::map<int, std::string> &ResponseMap)
 {
 	ResponseMap[100] =  "Continue";
@@ -333,6 +279,133 @@ void setResponseMap(std::map<int, std::string> &ResponseMap)
 	ResponseMap[510] =  "Not Extended";
 	ResponseMap[511] =  "Network Authentication";
 }
+
+void getAcceptCharset(std::map<std::string, std::vector<std::string> >& AcceptCharsetMap, std::string::iterator &itr)
+{
+	std::string Charset;
+	std::string qValue = "1";
+	while(std::isdigit(*itr) || std::isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
+				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
+	{
+		Charset.push_back(*itr);
+		++itr;
+	}
+	if (*itr == ';')
+	{
+		qValue.clear();
+		++itr;
+		++itr;
+		++itr;
+		while (std::isdigit(*itr) || *itr == '.')
+		{
+			qValue.push_back(*itr);
+			++itr;
+		}
+	}
+	AcceptCharsetMap[qValue].push_back(Charset);
+	skipBreak(itr);
+}
+
+bool isMatchCharset(std::string::iterator &itr)
+{
+	while(std::isdigit(*itr) || std::isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
+				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
+	{
+		++itr;
+	}
+	if (!(std::isprint(*itr)) && *itr != '\0') return false; //非表示文字が入ってたらreturn
+	return true;
+}
+
+int isTheFileExist(std::string targetFile)
+{
+	int fd = open(targetFile.c_str(), O_RDONLY);
+	if(fd != -1) //ファイルが存在して検索できた
+	{
+		close(fd);
+		return (200);
+	}
+	else //失敗したから、errnoチェックして確認
+	{
+		switch (errno)
+		{
+		case EACCES:
+			return (403);
+		default:
+			return (404);
+		}
+	}
+}
+
+
+void removeFilePart(std::string &SerachFileAbsolutePath)
+{
+	std::string::reverse_iterator first = SerachFileAbsolutePath.rbegin();
+	std::string::reverse_iterator last = SerachFileAbsolutePath.rend();
+	int count = 0;
+	while(first != last)
+	{
+		if (*first == '/')
+			break ;
+		++first;
+		count++;
+	}
+	size_t size = SerachFileAbsolutePath.size();
+	SerachFileAbsolutePath = SerachFileAbsolutePath.substr(0, size - count);
+}
+
+
+/*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+/**********************Util Fanctions*******************/
+/*******************************************************/
+
+/*******************************************************/
+/**********************Member Functions*******************/
+
+
+
+bool Response::isMatchAcceptLanguageFromat(std::string src)
+{
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while(itr != last)
+	{
+		int count = 0;
+		if (*itr == '*')
+		{
+			++itr;
+		}
+		else if (!isMatchLanguageRange(itr))
+			return false;
+		//ここまでで、langeage-rangeが回収できたとする
+		//次は、オプションの有無を確かめる
+		if (*itr == ';') //オプションのチェック
+		{
+			++itr;
+			if (!isMatchOption(itr))
+				return (false);
+		}
+		//オプションまで見たので、ブレイクを取り除く処理
+		skipBreak(itr);
+	}
+	return (true);
+}
+
+std::map<std::string, std::vector<std::string> > Response::parseAcceptLanguage(std::string src)
+{
+	//ここに入ってくる時点で、Accept-Languageの形式は満たしていることが決定している
+	std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
+	std::string::iterator itr = src.begin();
+	std::string::iterator last = src.end();
+	while (itr != last)
+	{
+		getAcceptLanguages(AcceptLanguageMap, itr);
+	}
+	AcceptLanguageMap[std::string("-")].push_back(std::string("*"));
+	return AcceptLanguageMap;
+}
+
+
 
 s_ConfigCommon Response::getConfigCommon()
 {
@@ -579,17 +652,6 @@ bool Response::isAcceptCharsetSet()
 	return (client.hmp.headers_[std::string("accept-charset")].size() != 0);
 }
 
-bool isMatchCharset(std::string::iterator &itr)
-{
-	while(std::isdigit(*itr) || std::isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
-				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
-	{
-		++itr;
-	}
-	if (!(std::isprint(*itr)) && *itr != '\0') return false; //非表示文字が入ってたらreturn
-	return true;
-}
-
 bool Response::isMatchAcceptCharsetFromat(std::string src)
 {
 	std::string::iterator itr = src.begin();
@@ -612,33 +674,6 @@ bool Response::isMatchAcceptCharsetFromat(std::string src)
 	}
 	return (true);
 }
-
-void getAcceptCharset(std::map<std::string, std::vector<std::string> >& AcceptCharsetMap, std::string::iterator &itr)
-{
-	std::string Charset;
-	std::string qValue = "1";
-	while(std::isdigit(*itr) || std::isalpha(*itr) || (*itr == '!') || (*itr == '#') || (*itr == '$') || (*itr == '%') || (*itr == '&') || (*itr == '\'') || (*itr == '*') \
-				|| (*itr == '+') || (*itr == '-') || (*itr == '.') || (*itr == '^') || (*itr == '_') || (*itr == '`') || (*itr == '|') || (*itr == '~'))
-	{
-		Charset.push_back(*itr);
-		++itr;
-	}
-	if (*itr == ';')
-	{
-		qValue.clear();
-		++itr;
-		++itr;
-		++itr;
-		while (std::isdigit(*itr) || *itr == '.')
-		{
-			qValue.push_back(*itr);
-			++itr;
-		}
-	}
-	AcceptCharsetMap[qValue].push_back(Charset);
-	skipBreak(itr);
-}
-
 
 std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(std::string src)
 {
@@ -847,7 +882,6 @@ int	Response::getFileFdForWrite()
 	return (writeFd);
 }
 
-
 bool Response::isAcceptLanguageSet()
 {
 	return (client.hmp.headers_[std::string("accept-language")].size() != 0);
@@ -923,17 +957,6 @@ bool Response::DecideConfigServer()
 	return (true);
 }
 
-/**
- * リクエストをみて、Location を決定する。
- * **/
-
-/**
- * location に該当するpath がなかったらどうする？ -> 404
- * location が
- * **/
-
-//前方一致
-//locationがなかったら、serverディレクティブ
 bool Response::DecideConfigLocation()
 {
 	std::string AbsolutePath = this->client.hmp.absolutePath_;
@@ -963,26 +986,6 @@ std::string Response::GetSerachAbsolutePath()
 		SerachAbsolutePath = AbsolutePath.replace(0, configLocation.path.size(), configLocation.alias);
 	}
 	return (SerachAbsolutePath);
-}
-
-int isTheFileExist(std::string targetFile)
-{
-	int fd = open(targetFile.c_str(), O_RDONLY);
-	if(fd != -1) //ファイルが存在して検索できた
-	{
-		close(fd);
-		return (200);
-	}
-	else //失敗したから、errnoチェックして確認
-	{
-		switch (errno)
-		{
-		case EACCES:
-			return (403);
-		default:
-			return (404);
-		}
-	}
 }
 
 //先にc
@@ -1172,22 +1175,6 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 		ResponseStatus = statusNo;
 		return ;
 	}
-}
-
-void removeFilePart(std::string &SerachFileAbsolutePath)
-{
-	std::string::reverse_iterator first = SerachFileAbsolutePath.rbegin();
-	std::string::reverse_iterator last = SerachFileAbsolutePath.rend();
-	int count = 0;
-	while(first != last)
-	{
-		if (*first == '/')
-			break ;
-		++first;
-		count++;
-	}
-	size_t size = SerachFileAbsolutePath.size();
-	SerachFileAbsolutePath = SerachFileAbsolutePath.substr(0, size - count);
 }
 
 bool Response::isDirectoryAvailable()

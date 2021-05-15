@@ -31,34 +31,12 @@ class Response
 		bool isAutoIndexApply;
 		int readFd;
 		int writeFd;
-		// std::string errorFilePath;
-		/**
-		 * Accept-Language
-		 * **/
 
-		/**
-		 * エラーページがあったら出せる。なかったらエラーステータスだけを返すようにする。
-		 * **/
-
-		/*各レスポンスで適用する設定項目*/
-
-		/*
-			曜日を取得する関数
-		*/
 		std::map<int, std::string> GetDate();
-
-		/**
-		 * 月を取得する関数
-		 * **/
 		std::map<int, std::string> GetMonth();
-
 		std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
 		std::map<std::string, std::vector<std::string> > AcceptCharsetMap;
 		std::string PutPostBody;
-
-		/**
-		 * クライアントと、リクエストからどのサーバーを使うのかきめる
-		* **/
 		bool DecideConfigServer(); //使うサーバーを決定
 		bool DecideConfigLocation(); //使うlocation を決定
 		std::string GetSerachAbsolutePath(); //Requestのパスと、
@@ -81,7 +59,6 @@ class Response
 		int isLanguageFileExist(std::string);
 		void setContentLanguage();
 		bool isLanguageFile(std::string, std::string);
-		/*.<Accept-Language> がなかったら406を返す*/
 		std::map<std::string, std::vector<std::string> > parseAcceptLanguage(std::string src);
 		bool isAuthorized();
 		void AppendBodyOnResponseMessage(std::string body);
@@ -93,7 +70,6 @@ class Response
 		bool isMatchAcceptCharsetFromat(std::string);
 		std::map<std::string, std::vector<std::string> > parseAcceptCharset(std::string src);
 		int isCharsetFileExist(std::string);
-
 		std::string removeLanguageAndCharsetFileExtention();
 		bool isCharsetFile(std::string FilePath, std::string fileExtention);
 		int isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath);
@@ -110,41 +86,17 @@ class Response
 		int		getFileFdForWrite();
 		void	setLocation();
 		void	addSlashOnAbsolutePath();
-		/*===============HTTPstatus===============*/
-
-
-		/*===============ResponseHeaderField===============*/
-		/**
-		 * Location ヘッダを作る関数
-		 * **/
-
-
-		/**
-		 * Serverヘッダをつくる関数
-		 * **/
 		void SetServer();
-		/*===============EntityHeaderField===============*/
-		/**
-		 * Aloowヘッダを作る関数
-		 * **/
 		void SetAllow();
-		/*===============GlobalHeaderField===============*/
-
-		/**
-		 *  Dateヘッダをつくるための関数
-		 * **/
 		void SetDate();
-
-		/*=====================返却用ファイルを入手する部分========================*/
 		std::string MakeFilePath();
 		std::string Getfile(std::string path);
-
 		bool isHTTPMethodHEAD();
-
 		int send();
 		Response(int test_number);
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
 		~Response();
 };
+
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
