@@ -100,7 +100,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         }
         debugPrintGetRecvData(i);
       }
-      if (FD_ISSET(clients_[i].readFd, &readFds_))
+      if (clients_[i].readFd != -1 && FD_ISSET(clients_[i].readFd, &readFds_))
       {
         if (!clients_[i].readDataFromFd.readFromFd())
         {
@@ -260,7 +260,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         else
           std::cout << "[EMERG] Irregularity status in Response" << std::endl;
       }
-      if (FD_ISSET(clients_[i].writeFd, &writeFds_) && clients_[i].status == WRITE)
+      if (clients_[i].writeFd != -1 && FD_ISSET(clients_[i].writeFd, &writeFds_) && clients_[i].status == WRITE)
       {
         try
         {
