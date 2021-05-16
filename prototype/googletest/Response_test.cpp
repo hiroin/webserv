@@ -118,6 +118,37 @@ TEST(Response_test, webserv_01)
       EXPECT_EQ(200, ResponseStatus);
       EXPECT_EQ("/tmp/webserv/0aa/index.html", Response.targetFilePath);
     }
+    // 0140
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.absolutePath_ = "/aa";
+      client_.hmp.headers_["host"] = "127.0.0.1";
+
+      Response Response(client_, config_);
+      int TargetFileFd = Response.getTargetFileFd();
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/0aa/index.html", Response.targetFilePath);
+    }
+    // 0141
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.absolutePath_ = "/zz";
+      client_.hmp.headers_["host"] = "127.0.0.1";
+
+      Response Response(client_, config_);
+      int TargetFileFd = Response.getTargetFileFd();
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(403, ResponseStatus);
+    }
     // 0007
     {
       Client client_;
