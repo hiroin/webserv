@@ -1,6 +1,6 @@
 #include "sendController.hpp"
 
-void SendController::Initialize(int fd, char *buf, size_t len)
+void SendController::Initialize(int fd, char *buf, ssize_t len)
 {
 	CliantFd = fd;
 	ResponseMessage = buf;
@@ -12,18 +12,18 @@ void SendController::setFd(int fd)
 	CliantFd = fd;
 }
 
-void SendController::setSendData(char *buf, size_t len)
+void SendController::setSendData(char *buf, ssize_t len)
 {
   ResponseMessage = buf;
   LeftLength = len;
 }
 
-bool SendController::SendMessage(size_t len)
+bool SendController::SendMessage(ssize_t len)
 {
 	if (LeftLength <= len)
 	{
     // std::cout << "ResponseMessage : " << ResponseMessage << std::endl;
-		int r = write(CliantFd, ResponseMessage, LeftLength);
+		ssize_t r = write(CliantFd, ResponseMessage, LeftLength);
     if (r == -1)
       throw std::runtime_error("write error.");
     if (r != LeftLength)

@@ -1,6 +1,6 @@
 #include "readData.hpp"
 
-unsigned long readData::readBuffsize_ = 1000000;
+ssize_t readData::readBuffsize_ = 1000000;
 
 void readData::clearData()
 {
@@ -16,7 +16,7 @@ void readData::setFd(int fd)
 
 bool readData::readFromFd()
 {
-  int read_size;
+  ssize_t read_size;
   char buf[readBuffsize_];
   std::string tmp;
 

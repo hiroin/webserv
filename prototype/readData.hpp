@@ -11,7 +11,7 @@
 
 class readData {
  private:
-  static unsigned long readBuffsize_;
+  static ssize_t readBuffsize_;
 
  public:
   void clearData();

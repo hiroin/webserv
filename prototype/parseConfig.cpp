@@ -434,7 +434,7 @@ bool parseConfig::insertToConfigClass(Config& c)
   for(std::vector<parseconfig::configServer>::iterator itrServer = 
       configHttp_.servers.begin(); itrServer != configHttp_.servers.end(); ++itrServer)
   {
-    size_t serverNumber = itrServer - configHttp_.servers.begin();
+    // size_t serverNumber = itrServer - configHttp_.servers.begin();
     // std::cout << "[DEBUG]サーバー設定(" << serverNumber << ")" << std::endl;
     s_ConfigServer tmpConfigServer;
     initCommonConfig(tmpConfigServer.configCommon);

@@ -5,7 +5,7 @@
 std::vector<std::string> ft_split_use_find_first_of(std::string s, std::string d)
 {
   std::vector<std::string> ret;
-  for(int i = 0, n; i <= s.length(); i = n + 1)
+  for(size_t i = 0, n; i <= s.length(); i = n + 1)
   {
     n = s.find_first_of(d, i);
     if(n == std::string::npos)

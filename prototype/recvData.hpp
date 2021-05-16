@@ -11,7 +11,7 @@
 
 class recvData {
  private:
-  static unsigned long recvBuffsize_;
+  static ssize_t recvBuffsize_;
 
  public:
   void clearData();

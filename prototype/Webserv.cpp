@@ -8,7 +8,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
     responses_[i] = NULL;
     clients_[i].gc.setDebugLevel(c.getDebugLevel());
   }
-  int selectReturn;
   struct timeval tvForSelect;
   struct timeval nowTv;
   unsigned long mainLoopCounter = 0;

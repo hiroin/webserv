@@ -22,14 +22,14 @@ class SendController
 	private:
 	int		CliantFd;
 	char*	ResponseMessage;
-	size_t	LeftLength;
+	ssize_t	LeftLength;
 
 	public:
-	bool	SendMessage(size_t len);
-	void	Initialize(int fd, char *buf, size_t len);
+	bool	SendMessage(ssize_t len);
+	void	Initialize(int fd, char *buf, ssize_t len);
 	int		GetFd();
   void	setFd(int fd);
-  void	setSendData(char *buf, size_t len);
+  void	setSendData(char *buf, ssize_t len);
 
 	SendController(){};
 	~SendController(){};

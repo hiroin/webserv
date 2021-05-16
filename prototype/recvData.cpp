@@ -1,6 +1,6 @@
 #include "recvData.hpp"
 
-unsigned long recvData::recvBuffsize_ = 1000000;
+ssize_t recvData::recvBuffsize_ = 1000000;
 
 void recvData::clearData()
 {
@@ -15,7 +15,7 @@ void recvData::setFd(int fd)
 
 bool recvData::recvFromSocket()
 {
-  int read_size;
+  ssize_t read_size;
   char buf[recvBuffsize_];
   std::string tmp;
 
