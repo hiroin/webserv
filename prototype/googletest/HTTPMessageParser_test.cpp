@@ -238,3 +238,28 @@ TEST(HTTPMessageParserEvenTest, isInvalidHeaderValue) {
   EXPECT_EQ(501, c.isInvalidHeaderValue());
   c.headers_.clear();
 }
+
+TEST(HTTPMessageParserEvenTest, isInvalidHeader) {
+
+  HTTPMessageParser c;
+  c.headers_["host"] = "127.0.0.1";
+  c.headers_["content-length"] = "3495";
+  EXPECT_EQ(200, c.isInvalidHeader());
+  c.headers_.clear();
+  c.headers_["host"] = "127.0.0.1";
+  c.headers_["content-length"] = "a";
+  EXPECT_EQ(400, c.isInvalidHeader());
+  c.headers_.clear();
+  c.headers_["host"] = "127.0.0.1";
+  c.headers_["transfer-encoding"] = "chunked";
+  EXPECT_EQ(200, c.isInvalidHeader());
+  c.headers_.clear();
+  c.headers_["host"] = "127.0.0.1";
+  c.headers_["transfer-encoding"] = "a";
+  EXPECT_EQ(501, c.isInvalidHeader());
+  c.headers_.clear();
+  c.headers_["content-length"] = "3495";
+  EXPECT_EQ(400, c.isInvalidHeader());
+  c.headers_.clear();
+
+}

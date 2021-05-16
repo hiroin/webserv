@@ -1,7 +1,3 @@
-#ifdef _GLIBCXX_DEBUG
-# include <debug/string>
-# include <debug/vector>
-#endif
 #include "Response.hpp"
 #include "Config.hpp"
 #include "HTTPMessageParser.hpp"

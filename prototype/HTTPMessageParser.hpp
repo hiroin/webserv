@@ -63,6 +63,8 @@ class HTTPMessageParser {
   std::map<std::string, std::string> headers_;
 
   // headerの値のチェック
+  int isInvalidHeader();
+  bool isSetHostHeader();
   int isInvalidHeaderValue();
 
   // bodyを格納

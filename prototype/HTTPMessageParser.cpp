@@ -378,6 +378,26 @@ int HTTPMessageParser::pushFieldNameAndValue(std::string fieldName, std::string 
   return 200;
 }
 
+int HTTPMessageParser::isInvalidHeader()
+{
+  if (!isSetHostHeader())
+    return 400;
+  return (isInvalidHeaderValue());
+}
+
+bool HTTPMessageParser::isSetHostHeader()
+{
+  for (std::map<std::string, std::string>::iterator itr = headers_.begin();
+    itr != headers_.end();
+    itr++
+  )
+  {
+    if (itr->first == "host")
+      return true;
+  }
+  return false;
+}
+
 int HTTPMessageParser::isInvalidHeaderValue()
 {
   for (std::map<std::string, std::string>::iterator itr = headers_.begin();

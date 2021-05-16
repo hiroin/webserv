@@ -1,10 +1,6 @@
 #ifndef _GETCHUNKED_H_
 #define _GETCHUNKED_H_
 
-
-#ifdef _GLIBCXX_DEBUG
-# include <debug/vector>
-#endif
 #include <iostream>
 #include <string>
 #include <errno.h>

@@ -137,7 +137,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           {
             debugPrintHeaders(i);
             std::map<std::string, std::string> headers = clients_[i].hmp.getHeaders();
-            int code = clients_[i].hmp.isInvalidHeaderValue();
+            int code = clients_[i].hmp.isInvalidHeader();
             if (code != 200)
             {
               responseNot200(i, code);
