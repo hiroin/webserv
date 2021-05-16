@@ -307,8 +307,13 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             {
               clients_[i].initClient();
             }
+            else if (clients_[i].hmp.headers_["connection"] == "close")
+            {
+              clients_[i].initClient();
+            }
             else
             {
+              clients_[i].initClient();
               clients_[i].status = PARSE_STARTLINE;
               clients_[i].hmp.clearData();
               clients_[i].body.clear();
