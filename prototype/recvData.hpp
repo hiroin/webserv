@@ -17,7 +17,6 @@ class recvData {
   void clearData();
   void setFd(int fd);
   bool recvFromSocket();
-  bool readFromFd();
   bool cutOutRecvDataBySpecifyingBytes(size_t size);
   bool cutOutRecvDataToEol();
   bool recvDataToEof();

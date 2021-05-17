@@ -40,27 +40,6 @@ bool recvData::recvFromSocket()
   return SUCCESS;
 }
 
-bool recvData::readFromFd()
-{
-  int read_size;
-  char buf[recvBuffsize_];
-  std::string tmp;
-
-  memset(buf, 0, sizeof(buf));
-  read_size = read(fd_, buf, sizeof(buf));
-  if (read_size == -1)
-  {
-    std::cout << "[EMERG]recvData::readFromFd() read() failed." << "ERROR: " << errno << std::endl;
-    recvData_.erase();
-    extractedData_.erase();
-    return FAILURE;
-  }
-  tmp.clear();
-  tmp.assign(buf, read_size);
-  recvData_ += tmp;
-  return SUCCESS;
-}
-
 bool recvData::cutOutRecvDataBySpecifyingBytes(size_t size)
 {
   if (recvData_.size() < size)
