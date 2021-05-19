@@ -413,13 +413,28 @@ int HTTPMessageParser::isInvalidHeaderValue()
   return 200;
 }
 
+void HTTPMessageParser::setCgiScripts(std::vector<std::string> cgiScripts)
+{
+  cgiScripts_ = cgiScripts;
+  for (std::vector<std::string>::iterator itr = cgiScripts_.begin();
+    itr != cgiScripts_.end();
+    itr++
+  )
+  {
+    std::string filenameExtension = *itr;
+    filenameExtension += '/';
+    filenameExtensions_.push_back(filenameExtension);
+  }
+}
+
 HTTPMessageParser::HTTPMessageParser() :
   method_(httpMessageParser::OTHER)
 {
-  filenameExtensions_.push_back(".htm/");  
-  filenameExtensions_.push_back(".html/");  
-  filenameExtensions_.push_back(".php/");  
-  filenameExtensions_.push_back(".cgi/");  
+  filenameExtensions_.push_back(".htm/");
+  filenameExtensions_.push_back(".html/");
+  filenameExtensions_.push_back(".php/");
+  filenameExtensions_.push_back(".cgi/");
+  filenameExtensions_.push_back(".bla/");
 }
 
 HTTPMessageParser::~HTTPMessageParser()

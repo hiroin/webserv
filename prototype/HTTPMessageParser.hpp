@@ -49,6 +49,10 @@ class HTTPMessageParser {
   std::string requestTarget_;
   std::string HTTPVersion_;
 
+  // CGIの拡張子を格納
+  std::vector<std::string> cgiScripts_;
+  void setCgiScripts(std::vector<std::string> cgiScripts);
+
   // requestTarget_をparseした結果を格納
   bool isAuthority(std::string requestTarget);
   std::string getHostAndPort(std::string requestTarget);

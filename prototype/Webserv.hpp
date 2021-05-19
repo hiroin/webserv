@@ -38,6 +38,7 @@ class Wevserv
  public:
   bool notBeCreatedSocket(int port, std::string host, std::vector<portAndHost>& portAndHostCombination);
   void setupServers();
+  void fetchAllCGIExtensionsFromConfig();
   void initFD();
   bool isNotKeepConnectionCode(int code);
   void responseNot200(int i, int code);
@@ -60,6 +61,7 @@ class Wevserv
  private:
   Config& c_;
   std::vector<Socket> servers_;
+  std::vector<std::string> cgiScripts_;
   Client clients_[MAX_SESSION];
   Response *responses_[MAX_SESSION];
   fd_set readFds_;

@@ -3,10 +3,12 @@
 Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
 {
   setupServers();
+  fetchAllCGIExtensionsFromConfig();
   for (int i = 0; i < MAX_SESSION; i++)
   {
     responses_[i] = NULL;
     clients_[i].gc.setDebugLevel(c.getDebugLevel());
+    clients_[i].hmp.setCgiScripts(cgiScripts_);
   }
   struct timeval tvForSelect;
   struct timeval nowTv;
@@ -381,6 +383,38 @@ void Wevserv::setupServers()
   {
     std::cerr << e.what() << '\n';
     exit(1);
+  }
+}
+
+void Wevserv::fetchAllCGIExtensionsFromConfig()
+{
+  for(std::vector<std::string>::iterator itr = c_.configGlobal.configCommon.cgiScripts.begin();
+      itr != c_.configGlobal.configCommon.cgiScripts.end();
+      ++itr)
+  {
+    cgiScripts_.push_back(*itr);
+  }
+  for(std::vector<s_ConfigServer>::iterator itrServer = c_.configGlobal.servers.begin();
+      itrServer != c_.configGlobal.servers.end();
+      ++itrServer)
+  {
+    for(std::vector<std::string>::iterator itr = itrServer->configCommon.cgiScripts.begin();
+        itr != itrServer->configCommon.cgiScripts.end();
+        ++itr)
+    {
+      cgiScripts_.push_back(*itr);
+    }
+    for(std::vector<s_ConfigLocation>::iterator itrLocation = itrServer->locations.begin();
+        itrLocation != itrServer->locations.end();
+        ++itrLocation)
+    {
+      for(std::vector<std::string>::iterator itr = itrLocation->configCommon.cgiScripts.begin();
+          itr != itrLocation->configCommon.cgiScripts.end();
+          ++itr)
+      {
+        cgiScripts_.push_back(*itr);
+      }
+    }
   }
 }
 
