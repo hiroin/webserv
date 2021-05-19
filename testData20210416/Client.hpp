@@ -20,6 +20,7 @@ class Client
   ~Client();
   bool operator==(const Client&);
   bool operator!=(const Client&);
+  std::string body;
 
  private:
   Client(const Client&);
