@@ -1,7 +1,3 @@
-#ifdef _GLIBCXX_DEBUG
-# include <debug/string>
-# include <debug/vector>
-#endif
 #include "Response.hpp"
 #include "Config.hpp"
 #include "HTTPMessageParser.hpp"
@@ -771,35 +767,44 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		{
 			if (isTransferEncodingChunked() || isContentLength())
 			{
-				std::string SearchAbsolutePath = GetSerachAbsolutePath();
-				PutPostBody = client.hmp.body_;
-				if (client.hmp.method_ == httpMessageParser::PUT)
+				s_ConfigCommon configCommon = getConfigCommon();
+				int clientMaxBodySize = configCommon.clientMaxBodySize;
+				if (client.body.size() > clientMaxBodySize)
 				{
-					if (isDirectoryAvailable())
-					{
-						if (SearchAbsolutePath[SearchAbsolutePath.size() - 1] != '/') //directory がOKだったらこの下で書き込み
-						{
-							//指定されたリソースが作成できるかをチェック
-							this->targetFilePath = SearchAbsolutePath;
-							int isExist = isTheFileExist(this->targetFilePath);
-							int fd = open(this->targetFilePath.c_str(), O_RDWR | O_CREAT, S_IRWXU);
-							if (fd == -1)
-							{
-								ResponseStatus = 403;
-								return;
-							}
-							close(fd);
-							if (isExist == 200)
-								ResponseStatus = 204;
-							else
-								ResponseStatus = 201;
-						}
-					}
-					else ResponseStatus = 403;
+					ResponseStatus = 413;
 				}
-				else //CGI にリクエストをだす
+				else
 				{
+					std::string SearchAbsolutePath = GetSerachAbsolutePath();
+					PutPostBody = client.hmp.body_;
+					if (client.hmp.method_ == httpMessageParser::PUT)
+					{
+						if (isDirectoryAvailable())
+						{
+							if (SearchAbsolutePath[SearchAbsolutePath.size() - 1] != '/') //directory がOKだったらこの下で書き込み
+							{
+								//指定されたリソースが作成できるかをチェック
+								this->targetFilePath = SearchAbsolutePath;
+								int isExist = isTheFileExist(this->targetFilePath);
+								int fd = open(this->targetFilePath.c_str(), O_RDWR | O_CREAT, S_IRWXU);
+								if (fd == -1)
+								{
+									ResponseStatus = 403;
+									return;
+								}
+								close(fd);
+								if (isExist == 200)
+									ResponseStatus = 204;
+								else
+									ResponseStatus = 201;
+							}
+						}
+						else ResponseStatus = 403;
+					}
+					else //CGI にリクエストをだす
+					{
 
+					}
 				}
 			}
 			else
