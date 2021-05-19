@@ -2488,4 +2488,36 @@ TEST(Response_test, PUT)
 
     EXPECT_EQ(403, ResponseStatus);
   }
+  // 0140
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::PUT;
+    client_.hmp.absolutePath_ = "/limit/putdata.txt";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["transfer-encoding"] = "chunked";
+    client_.body = "01234567890";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(413, ResponseStatus);
+  }
+  // 0141
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::PUT;
+    client_.hmp.absolutePath_ = "/limit/putdata.txt";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["content-length"] = "11";
+    client_.body = "01234567890";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(413, ResponseStatus);
+  }  
 }
