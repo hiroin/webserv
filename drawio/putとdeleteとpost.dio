@@ -456,7 +456,7 @@
                     <mxGeometry x="3059" y="685" width="40" height="20" as="geometry"/>
                 </mxCell>
                 <mxCell id="157" value="Yes" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="3014" y="730" width="40" height="20" as="geometry"/>
+                    <mxGeometry x="3010" y="720" width="40" height="20" as="geometry"/>
                 </mxCell>
                 <mxCell id="158" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="159" target="163" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
@@ -699,6 +699,9 @@
                 </mxCell>
                 <mxCell id="254" value="ファイルがなかった場合、/へのボディのアップロードと解釈する" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
                     <mxGeometry x="2145" y="980" width="375" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="255" value="ファイルの名前は任意&lt;br&gt;POSTfile_(time関数で取得したtimestamp).dataな感じでいかな。" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="3075" y="802" width="195" height="20" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
