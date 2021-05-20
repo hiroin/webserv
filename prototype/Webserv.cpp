@@ -83,7 +83,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         }
         if (limitOver)
         {
-          std::cout << "[ERR]over MAX_SESSION." << std::endl;
+          std::cout << "[EMERG]over MAX_SESSION." << std::endl;
           responseNot200(limitOverI, 503);
         }
       }
