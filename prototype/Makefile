@@ -27,7 +27,8 @@ HTTP1_SOURCE = main.cpp \
 							 Response.cpp \
 							 ft_inet_ntoa.cpp \
 							 readData.cpp \
-							 Webserv.cpp
+							 Webserv.cpp \
+							 php-cgi.cpp
 .PHONY: all clean
 OBJS	= $(HTTP1_SOURCE:.cpp=.o)
 .cpp.o:

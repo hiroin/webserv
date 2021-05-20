@@ -2521,3 +2521,36 @@ TEST(Response_test, PUT)
     EXPECT_EQ(413, ResponseStatus);
   }  
 }
+
+TEST(Response_test, CGI)
+{
+  const char* configfile = "testcase/022_cgiscripts.conf";
+  Config config_;
+  parseConfig(configfile, config_);
+  ssize_t read_size;
+
+  // 0142
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/index.php";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.query_ = "name=ap2";
+    client_.ip = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+
+    char buf[1000];
+    memset(buf, 0, sizeof(buf));
+    read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+    buf[read_size] = 0;
+    std::cout << "Response.getCgiFd() : " << Response.getCgiFd() << std::endl;
+    std::cout << "CGIの出力 : " << buf << std::endl;
+
+  }
+}

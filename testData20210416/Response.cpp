@@ -716,6 +716,8 @@ bool Response::isContentLength()
 
 bool isExtention(std::string absolutePath)
 {
+  if (absolutePath[absolutePath.size() - 1])
+    return true;  
 	std::string::reverse_iterator first = absolutePath.rbegin();
 	std::string::reverse_iterator last = absolutePath.rend();
 	while(first != last)

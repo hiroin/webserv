@@ -60,6 +60,25 @@ std::string ft_ltos(long nu)
 	return (ret);
 
 }
+
+std::string ft_ultos(unsigned long nu)
+{
+	if (nu == 0)
+	{
+		return ("0");
+	}
+	std::string ret;
+	while (nu > 0)
+	{
+		char c[2];
+		c[0] = '0' + nu % 10;
+		c[1] = '\0';
+		ret.insert(0, std::string(c));
+		nu /= 10;
+	}
+	return (ret);
+}
+
 std::string getFileExtention(std::string FilePath)
 {
 	int i = FilePath.size() - 1;
@@ -601,7 +620,7 @@ bool Response::isRequestMatchAuth()
 	std::string credential;
 	std::string EncodedServerCredential;
 
-	int i = 0;
+	size_t i = 0;
 	for(i = 0; i < Authorization.size(); i++)
 	{
 		if (Authorization[i] == ' ')
@@ -697,6 +716,8 @@ bool Response::isContentLength()
 
 bool isExtention(std::string absolutePath)
 {
+  if (absolutePath[absolutePath.size() - 1])
+    return true;
 	std::string::reverse_iterator first = absolutePath.rbegin();
 	std::string::reverse_iterator last = absolutePath.rend();
 	while(first != last)
@@ -718,7 +739,31 @@ void Response::addSlashOnAbsolutePath()
 	}
 }
 
-Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1), ResponseStatus(-1)
+bool Response::isExcutable(std::string filePath)
+{
+	struct stat buf;
+	int ret = stat(filePath.c_str(), &buf);
+	if (ret == -1) return false;
+	if (buf.st_mode & S_IXUSR)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Response::isCgiFile()
+{
+	s_ConfigCommon configCommon = getConfigCommon();
+	std::vector<std::string> cgiScripts = configCommon.cgiScripts;
+	std::string fileExtention = "." + getFileExtention(targetFilePath);
+	for(size_t i = 0; i < cgiScripts.size(); i++)
+	{
+		if (cgiScripts[i] == fileExtention) return true ;
+	}
+	return false ;
+}
+
+Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1), ResponseStatus(-1), isCGI(false)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
@@ -739,7 +784,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	if (isMethodAllowed())
 	{
 		//ここから、メソッド毎に処理を分けて書いていく
-		if (client.hmp.method_ == httpMessageParser::GET)
+		if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
 		{
 			if (isAcceptCharsetSet())
 			{
@@ -762,6 +807,23 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 					ResponseStatus = 406;
 			}
 			setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
+			if (ResponseStatus == 200)
+			{
+				//cgi を実行か判断
+				if (isCgiFile())
+				{
+					if (getFileExtention(targetFilePath) == std::string("php"))
+					{
+						if (execPhpCgi() != -1)
+							isCGI = true;
+					}
+					else
+					{
+						//fast-cgi の実行
+					}
+				}
+
+			}
 		}
 		else if (client.hmp.method_ == httpMessageParser::PUT || client.hmp.method_ == httpMessageParser::POST)
 		{
@@ -843,10 +905,13 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 	if (client.hmp.method_ == httpMessageParser::GET)
 	{
-		setContenType(); //Languageを考えて選択する。
-		setContentLength();
-		if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
-			setContentLanguage();
+		if (!isCGI)
+		{
+			setContenType();
+			setContentLength();
+			if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
+				setContentLanguage();
+		}
 		client.status = READ;
 	}
 	if (client.hmp.method_ == httpMessageParser::PUT)
@@ -857,7 +922,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 }
 
-Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config), readFd(-1), writeFd(-1), ResponseStatus(-1)
+Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config), ResponseStatus(-1)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
@@ -935,13 +1000,13 @@ bool Response::DecideConfigServer()
 
 	//ここから、configをなめていって該当設定を見つけよう。
 	std::vector<s_ConfigServer> servers = config.configGlobal.servers;
-	for(int i = 0; i < servers.size(); i++)
+	for(size_t i = 0; i < servers.size(); i++)
 	{
 		if (servers[i].port == clientPort && servers[i].host == clientHostName) //クライアントとportが一致する設定は必ずある
 		{
 			std::vector<std::string> serverNames = servers[i].serverNames;
 			std::string requestHOST = hmp.headers_["host"];
-			for(int j = 0; j < serverNames.size(); j++)
+			for(size_t j = 0; j < serverNames.size(); j++)
 			{
 				if (serverNames[j] == requestHOST)
 				{
@@ -951,7 +1016,7 @@ bool Response::DecideConfigServer()
 			}
 		}
 	}
-	for(int i = 0; i < servers.size(); i++)
+	for(size_t i = 0; i < servers.size(); i++)
 	{
 		if (servers[i].port == clientPort && servers[i].host == clientHostName)// serverNameで一致するものがなかったら一番上のもの
 		{
@@ -967,7 +1032,7 @@ bool Response::DecideConfigLocation()
 	std::string AbsolutePath = this->client.hmp.absolutePath_;
 	std::vector<s_ConfigLocation> locations = this->configServer.locations;
 
-	for(int i = 0; i < locations.size(); i++)// 文字が長い順番でlocationが入ってる。
+	for(size_t i = 0; i < locations.size(); i++)// 文字が長い順番でlocationが入ってる。
 	{
 		if (AbsolutePath.find(locations[i].path) == 0) //location path と absolutePathが先頭一致した場合
 		{
@@ -1004,7 +1069,7 @@ int Response::isLanguageFileExist(std::string SerachFileAbsolutePath)
 		int statusNo;
 		std::string targetFile;
 		std::vector<std::string> Languages = first->second;
-		for(int i = 0; i < Languages.size(); i++)
+		for(size_t i = 0; i < Languages.size(); i++)
 		{
 			if (Languages[i] == "*")
 				targetFile = SerachFileAbsolutePath;
@@ -1048,7 +1113,7 @@ int Response::isCharsetFileExist(std::string SerachFileAbsolutePath)
 		int statusNo;
 		std::string targetFile;
 		std::vector<std::string> Charset = first->second;
-		for(int i = 0; i < Charset.size(); i++)
+		for(size_t i = 0; i < Charset.size(); i++)
 		{
 			if (Charset[i] == "*")
 				targetFile = SerachFileAbsolutePath;
@@ -1083,7 +1148,7 @@ int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
 		std::vector<std::string> Charset = Cfirst->second;
 		std::string targetFileWithCharset;
 
-		for(int i = 0; i < Charset.size(); i++)
+		for(size_t i = 0; i < Charset.size(); i++)
 		{
 			targetFileWithCharset = SerachFileAbsolutePath + "." + Charset[i]; // Charsetつけた
 
@@ -1092,7 +1157,7 @@ int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
 			while(Lfirst != Llast)
 			{
 				std::vector<std::string> Languages = Lfirst->second;
-				for(int i = 0; i < Languages.size(); i++)
+				for(size_t i = 0; i < Languages.size(); i++)
 				{
 					std::string targetFile;
 					if (Languages[i] == "*")
@@ -1152,7 +1217,7 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 		s_ConfigCommon configCommon = getConfigCommon();
 		int statusNo = 403;
 		indexs = configCommon.indexs;
-		for(int i = 0; i < indexs.size(); i++)
+		for(size_t i = 0; i < indexs.size(); i++)
 		{
 			this->targetFilePath = SerachFileAbsolutePath + indexs[i]; //indexファイルを見ていく
 			statusNo = isTargetFileAbailable(this->targetFilePath);
@@ -1265,7 +1330,7 @@ void Response::getAutoIndexContent()
 	AutoIndexContent.append(std::string("<h1>Index of "));
 	AutoIndexContent.append(std::string(client.hmp.absolutePath_));
 	AutoIndexContent.append(std::string("</h1><hr><pre>"));
-	for(int i = 0; i < directoryContents.size(); i++)
+	for(size_t i = 0; i < directoryContents.size(); i++)
 	{
 		std::string aTag;
 		aTag = makeATag(directoryContents[i]);
@@ -1375,7 +1440,7 @@ bool Response::isLanguageFile(std::string FilePath, std::string fileExtention)
 	while (first != last)
 	{
 		std::vector<std::string> values = first->second;
-		for(int i = 0; i < values.size(); i++)
+		for(size_t i = 0; i < values.size(); i++)
 		{
 			if (values[i] == fileExtention)
 			{
@@ -1398,7 +1463,7 @@ bool Response::isCharsetFile(std::string FilePath, std::string fileExtention)
 	while (first != last)
 	{
 		std::vector<std::string> values = first->second;
-		for(int i = 0; i < values.size(); i++)
+		for(size_t i = 0; i < values.size(); i++)
 		{
 			if (values[i] == fileExtention)
 			{
@@ -1493,4 +1558,18 @@ void Response::AppendBodyOnResponseMessage(std::string body)
 {
 	responseMessege.append(std::string("\r\n"));
 	responseMessege.append(body);
+}
+
+int Response::getCgiFd()
+{
+	if (isCGI)
+		return readFd;
+	else
+		return -1;
+}
+
+void Response::mergeCgiResult(std::string CgiResult)
+{
+	// Todo!!! CgiResult からヘッダとBodyを分けて、responseMessage にappend
+	// Content-Length , Content-Type, client status =SEND
 }
