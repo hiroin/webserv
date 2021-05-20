@@ -857,7 +857,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 }
 
-Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config), ResponseStatus(-1)
+Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config), readFd(-1), writeFd(-1), ResponseStatus(-1)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
