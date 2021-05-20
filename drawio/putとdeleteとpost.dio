@@ -323,8 +323,15 @@
                 <mxCell id="111" value="ファイルあり?&lt;br&gt;例 index.html" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="2030" y="770" width="110" height="110" as="geometry"/>
                 </mxCell>
-                <mxCell id="119" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="113" target="116" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="119" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="113" target="245" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1974" y="545" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1940" y="545"/>
+                            <mxPoint x="1940" y="450"/>
+                            <mxPoint x="2757" y="450"/>
+                        </Array>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="123" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="113" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -333,9 +340,6 @@
                 </mxCell>
                 <mxCell id="113" value="config.indexの設定あり?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="2030" y="490" width="110" height="110" as="geometry"/>
-                </mxCell>
-                <mxCell id="116" value="403" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="1890" y="515" width="84" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="118" value="No" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
                     <mxGeometry x="1990" y="550" width="40" height="20" as="geometry"/>
@@ -388,13 +392,17 @@
                 <mxCell id="135" value="CGIの実行処理開始" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="2690" y="1278" width="84" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="140" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="138" target="124" edge="1">
+                <mxCell id="140" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="138" target="124" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
-                            <mxPoint x="2085" y="1000"/>
-                            <mxPoint x="2165" y="1000"/>
+                            <mxPoint x="2165" y="950"/>
                             <mxPoint x="2165" y="700"/>
                         </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="253" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="138">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="2610" y="550" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="138" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.loop_limit;whiteSpace=wrap;rotation=-180;" parent="1" vertex="1">
@@ -457,13 +465,15 @@
                     <mxGeometry x="2949" y="782" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="160" value="openしたfdをメインループに返却" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="2946.5" y="1050" width="125" height="68" as="geometry"/>
+                    <mxGeometry x="2949" y="1169" width="125" height="68" as="geometry"/>
                 </mxCell>
                 <mxCell id="161" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="163" target="165" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="162" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="163" target="160" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="162" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="163" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="3009" y="1040" as="targetPoint"/>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="163" value="openに失敗?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="1" vertex="1">
                     <mxGeometry x="2959" y="882" width="100" height="100" as="geometry"/>
@@ -680,6 +690,15 @@
                 </mxCell>
                 <mxCell id="246" value="ファイルを書き込むPATHはuploadPath" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
                     <mxGeometry x="2697" y="645" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="251" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="250" target="160">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="250" value="201でレスポンスヘッダ作成&lt;br&gt;※要Content-Locationヘッダ" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="2951.5" y="1040" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="254" value="ファイルがなかった場合、/へのボディのアップロードと解釈する" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="2145" y="980" width="375" height="20" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
