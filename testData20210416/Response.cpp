@@ -1566,12 +1566,8 @@ int Response::getCgiFd()
 		return -1;
 }
 
-void Response::mergeContentsLength(int Length)
+void Response::mergeCgiResult(std::string CgiResult)
 {
-	responseMessege.append(std::string("Content-Length: ") + ft_itos(Length) + "\r\n");
-}
-
-void Response::mergeContentType(std::string ContentType)
-{
-	responseMessege.append(ContentType + "\r\n");
+	// Todo!!! CgiResult からヘッダとBodyを分けて、responseMessage にappend
+	// Content-Length , Content-Type, client status =SEND
 }

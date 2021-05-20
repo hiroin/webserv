@@ -101,8 +101,7 @@ class Response
 		bool isExcutable(std::string filePath);
 		void addEnvironmentValue();
 		int getCgiFd();
-		void mergeContentsLength(int Length);
-		void mergeContentType(std::string ContentType);
+		void mergeCgiResult(std::string CgiResult);
 
 		//php-cgi
 		int execPhpCgi();
