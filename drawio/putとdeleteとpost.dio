@@ -400,9 +400,14 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="253" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="138">
+                <mxCell id="253" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="138" target="245">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="2610" y="550" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="2085" y="1000"/>
+                            <mxPoint x="2650" y="1000"/>
+                            <mxPoint x="2650" y="545"/>
+                        </Array>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="138" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.loop_limit;whiteSpace=wrap;rotation=-180;" parent="1" vertex="1">
@@ -417,10 +422,8 @@
                 <mxCell id="170" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="143" target="135" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="244" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="143" target="245">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="2640" y="545" as="targetPoint"/>
-                    </mxGeometry>
+                <mxCell id="257" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="143" target="256">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="143" value="config.cgiScriptsに拡張子あり?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="2390" y="490" width="110" height="110" as="geometry"/>
@@ -432,7 +435,7 @@
                     <mxGeometry x="2510" y="560" width="40" height="20" as="geometry"/>
                 </mxCell>
                 <mxCell id="147" value="ボディのアップロードと解釈する&lt;br&gt;(tester対策仕様)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-                    <mxGeometry x="2481" y="510" width="230" height="20" as="geometry"/>
+                    <mxGeometry x="2577" y="420" width="230" height="20" as="geometry"/>
                 </mxCell>
                 <mxCell id="155" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="150" target="154" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
@@ -702,6 +705,12 @@
                 </mxCell>
                 <mxCell id="255" value="ファイルの名前は任意&lt;br&gt;POSTfile_(time関数で取得したtimestamp).dataな感じでいかな。" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
                     <mxGeometry x="3075" y="802" width="195" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="256" value="405" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="2510" y="620" width="84" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="258" value="&lt;div&gt;[config]&lt;/div&gt;&lt;div&gt;root /www&lt;/div&gt;&lt;div&gt;index index.html index.php&lt;/div&gt;&lt;div&gt;upload_path /upload&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[リクエスト]&lt;/div&gt;&lt;div&gt;POST / HTTP/1.1&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[実行結果]&lt;/div&gt;&lt;div&gt;(1) /www/index.htmlがあれば、/www/index.phpを実行…しようとするけど、config.cgiScriptsに拡張子がないので405&lt;/div&gt;&lt;div&gt;(2) /www/index.htmlがなくて/www/index.phpがあれば、/www/index.phpを実行&lt;/div&gt;&lt;div&gt;(3) /www/index.htmlも/www/index.phpもなければ、/uploadディレクトリに/upload/POSTfile_1416483005.dataのようなファイルにボディを保存&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;-----------------------------------------&lt;/div&gt;&lt;div&gt;[config]&lt;/div&gt;&lt;div&gt;root /www&lt;/div&gt;&lt;div&gt;upload_path /upload&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[リクエスト]&lt;/div&gt;&lt;div&gt;POST / HTTP/1.1&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[実行結果]&lt;/div&gt;&lt;div&gt;/uploadディレクトリに/upload/POSTfile_1416483005.dataのようなファイルにボディを保存&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;------------------------------------------&lt;/div&gt;&lt;div&gt;[config]&lt;/div&gt;&lt;div&gt;root /www&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[リクエスト]&lt;/div&gt;&lt;div&gt;POST / HTTP/1.1&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[実行結果]&lt;/div&gt;&lt;div&gt;/wwwディレクトリに/www/POSTfile_1416483005.dataのようなファイルにボディを保存&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="2817" y="15" width="803.5" height="500" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
