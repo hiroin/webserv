@@ -29,14 +29,18 @@ class Response
 		std::string targetFilePath;
 		std::string AutoIndexContent;
 		bool isAutoIndexApply;
+		bool isCGI;
 		int readFd;
 		int writeFd;
 
-		std::map<int, std::string> GetDate();
-		std::map<int, std::string> GetMonth();
+
 		std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
 		std::map<std::string, std::vector<std::string> > AcceptCharsetMap;
 		std::string PutPostBody;
+		std::vector<std::string> envp;
+		std::vector<std::string> argv;
+		std::map<int, std::string> GetDate();
+		std::map<int, std::string> GetMonth();
 		bool DecideConfigServer(); //使うサーバーを決定
 		bool DecideConfigLocation(); //使うlocation を決定
 		std::string GetSerachAbsolutePath(); //Requestのパスと、
@@ -93,6 +97,17 @@ class Response
 		std::string Getfile(std::string path);
 		bool isHTTPMethodHEAD();
 		int send();
+		bool isCgiFile();
+		bool isExcutable(std::string filePath);
+		void addEnvironmentValue();
+		int getCgiFd();
+		void mergeContentsLength(int Length);
+		void mergeContentType(std::string ContentType);
+
+		//php-cgi
+		int execPhpCgi();
+
+		/////////////////////////////////
 		Response(int test_number);
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
