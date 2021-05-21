@@ -147,7 +147,7 @@ TEST(Response_test, webserv_01)
       int TargetFileFd = Response.getTargetFileFd();
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(403, ResponseStatus);
+      EXPECT_EQ(404, ResponseStatus);
     }
     // 0007
     {
@@ -429,7 +429,7 @@ TEST(Response_test, webserv_error)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(404, ResponseStatus);
+      EXPECT_EQ(403, ResponseStatus);
       EXPECT_EQ("", Response.targetFilePath);
     }
     // 0023
@@ -444,7 +444,7 @@ TEST(Response_test, webserv_error)
       Response Response(client_, config_);
       int ResponseStatus = Response.ResponseStatus;
 
-      EXPECT_EQ(404, ResponseStatus);
+      EXPECT_EQ(403, ResponseStatus);
       EXPECT_EQ("", Response.targetFilePath);
     }
   }
