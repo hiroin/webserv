@@ -2544,13 +2544,14 @@ TEST(Response_test, CGI)
     int ResponseStatus = Response.ResponseStatus;
 
     EXPECT_EQ(200, ResponseStatus);
+    EXPECT_LE(3, Response.getCgiFd());
 
-    char buf[1000];
-    memset(buf, 0, sizeof(buf));
-    read_size = read(Response.getCgiFd(), buf, sizeof(buf));
-    buf[read_size] = 0;
-    std::cout << "Response.getCgiFd() : " << Response.getCgiFd() << std::endl;
-    std::cout << "CGIの出力 : " << buf << std::endl;
+    // char buf[1000];
+    // memset(buf, 0, sizeof(buf));
+    // read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+    // buf[read_size] = 0;
+    // std::cout << "Response.getCgiFd() : " << Response.getCgiFd() << std::endl;
+    // std::cout << "CGIの出力 : " << buf << std::endl;
 
   }
 }

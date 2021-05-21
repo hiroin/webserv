@@ -21,6 +21,7 @@ class Client
   bool operator==(const Client&);
   bool operator!=(const Client&);
   std::string body;
+  bool bCGI;
 
  private:
   Client(const Client&);
