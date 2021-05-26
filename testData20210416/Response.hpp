@@ -54,7 +54,6 @@ class Response
 		void setContenType();
 		std::string GetContentType(std::string key); //contentTypeを取得する関数
 		std::string GetLastModified(); //最終更新日を返す関数
-		int getTargetFileFd();
 		bool isMethodAllowed();
 		void setAllow();
 		s_ConfigCommon getConfigCommon();
@@ -98,15 +97,18 @@ class Response
 		bool isHTTPMethodHEAD();
 		int send();
 		bool isCgiFile();
-		bool isExcutable(std::string filePath);
+		bool isReadable(std::string filePath);
+		bool isExecutable(std::string filePath);
 		void addEnvironmentValue();
-		int getCgiFd();
+		int getCgiFd(); //CGIの読み取り用FDを取得する関数
+		int getTargetFileFd(); //ファイル読み取り用FDを取得する関数
 		void mergeCgiResult(std::string CgiResult);
 
 		//php-cgi
-		int execPhpCgi();
-
+		bool execPhpCgi();
 		/////////////////////////////////
+
+		bool execCgi();
 		Response(int test_number);
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
