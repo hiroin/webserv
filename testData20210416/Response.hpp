@@ -98,15 +98,17 @@ class Response
 		bool isHTTPMethodHEAD();
 		int send();
 		bool isCgiFile();
-		bool isExcutable(std::string filePath);
+		bool isReadable(std::string filePath);
+		bool isExecutable(std::string filePath);
 		void addEnvironmentValue();
 		int getCgiFd();
 		void mergeCgiResult(std::string CgiResult);
 
 		//php-cgi
-		int execPhpCgi();
-
+		bool execPhpCgi();
 		/////////////////////////////////
+
+		bool execCgi();
 		Response(int test_number);
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
