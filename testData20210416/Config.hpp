@@ -50,6 +50,7 @@ struct s_ConfigServer
 struct s_ConfigGlobal
 {
   std::string phpCgiPath;
+  std::string cgitesterPath;
   std::vector<s_ConfigServer> servers;
   s_ConfigCommon configCommon;
 };
