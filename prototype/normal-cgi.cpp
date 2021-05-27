@@ -48,7 +48,7 @@ void Response::addEnvironmentValue()
 	if (isNecesarryAuth())
 	{
 		envp.push_back("AUTH_TYPE=Basic");
-		envp.push_back(std::string("REMOTE_USER") + configCommon.authBasicUid);
+		envp.push_back(std::string("REMOTE_USER=") + configCommon.authBasicUid);
 	}
 	if (client.hmp.method_ == httpMessageParser::POST)
 	{

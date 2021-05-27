@@ -18,7 +18,7 @@ int main()
   client_.hmp.headers_["host"] = "127.0.0.1";
   // client_.hmp.absolutePath_ = "/index.php";
   // client_.hmp.absolutePath_ = "/index.cgi";
-  client_.hmp.absolutePath_ = "/index.cgi";
+  client_.hmp.absolutePath_ = "/auth/index.cgi";
   client_.hmp.query_ = "name=ap2";
   // client_.hmp.query_ = "name+ap2";
   // client_.hmp.query_ = "full=name+ap2";
@@ -26,9 +26,10 @@ int main()
   // client_.hmp.requestTarget_ = "/index.cgi?name=ap2";
   // client_.hmp.requestTarget_ = "/index.cgi?name+ap2";
   // client_.hmp.requestTarget_ = "/index.cgi?full=name+ap2";
-  client_.hmp.requestTarget_ = "/index.cgi/a/b";
-  client_.hmp.pathinfo_ = "/a/b";
-  client_.ip = "127.0.0.1";  
+  // client_.hmp.requestTarget_ = "/index.cgi/a/b";
+  // client_.hmp.pathinfo_ = "/a/b";
+  client_.ip = "127.0.0.1";
+  client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
   Response Response(client_, config_);
      
   int ResponseStatus = Response.ResponseStatus;
