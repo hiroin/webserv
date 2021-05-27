@@ -741,7 +741,17 @@ void Response::addSlashOnAbsolutePath()
 	}
 }
 
-bool Response::isExcutable(std::string filePath)
+bool Response::isReadable(std::string filePath)
+{
+	int ret = open(filePath.c_str(), O_RDONLY);
+	if (ret == -1)
+		return false;
+	close(ret);
+	return true;
+}
+
+
+bool Response::isExecutable(std::string filePath)
 {
 	struct stat buf;
 	int ret = stat(filePath.c_str(), &buf);
@@ -816,12 +826,14 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 				{
 					if (getFileExtention(targetFilePath) == std::string("php"))
 					{
-						if (execPhpCgi() != -1)
+						if (execPhpCgi())
 							isCGI = true;
 					}
 					else
 					{
-						//fast-cgi の実行
+						if (execCgi())
+							isCGI = true;
+						//phpでないCGI の実行
 					}
 				}
 
@@ -1096,8 +1108,6 @@ int Response::isLanguageFileExist(std::string SerachFileAbsolutePath)
 	return (406); //見つからなかったら406
 }
 
-
-
 void Response::setContentLanguage()
 {
 	std::string ContentLanguage = "Content-Language: ";
@@ -1139,6 +1149,7 @@ int Response::isCharsetFileExist(std::string SerachFileAbsolutePath)
 	}
 	return (406); //見つからなかったら406
 }
+
 int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
 {
 	std::map<std::string, std::vector<std::string> >::reverse_iterator Cfirst = AcceptCharsetMap.rbegin();
@@ -1186,7 +1197,6 @@ int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
 	}
 	return (406); //見つからなかったら406
 }
-
 
 int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
 {

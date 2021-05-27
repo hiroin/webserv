@@ -20,7 +20,8 @@ SOURCE = ../../HTTPMessageParser.cpp \
   ../../Config.cpp \
 	../../parseConfig.cpp \
 	../../readData.cpp \
-	../../php-cgi.cpp
+	../../php-cgi.cpp \
+	../../normal-cgi.cpp
 
 .PHONY: all clean
 

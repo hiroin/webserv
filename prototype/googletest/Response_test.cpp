@@ -2362,7 +2362,8 @@ TEST(Response_test, PUT)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(201, ResponseStatus);
+    // EXPECT_EQ(201, ResponseStatus);
+    EXPECT_EQ(204, ResponseStatus);
     EXPECT_EQ("/tmp/webserv/put/index.htm", Response.targetFilePath);
   }
   // 0132
@@ -2538,6 +2539,7 @@ TEST(Response_test, CGI)
     client_.hmp.absolutePath_ = "/index.php";
     client_.hmp.headers_["host"] = "127.0.0.1";
     client_.hmp.query_ = "name=ap2";
+    client_.hmp.requestTarget_ = "/index.php?name=ap2";
     client_.ip = "127.0.0.1";
 
     Response Response(client_, config_);
