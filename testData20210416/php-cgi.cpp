@@ -92,7 +92,6 @@ bool Response::execPhpCgi()
 	readFd = pipes[0];
 	ResponseStatus = 200;
 	return true;
-
 }
 
 #endif /* A2879922_2A4B_4315_BE9F_5B8029A21A98 */
