@@ -116,3 +116,5 @@ class Response
 };
 
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
+
+// /* 残タスク　HEAD, POST が '/' で終わってる場合には、'/' を rootとしてファイルをアップロードする必要あり config に uploadPath があるので、そのpath にアップロード、ファイル名は適当に決める。*/
