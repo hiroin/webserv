@@ -829,6 +829,11 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 						if (execPhpCgi())
 							isCGI = true;
 					}
+					else if (getFileExtention(targetFilePath) == std::string("bla"))
+					{
+						if (execCgiTester())
+							isCGI = true;
+					}
 					else
 					{
 						if (execCgi())

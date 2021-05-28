@@ -109,6 +109,9 @@ class Response
 		/////////////////////////////////
 
 		bool execCgi();
+		//////////////////
+
+		bool execCgiTester();
 		Response(int test_number);
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
