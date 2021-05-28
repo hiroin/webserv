@@ -829,6 +829,11 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 						if (execPhpCgi())
 							isCGI = true;
 					}
+					else if (getFileExtention(targetFilePath) == std::string("bla"))
+					{
+						if (execCgiTester())
+							isCGI = true;
+					}
 					else
 					{
 						if (execCgi())
@@ -1580,8 +1585,33 @@ int Response::getCgiFd()
 		return -1;
 }
 
+std::vector<std::string> splitByCRLF(std::string string)
+{
+	std::string separator = std::string("\r\n\r\n");         // 区切り文字
+	size_t separator_length = separator.length(); // 区切り文字の長さ
+	std::vector<std::string> ret;
+	if (separator_length == 0) {
+  	ret.push_back(string);
+	} else {
+  	size_t offset = 0;
+  	while (1) {
+    	size_t pos = string.find(separator, offset);
+    	if (pos == std::string::npos) {
+      	ret.push_back(string.substr(offset));
+      	break;
+    	}
+    	ret.push_back(string.substr(offset, pos - offset));
+    	offset = pos + separator_length;
+  		}
+	}
+	return ret;
+}
+
 void Response::mergeCgiResult(std::string CgiResult)
 {
-	// Todo!!! CgiResult からヘッダとBodyを分けて、responseMessage にappend
-	// Content-Length , Content-Type, client status =SEND
+	std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
+	size_t contentLength = HeaderBody[1].size();
+	responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
+	responseMessege.append(CgiResult);
+	client.status = SEND;
 }

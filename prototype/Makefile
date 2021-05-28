@@ -29,7 +29,8 @@ HTTP1_SOURCE = main.cpp \
 							 readData.cpp \
 							 Webserv.cpp \
 							 php-cgi.cpp \
-							 normal-cgi.cpp
+							 normal-cgi.cpp \
+							 cgiTester.cpp
 .PHONY: all clean
 OBJS	= $(HTTP1_SOURCE:.cpp=.o)
 .cpp.o:
