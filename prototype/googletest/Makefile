@@ -21,7 +21,8 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../parseConfig.cpp \
 	../readData.cpp \
 	../php-cgi.cpp \
-	../normal-cgi.cpp
+	../normal-cgi.cpp \
+	../cgiTester.cpp
 OBJS = $(SOURCE:.cpp=.o)
 
 .PHONY: all clean

@@ -2362,8 +2362,8 @@ TEST(Response_test, PUT)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    // EXPECT_EQ(201, ResponseStatus);
-    EXPECT_EQ(204, ResponseStatus);
+    EXPECT_EQ(201, ResponseStatus);
+    // EXPECT_EQ(204, ResponseStatus);
     EXPECT_EQ("/tmp/webserv/put/index.htm", Response.targetFilePath);
   }
   // 0132
@@ -2529,6 +2529,7 @@ TEST(Response_test, CGI)
   Config config_;
   parseConfig(configfile, config_);
   ssize_t read_size;
+  char buf[1000];
 
   // 0142
   {
@@ -2548,12 +2549,60 @@ TEST(Response_test, CGI)
     EXPECT_EQ(200, ResponseStatus);
     EXPECT_LE(3, Response.getCgiFd());
 
-    // char buf[1000];
-    // memset(buf, 0, sizeof(buf));
-    // read_size = read(Response.getCgiFd(), buf, sizeof(buf));
-    // buf[read_size] = 0;
-    // std::cout << "Response.getCgiFd() : " << Response.getCgiFd() << std::endl;
-    // std::cout << "CGIの出力 : " << buf << std::endl;
+    memset(buf, 0, sizeof(buf));
+    read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+    buf[read_size] = 0;
+    // std::cout << "CGIの出力" << std::endl << buf << std::endl;
+    EXPECT_THAT(buf, MatchesRegex(".*\\[GATEWAY_INTERFACE] => CGI/1.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[PATH_INFO] => /index.php\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[PATH_TRANSLATED] => /tmp/webserv/base\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[QUERY_STRING] => name=ap2\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[REMOTE_ADDR] => 127.0.0.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[REQUEST_METHOD] => GET\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[REQUEST_URI] => /index.php\\?name=ap2\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SCRIPT_NAME] => /index.php\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SCRIPT_FILENAME] => /tmp/webserv/base/index.php\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_NAME] => 127.0.0.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_PORT] => 8080\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_PROTOCOL] => HTTP/1.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_SOFTWARE] => nginx\n.*"));
+    close(Response.getCgiFd());
+  }
+  // 0143
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/index.cgi";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.query_ = "name=ap2";
+    client_.hmp.requestTarget_ = "/index.cgi?name=ap2";
+    client_.ip = "127.0.0.1";
 
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_LE(3, Response.getCgiFd());
+
+    memset(buf, 0, sizeof(buf));
+    read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+    buf[read_size] = 0;
+    // std::cout << "CGIの出力" << std::endl << buf << std::endl;
+    EXPECT_THAT(buf, MatchesRegex(".*\\[GATEWAY_INTERFACE] => CGI/1.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[PATH_INFO] => /index.cgi\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[PATH_TRANSLATED] => /tmp/webserv/base\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[QUERY_STRING] => name=ap2\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[REMOTE_ADDR] => 127.0.0.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[REQUEST_METHOD] => GET\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[REQUEST_URI] => /index.cgi\\?name=ap2\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SCRIPT_NAME] => /index.cgi\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SCRIPT_FILENAME] => /tmp/webserv/base/index.cgi\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_NAME] => 127.0.0.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_PORT] => 8080\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_PROTOCOL] => HTTP/1.1\n.*"));
+    EXPECT_THAT(buf, MatchesRegex(".*\\[SERVER_SOFTWARE] => nginx\n.*"));
+    close(Response.getCgiFd());
   }
 }
