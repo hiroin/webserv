@@ -16,9 +16,9 @@ int main()
   client_.host = "*";
   client_.hmp.method_ = httpMessageParser::GET;
   client_.hmp.headers_["host"] = "127.0.0.1";
-  // client_.hmp.absolutePath_ = "/index.php";
+  client_.hmp.absolutePath_ = "/index.php";
   // client_.hmp.absolutePath_ = "/index.cgi";
-  client_.hmp.absolutePath_ = "/auth/index.cgi";
+  // client_.hmp.absolutePath_ = "/auth/index.cgi";
   client_.hmp.query_ = "name=ap2";
   // client_.hmp.query_ = "name+ap2";
   // client_.hmp.query_ = "full=name+ap2";
@@ -29,7 +29,7 @@ int main()
   // client_.hmp.requestTarget_ = "/index.cgi/a/b";
   // client_.hmp.pathinfo_ = "/a/b";
   client_.ip = "127.0.0.1";
-  client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
+  // client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
   Response Response(client_, config_);
      
   int ResponseStatus = Response.ResponseStatus;
@@ -50,7 +50,6 @@ int main()
     char buf[10000];
     memset(buf, 0, sizeof(buf));
     ssize_t read_size = read(Response.getCgiFd(), buf, sizeof(buf));
-    buf[read_size] = 0;
     std::cout << "CGIの出力" << std::endl << buf << std::endl;
   }
 }
