@@ -905,7 +905,12 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		{
 			setContenType();
 			setContentLength();
-			client.status = READ;
+			if (client.hmp.method_ == httpMessageParser::HEAD)
+			{
+				client.status = SEND;
+			}
+			else
+				client.status = READ;
 			return ;
 		}
 		else
@@ -921,6 +926,14 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		makeAutoIndexResponse();
 		client.status = SEND;
 		return ;
+	}
+	if (client.hmp.method_ == httpMessageParser::HEAD)
+	{
+		setContenType();
+		setContentLength();
+		if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
+			setContentLanguage();
+		client.status = SEND;
 	}
 	if (client.hmp.method_ == httpMessageParser::GET)
 	{
@@ -1364,7 +1377,8 @@ void	Response::makeAutoIndexResponse()
 	responseMessege.append(std::string("Content-Length: "));
 	responseMessege.append(autoIndexSize + "\r\n");
 	responseMessege.append(std::string("\r\n"));
-	responseMessege.append(AutoIndexContent);
+	if (client.hmp.method_ == httpMessageParser::GET)
+		responseMessege.append(AutoIndexContent);
 }
 
 bool Response::isAutoIndex()
