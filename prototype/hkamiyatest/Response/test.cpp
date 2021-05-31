@@ -51,6 +51,7 @@ int main()
     memset(buf, 0, sizeof(buf));
     ssize_t read_size = read(Response.getCgiFd(), buf, sizeof(buf));
     std::cout << "CGIの出力" << std::endl << buf << std::endl;
+    close(Response.getCgiFd());
   }
 }
 
