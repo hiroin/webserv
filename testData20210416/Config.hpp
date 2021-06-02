@@ -30,6 +30,7 @@ struct s_ConfigLocation
 {
   std::string path;
   std::string alias;
+  std::string rewrite;
   s_ConfigCommon configCommon;
   bool operator==(const s_ConfigLocation&) const;
   bool operator!=(const s_ConfigLocation&) const;

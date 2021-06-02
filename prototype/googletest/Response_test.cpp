@@ -2772,3 +2772,101 @@ TEST(Response_test, CGI)
     close(Response.getCgiFd());
   }
 }
+
+TEST(Response_test, HEAD)
+{
+  const char* configfile = "testcase/022_cgiscripts.conf";
+  Config config_;
+  parseConfig(configfile, config_);
+
+  // 0148
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::HEAD;
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+  }
+  // 0149
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::HEAD;
+    client_.hmp.absolutePath_ = "/0";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+  }
+  // 0149
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::HEAD;
+    client_.hmp.absolutePath_ = "/1";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(404, ResponseStatus);
+  }
+  // 0150
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::HEAD;
+    client_.hmp.absolutePath_ = "/index.php";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+  }
+  // 0151
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::HEAD;
+    client_.hmp.absolutePath_ = "/index.cgi";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+  }
+  // 0152
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::HEAD;
+    client_.hmp.absolutePath_ = "/1.jpg";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+  }  
+}

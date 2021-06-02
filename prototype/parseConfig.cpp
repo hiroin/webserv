@@ -479,7 +479,17 @@ bool parseConfig::insertToConfigClass(Config& c)
           itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
       {
         if (insertAlias(itr, tmpConfigLocation.alias))
+        {
+          if (tmpConfigLocation.alias != "" && tmpConfigLocation.rewrite != "")
+            throw std::runtime_error("Config Error : alias and rewrite are set to the same directive.");
           continue;
+        }
+        if (insertRewrite(itr, tmpConfigLocation.rewrite))
+        {
+          if (tmpConfigLocation.alias != "" && tmpConfigLocation.rewrite != "")
+            throw std::runtime_error("Config Error : alias and rewrite are set to the same directive.");
+          continue;
+        }
         if (insertAutoindex(itr, tmpConfigLocation.configCommon.autoindex))
           continue;
         if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods, tmpConfigLocation.configCommon.allowMethodsBool))
@@ -598,6 +608,22 @@ bool parseConfig::insertAlias(contextIterator itr, std::string& alias)
     std::string aliasValue = itr->values.at(0).value.at(0);
     // std::cout << "[DEBUG]alias : " << aliasValue << std::endl;
     alias = aliasValue;
+    return true;
+  }
+  return false;
+}
+
+bool parseConfig::insertRewrite(contextIterator itr, std::string& rewrite)
+{
+  if (itr->key == "rewrite")
+  {
+    if (itr->values.size() > 1)
+      throw std::runtime_error("Config Error : duplicatie rewrite");
+    if (itr->values.at(0).value.size() >= 2)
+      throw std::runtime_error("Config Error : invalid rewrite");
+    std::string rewriteValue = itr->values.at(0).value.at(0);
+    // std::cout << "[DEBUG]alias : " << aliasValue << std::endl;
+    rewrite = rewriteValue;
     return true;
   }
   return false;
