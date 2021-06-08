@@ -963,7 +963,8 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 	if (client.hmp.method_ == httpMessageParser::HEAD)
 	{
-		setContenType();
+		setContenType(); //Languageを考えて選択する。
+		setLastModified();
 		setContentLength();
 		if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
 			setContentLanguage();
@@ -1464,12 +1465,42 @@ void Response::setDate()
 	time(&timer);
 	gmt = gmtime(&timer);
 	responseMessege.append("Date: ");
-	responseMessege.append(GetDate()[gmt->tm_wday] + ", ");
-	responseMessege.append(ft_itos(gmt->tm_mday) + " ");
-	responseMessege.append(GetMonth()[gmt->tm_mon] + " ");
-	responseMessege.append(ft_itos(gmt->tm_year + 1900) + " ");
-	responseMessege.append(ft_itos(gmt->tm_hour) + ":" + ft_itos(gmt->tm_min) + ":" + ft_itos(gmt->tm_sec) + " ");
-	responseMessege.append("GMT\r\n");
+	responseMessege.append(makeRFCDate(timer));
+	responseMessege.append("\r\n");
+}
+
+std::string Response::makeRFCDate(time_t timestamp)
+{
+	struct tm *gmt;
+	gmt = gmtime(&timestamp);
+  std::string RFCDate;
+	RFCDate.append(GetDate()[gmt->tm_wday] + ", ");
+	RFCDate.append(ft_ito00(gmt->tm_mday) + " ");
+	RFCDate.append(GetMonth()[gmt->tm_mon] + " ");
+	RFCDate.append(ft_itos(gmt->tm_year + 1900) + " ");
+	RFCDate.append(ft_ito00(gmt->tm_hour) + ":" + ft_ito00(gmt->tm_min) + ":" + ft_ito00(gmt->tm_sec) + " ");
+	RFCDate.append("GMT");
+  return RFCDate;
+}
+
+std::string Response::ft_ito00(int n)
+{
+	std::string ret;
+	if (n <= 9)
+	{
+		ret += '0';
+		ret += '0' + n;
+		return ret;
+	}
+	while (n > 0)
+	{
+		char c[2];
+		c[0] = '0' + n % 10;
+		c[1] = '\0';
+		ret.insert(0, std::string(c));
+		n /= 10;
+	}
+	return (ret);
 }
 
 void	Response::setLocation()
@@ -1624,6 +1655,21 @@ void Response::setContentLength()
 	responseMessege.append(ContentLength);
 }
 
+time_t Response::getLastModified()
+
+{
+	struct stat buf;
+	stat(targetFilePath.c_str(), &buf);
+	return buf.st_mtime;
+}
+
+void Response::setLastModified()
+{
+	std::string LastModified = "Last-Modified: ";
+	time_t timestamp = getLastModified();
+  LastModified.append(makeRFCDate(timestamp) + "\r\n");
+	responseMessege.append(LastModified);
+}
 
 void Response::AppendBodyOnResponseMessage(std::string body)
 {

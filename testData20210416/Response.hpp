@@ -116,6 +116,11 @@ class Response
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
 		~Response();
+
+		std::string makeRFCDate(time_t timestamp);
+		std::string ft_ito00(int n);
+		time_t getLastModified();
+		void setLastModified();
 };
 
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
