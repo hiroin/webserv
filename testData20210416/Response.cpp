@@ -949,8 +949,9 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 		}
 		else
 		{
-			responseMessege.append(std::string("Content-Length: 0\r\n"));
+			responseMessege.append(std::string("Content-Length: 5\r\n"));
 			responseMessege.append(std::string("\r\n"));
+			responseMessege.append(std::string("Error"));
 			client.status = SEND;
 			return ;
 		}
@@ -1709,9 +1710,40 @@ std::vector<std::string> splitByCRLF(std::string string)
 
 void Response::mergeCgiResult(std::string CgiResult)
 {
-	std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
-	size_t contentLength = HeaderBody[1].size();
-	responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
-	responseMessege.append(CgiResult);
+	if (CgiResult.find("\r\n\r\n") == std::string::npos)
+	{
+		responseMessege.clear();
+		ResponseStatus = 500;
+		setResponseLine();
+		setDate();
+		if (isErrorFilePathExist())
+		{
+			setContenType();
+			setContentLength();
+			if (client.hmp.method_ == httpMessageParser::HEAD)
+			{
+				client.status = SEND;
+			}
+			else
+				client.status = READ;
+			return ;
+		}
+		else
+		{
+			responseMessege.append(std::string("Content-Length: 5\r\n"));
+			responseMessege.append(std::string("\r\n"));
+			responseMessege.append(std::string("Error"));
+			client.status = SEND;
+			return ;
+		}
+
+	}
+	else
+	{
+		std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
+		size_t contentLength = HeaderBody[1].size();
+		responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
+		responseMessege.append(CgiResult);
+	}
 	client.status = SEND;
 }
