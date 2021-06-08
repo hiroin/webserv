@@ -83,7 +83,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         }
         if (limitOver)
         {
-          std::cout << "[ERR]over MAX_SESSION." << std::endl;
+          std::cout << "[EMERG]over MAX_SESSION." << std::endl;
           responseNot200(limitOverI, 503);
         }
       }
@@ -105,8 +105,16 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         if (!clients_[i].readDataFromFd.readFromFd())
         {
-          deleteResponses(i);
-          clients_[i].initClient();
+          if (responses_[i]->isCGI == true)
+          {
+            deleteResponses(i);
+            responseNot200(i, 500);
+          }
+          else
+          {
+            deleteResponses(i);
+            clients_[i].initClient();
+          }
           continue;
         }
         debugPrintGetReadData(i);
@@ -241,7 +249,14 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         }
         else if (clients_[i].status == READ)
         {
-          clients_[i].readFd = responses_[i]->getTargetFileFd();
+          if (responses_[i]->isCGI == true)
+          {
+            clients_[i].readFd = responses_[i]->getCgiFd();
+          }
+          else
+          {
+            clients_[i].readFd = responses_[i]->getTargetFileFd();
+          }
           if (clients_[i].readFd == -1)
           {
             deleteResponses(i);
@@ -288,7 +303,12 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           if (close(clients_[i].readFd) == -1)
             std::cout << "[EMERG] cannot close clients_[" << i << "]readFd : " << clients_[i].readFd << std::endl;
           clients_[i].readFd = -1;
-          responses_[i]->AppendBodyOnResponseMessage(clients_[i].readDataFromFd.getReadData());
+          if (responses_[i]->isCGI == true)
+          {
+            responses_[i]->mergeCgiResult(clients_[i].readDataFromFd.getReadData());
+          }
+          else
+            responses_[i]->AppendBodyOnResponseMessage(clients_[i].readDataFromFd.getReadData());
           debugPrintResponseMessege(i);
           clients_[i].readDataFromFd.clearData();
           clients_[i].responseMessege = responses_[i]->responseMessege;
@@ -594,7 +614,7 @@ std::string Wevserv::getTime()
 
 void Wevserv::debugPrintGetRecvData(int i)
 {
-  if (c_.getDebugLevel() >= 2)
+  if (c_.getDebugLevel() >= 1)
   {
     std::cout << "--recvData-----------------------------" << std::endl;
     std::cout << clients_[i].receivedData.getRecvData();

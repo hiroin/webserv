@@ -60,6 +60,7 @@ bool recvData::cutOutRecvDataToEol()
       pos = recvData_.find("\n");
       extractedData_ = recvData_.substr(0, pos);
       recvData_ = recvData_.substr(pos + 1);
+      // std::cout << "extractedData_[n ] : " << extractedData_<< std::endl;
       return SUCCESS;
     }
     else if (*itr == '\r')
@@ -69,14 +70,16 @@ bool recvData::cutOutRecvDataToEol()
       {
         extractedData_ = recvData_.substr(0, pos);
         recvData_ = recvData_.substr(pos + 2);
+        // std::cout << "extractedData_[rn] : " << extractedData_<< std::endl;
         return SUCCESS;
       }
-      else
-      {
-        extractedData_ = recvData_.substr(0, pos);
-        recvData_ = recvData_.substr(pos + 1);
-        return SUCCESS;
-      }
+      // else
+      // {
+      //   extractedData_ = recvData_.substr(0, pos);
+      //   recvData_ = recvData_.substr(pos + 1);
+      //   // std::cout << "extractedData_[r ] : " << extractedData_<< std::endl;
+      //   return SUCCESS;
+      // }
     }
   }
   return FAILURE;
@@ -89,6 +92,9 @@ std::string recvData::getRecvData() const
 
 std::string recvData::getExtractedData() const
 {
+  // std::cout << "--extractedData_-----------------------" << std::endl;
+  // std::cout << extractedData_ << std::endl;
+  // std::cout << "---------------------------------------" << std::endl;
   return extractedData_;
 }
 

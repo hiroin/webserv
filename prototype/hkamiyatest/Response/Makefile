@@ -20,11 +20,17 @@ SOURCE = ../../HTTPMessageParser.cpp \
   ../../Config.cpp \
 	../../parseConfig.cpp \
 	../../readData.cpp \
+	../../php-cgi.cpp \
+	../../normal-cgi.cpp \
+	../../cgiTester.cpp
+OBJS = $(SOURCE:.cpp=.o)
 
 .PHONY: all clean
 
 re: $(SOURCE) test.cpp
 	$(CC) $(SOURCE) test.cpp  -o $(EXECFILE) -g -D_GLIBCXX_DEBUG -std=c++11 -fsanitize=address
+# re: $(OBJS) test.cpp
+# 	$(CC) $(OBJS) test.cpp  -o $(EXECFILE) -g -D_GLIBCXX_DEBUG -std=c++11 -fsanitize=address
 
 clean:
 	rm -rf *.o $(EXECFILE) test_ft

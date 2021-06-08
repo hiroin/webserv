@@ -29,14 +29,18 @@ class Response
 		std::string targetFilePath;
 		std::string AutoIndexContent;
 		bool isAutoIndexApply;
+		bool isCGI;
 		int readFd;
 		int writeFd;
 
-		std::map<int, std::string> GetDate();
-		std::map<int, std::string> GetMonth();
+
 		std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
 		std::map<std::string, std::vector<std::string> > AcceptCharsetMap;
 		std::string PutPostBody;
+		std::vector<std::string> envp;
+		std::vector<std::string> argv;
+		std::map<int, std::string> GetDate();
+		std::map<int, std::string> GetMonth();
 		bool DecideConfigServer(); //使うサーバーを決定
 		bool DecideConfigLocation(); //使うlocation を決定
 		std::string GetSerachAbsolutePath(); //Requestのパスと、
@@ -50,7 +54,6 @@ class Response
 		void setContenType();
 		std::string GetContentType(std::string key); //contentTypeを取得する関数
 		std::string GetLastModified(); //最終更新日を返す関数
-		int getTargetFileFd();
 		bool isMethodAllowed();
 		void setAllow();
 		s_ConfigCommon getConfigCommon();
@@ -93,6 +96,22 @@ class Response
 		std::string Getfile(std::string path);
 		bool isHTTPMethodHEAD();
 		int send();
+		bool isCgiFile();
+		bool isReadable(std::string filePath);
+		bool isExecutable(std::string filePath);
+		void addEnvironmentValue();
+		int getCgiFd(); //CGIの読み取り用FDを取得する関数
+		int getTargetFileFd(); //ファイル読み取り用FDを取得する関数
+		void mergeCgiResult(std::string CgiResult);
+
+		//php-cgi
+		bool execPhpCgi();
+		/////////////////////////////////
+
+		bool execCgi();
+		//////////////////
+
+		bool execCgiTester();
 		Response(int test_number);
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
@@ -105,3 +124,5 @@ class Response
 };
 
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
+
+// /* 残タスク　HEAD, POST が '/' で終わってる場合には、'/' を rootとしてファイルをアップロードする必要あり config に uploadPath があるので、そのpath にアップロード、ファイル名は適当に決める。*/

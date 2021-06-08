@@ -30,6 +30,7 @@ struct s_ConfigLocation
 {
   std::string path;
   std::string alias;
+  std::string rewrite;
   s_ConfigCommon configCommon;
   bool operator==(const s_ConfigLocation&) const;
   bool operator!=(const s_ConfigLocation&) const;
@@ -50,6 +51,7 @@ struct s_ConfigServer
 struct s_ConfigGlobal
 {
   std::string phpCgiPath;
+  std::string cgitesterPath;
   std::vector<s_ConfigServer> servers;
   s_ConfigCommon configCommon;
 };
