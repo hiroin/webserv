@@ -11,6 +11,9 @@
 #include <sys/types.h>
 #include <ctime>
 #include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 /*******************************************************/
 /**********************Util Fanctions*******************/
@@ -369,6 +372,21 @@ void removeFilePart(std::string &SerachFileAbsolutePath)
 	SerachFileAbsolutePath = SerachFileAbsolutePath.substr(0, size - count);
 }
 
+
+std::string getDatetimeStr() {
+    time_t t = time(NULL);
+    const tm* localTime = localtime(&t);
+    std::stringstream s;
+    s << "20" << localTime->tm_year - 100;
+    // setw(),setfill()で0詰め
+    s << std::setw(2) << std::setfill('0') << localTime->tm_mon + 1;
+    s << std::setw(2) << std::setfill('0') << localTime->tm_mday;
+    s << std::setw(2) << std::setfill('0') << localTime->tm_hour;
+    s << std::setw(2) << std::setfill('0') << localTime->tm_min;
+    s << std::setw(2) << std::setfill('0') << localTime->tm_sec;
+    // std::stringにして値を返す
+    return s.str();
+}
 
 /*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /**********************Util Fanctions*******************/
@@ -884,7 +902,23 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 					}
 					else //CGI にリクエストをだす
 					{
-
+						//absolutePath の最後が'/' で終了していたらファイル作って、読み込み用のFDを返す
+						if (client.hmp.absolutePath_[client.hmp.absolutePath_.size() - 1] == '/')
+						{
+							//uploadPath にタイムスタンプでファイルを作成しておく
+							std::string createFilePath = getConfigCommon().uploadPath + "/" + getDatetimeStr();
+							int fd = open(createFilePath.c_str(), O_RDWR | O_CREAT, S_IREAD | S_IWRITE);
+							if (fd == -1 )
+							{
+								ResponseStatus = 403;
+							}
+							else
+							{
+								close(fd);
+								targetFilePath = createFilePath;
+								ResponseStatus = 201;
+							}
+						}
 					}
 				}
 			}
@@ -950,6 +984,12 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	{
 		setLocation();
 		responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
+		client.status = WRITE;
+	}
+	if (client.hmp.method_ == httpMessageParser::POST)
+	{
+		responseMessege.append(std::string("Content-Length: 0\r\n"));
+		responseMessege.append(std::string("Content-Location: ") + targetFilePath + "\r\n\r\n");
 		client.status = WRITE;
 	}
 }

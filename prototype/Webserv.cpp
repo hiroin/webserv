@@ -614,7 +614,7 @@ std::string Wevserv::getTime()
 
 void Wevserv::debugPrintGetRecvData(int i)
 {
-  if (c_.getDebugLevel() >= 2)
+  if (c_.getDebugLevel() >= 1)
   {
     std::cout << "--recvData-----------------------------" << std::endl;
     std::cout << clients_[i].receivedData.getRecvData();
