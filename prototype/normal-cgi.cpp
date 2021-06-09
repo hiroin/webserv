@@ -57,10 +57,13 @@ void Response::addEnvironmentValue()
 		envp.push_back(client.hmp.headers_["content-type"]);
 	}
 	envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
-	envp.push_back(std::string("PATH_INFO=") + "/" + client.hmp.pathinfo_);
-  if (configServer.root[configServer.root.size() - 1] != '/')
-    configServer.root.append("/");
-	envp.push_back(std::string("PATH_TRANSLATED=") + configServer.root + client.hmp.pathinfo_);
+  if (client.hmp.pathinfo_ != "")
+  {
+    envp.push_back(std::string("PATH_INFO=") + "/" + client.hmp.pathinfo_);
+    if (configServer.root[configServer.root.size() - 1] != '/')
+      configServer.root.append("/");
+    envp.push_back(std::string("PATH_TRANSLATED=") + configServer.root + client.hmp.pathinfo_);
+  }
 	envp.push_back(std::string("QUERY_STRING=") + client.hmp.query_);
 	envp.push_back(std::string("REMOTE_ADDR=") + client.ip);
 	envp.push_back(std::string("REQUEST_METHOD=") + getMethodasString(client.hmp.method_));
@@ -70,7 +73,7 @@ void Response::addEnvironmentValue()
 	envp.push_back(std::string("SERVER_NAME=") + client.hmp.headers_["host"]);
 	envp.push_back(std::string("SERVER_PORT=") + ft_itos(client.port));
 	envp.push_back(std::string("SERVER_PROTOCOL=") + "HTTP/1.1");
-	envp.push_back(std::string("SERVER_SOFTWARE=") + "nginx");
+	envp.push_back(std::string("SERVER_SOFTWARE=") + "webserv");
 	envp.push_back(std::string("REDIRECT_STATUS=") + "200");
 
 }
