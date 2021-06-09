@@ -1033,6 +1033,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 	}
 	if (client.hmp.method_ == httpMessageParser::DELETE)
 	{
+		responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
 		client.status = SEND;
 	}
 }
