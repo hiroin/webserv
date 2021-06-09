@@ -1506,7 +1506,7 @@ std::string Response::ft_ito00(int n)
 void	Response::setLocation()
 {
 	responseMessege.append(std::string("Location: "));
-	responseMessege.append(this->targetFilePath + "\r\n");
+	responseMessege.append(this->client.hmp.absolutePath_ + "\r\n");
 }
 
 bool Response::isErrorFilePathExist()
