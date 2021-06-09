@@ -1031,6 +1031,10 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
 		client.status = WRITE;
 	}
+	if (client.hmp.method_ == httpMessageParser::DELETE)
+	{
+		client.status = SEND;
+	}
 }
 
 Response::Response(int ErrorCode, Client &client, Config &config) : ResponseStatus(-1), config(config), client(client), readFd(-1), writeFd(-1)
