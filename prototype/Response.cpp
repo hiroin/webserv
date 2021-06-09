@@ -990,8 +990,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 	if (client.hmp.method_ == httpMessageParser::POST)
 	{
-		responseMessege.append(std::string("Content-Length: 0\r\n"));
-		responseMessege.append(std::string("Content-Location: ") + targetFilePath + "\r\n\r\n");
+		responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
 		client.status = WRITE;
 	}
 }
