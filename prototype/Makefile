@@ -34,7 +34,7 @@ HTTP1_SOURCE = main.cpp \
 .PHONY: all clean
 OBJS	= $(HTTP1_SOURCE:.cpp=.o)
 .cpp.o:
-	$(CXX) -g -D_GLIBCXX_DEBUG -std=c++98 -c $< -o $@
+	$(CXX) -Wall -Werror -Wextra -g -D_GLIBCXX_DEBUG -std=c++98 -c $< -o $@
 all: $(HTTP1)
 $(HTTP1): $(OBJS)
 	clang++ $(OBJS) -o $(HTTP1) -g -D_GLIBCXX_DEBUG -std=c++98 -O0

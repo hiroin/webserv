@@ -112,13 +112,13 @@ bool Response::execCgi()
 			}
 		}
 		// クエリの確認
-		if (client.hmp.query_.find("=") != -1)
+		if (client.hmp.query_.find("=") != std::string::npos)
 		{
 			argv.push_back(targetFilePath);
 		}
 		else
 		{
-			if (client.hmp.query_.find("+") != -1)
+			if (client.hmp.query_.find("+") != std::string::npos)
 			{
 				std::vector<std::string> queries;
 				argv.push_back(targetFilePath);

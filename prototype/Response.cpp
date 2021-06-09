@@ -403,7 +403,6 @@ bool Response::isMatchAcceptLanguageFromat(std::string src)
 	std::string::iterator last = src.end();
 	while(itr != last)
 	{
-		int count = 0;
 		if (*itr == '*')
 		{
 			++itr;
@@ -691,7 +690,6 @@ bool Response::isMatchAcceptCharsetFromat(std::string src)
 	std::string::iterator last = src.end();
 	while(itr != last)
 	{
-		int count = 0;
 		if (!isMatchCharset(itr))
 			return false;
 		//ここまでで、langeage-rangeが回収できたとする
@@ -793,7 +791,7 @@ bool Response::isCgiFile()
 	return false ;
 }
 
-Response::Response(Client &client, Config &config) : client(client), config(config), isAutoIndexApply(false), readFd(-1), writeFd(-1), ResponseStatus(-1), isCGI(false)
+Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(config), client(client), isAutoIndexApply(false), isCGI(false) , readFd(-1), writeFd(-1)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
@@ -868,7 +866,9 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 			{
 				s_ConfigCommon configCommon = getConfigCommon();
 				int clientMaxBodySize = configCommon.clientMaxBodySize;
-				if (client.body.size() > clientMaxBodySize)
+        if (clientMaxBodySize < 0)
+          clientMaxBodySize = 0;
+				if (client.body.size() > static_cast<unsigned int>(clientMaxBodySize))
 				{
 					ResponseStatus = 413;
 				}
@@ -995,7 +995,7 @@ Response::Response(Client &client, Config &config) : client(client), config(conf
 	}
 }
 
-Response::Response(int ErrorCode ,Client &client, Config &config) : client(client), config(config), readFd(-1), writeFd(-1), ResponseStatus(-1)
+Response::Response(int ErrorCode ,Client &client, Config &config) : ResponseStatus(-1), config(config), client(client), readFd(-1), writeFd(-1)
 {
 	addSlashOnAbsolutePath();
 	DecideConfigServer(); //使用するserverディレクティブを決定
@@ -1533,6 +1533,7 @@ bool Response::isErrorFilePathExist()
 
 bool Response::isLanguageFile(std::string FilePath, std::string fileExtention)
 {
+  static_cast<void>(FilePath);
 	if(AcceptLanguageMap.size() == 0)
 		return(false);
 
@@ -1556,6 +1557,7 @@ bool Response::isLanguageFile(std::string FilePath, std::string fileExtention)
 
 bool Response::isCharsetFile(std::string FilePath, std::string fileExtention)
 {
+  static_cast<void>(FilePath);
 	if(AcceptCharsetMap.size() == 0)
 		return(false);
 

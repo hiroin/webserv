@@ -73,7 +73,7 @@ void Response::addEnvironmentValue()
 	envp.push_back(std::string("SERVER_NAME=") + client.hmp.headers_["host"]);
 	envp.push_back(std::string("SERVER_PORT=") + ft_itos(client.port));
 	envp.push_back(std::string("SERVER_PROTOCOL=") + "HTTP/1.1");
-	envp.push_back(std::string("SERVER_SOFTWARE=") + "nginx");
+	envp.push_back(std::string("SERVER_SOFTWARE=") + "webserv");
 	envp.push_back(std::string("REDIRECT_STATUS=") + "200");
 
 }
@@ -112,13 +112,13 @@ bool Response::execCgi()
 			}
 		}
 		// クエリの確認
-		if (client.hmp.query_.find("=") != -1)
+		if (client.hmp.query_.find("=") != std::string::npos)
 		{
 			argv.push_back(targetFilePath);
 		}
 		else
 		{
-			if (client.hmp.query_.find("+") != -1)
+			if (client.hmp.query_.find("+") != std::string::npos)
 			{
 				std::vector<std::string> queries;
 				argv.push_back(targetFilePath);
