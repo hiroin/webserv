@@ -57,7 +57,7 @@ void Response::addEnvironmentValue()
 		envp.push_back(client.hmp.headers_["content-type"]);
 	}
 	envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
-	envp.push_back(std::string("PATH_INFO=") + client.hmp.absolutePath_);
+	envp.push_back(std::string("PATH_INFO=") + "/" + client.hmp.pathinfo_);
   if (configServer.root[configServer.root.size() - 1] != '/')
     configServer.root.append("/");
 	envp.push_back(std::string("PATH_TRANSLATED=") + configServer.root + client.hmp.pathinfo_);
