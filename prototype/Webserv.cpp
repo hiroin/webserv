@@ -336,7 +336,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             }
             else
             {
-              clients_[i].initClient();
+              // initClientを作る
               clients_[i].status = PARSE_STARTLINE;
               clients_[i].hmp.clearData();
               clients_[i].body.clear();
