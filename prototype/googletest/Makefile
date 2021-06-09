@@ -12,7 +12,6 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../ft_istoken.cpp \
 	../Client.cpp \
 	../recvData.cpp \
-	../ft_memset.cpp \
 	../ft_isctl.cpp \
 	../ft_istspecials.cpp \
 	../getChunked.cpp \

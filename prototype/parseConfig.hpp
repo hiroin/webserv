@@ -102,7 +102,6 @@ class parseConfig
   bool isCode(std::string s);
   bool isMethod(std::string s);
   bool isFilenameExtension(std::string s);
-  void initCommonConfig(s_ConfigCommon &c);
   void inheritedFromHigherlevelDirectives(Config& c);
   void inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& lower);
   bool notExistRootDirective(Config& c);

@@ -388,7 +388,6 @@ void parseConfig::printConfigHttp()
 bool parseConfig::insertToConfigClass(Config& c)
 { 
   s_ConfigCommon& tmpConfigCommon = c.configGlobal.configCommon;
-  initCommonConfig(tmpConfigCommon);
   for(std::vector<parseconfig::context>::iterator itr = 
       configHttp_.contexts.begin(); itr != configHttp_.contexts.end(); ++itr)
   {
@@ -437,7 +436,6 @@ bool parseConfig::insertToConfigClass(Config& c)
     // size_t serverNumber = itrServer - configHttp_.servers.begin();
     // std::cout << "[DEBUG]サーバー設定(" << serverNumber << ")" << std::endl;
     s_ConfigServer tmpConfigServer;
-    initCommonConfig(tmpConfigServer.configCommon);
     for(std::vector<parseconfig::context>::iterator itr =
         itrServer->contexts.begin(); itr != itrServer->contexts.end(); ++itr)
     {
@@ -473,7 +471,6 @@ bool parseConfig::insertToConfigClass(Config& c)
     {
       // std::cout << "[DEBUG]  ロケーション設定(" << itrConfig->path << ")" << std::endl;
       s_ConfigLocation tmpConfigLocation;
-      initCommonConfig(tmpConfigLocation.configCommon);
       tmpConfigLocation.path = itrConfig->path;
       for(std::vector<parseconfig::context>::iterator itr =
           itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
@@ -572,11 +569,6 @@ bool parseConfig::isFilenameExtension(std::string s)
   if (s.find(".", 1) != std::string::npos)
     return false;
   return true;
-}
-
-void parseConfig::initCommonConfig(s_ConfigCommon &c)
-{
-  c.clientMaxBodySize = -1;
 }
 
 bool parseConfig::insertAutoindex(contextIterator itr, std::string& autoindex)
