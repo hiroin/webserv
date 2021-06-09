@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <errno.h>
-#include <string.h>
+#include <cstring>
 #include <sys/time.h>
 #include <iostream>
 #include <algorithm>

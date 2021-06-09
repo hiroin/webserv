@@ -73,13 +73,6 @@ bool recvData::cutOutRecvDataToEol()
         // std::cout << "extractedData_[rn] : " << extractedData_<< std::endl;
         return SUCCESS;
       }
-      // else
-      // {
-      //   extractedData_ = recvData_.substr(0, pos);
-      //   recvData_ = recvData_.substr(pos + 1);
-      //   // std::cout << "extractedData_[r ] : " << extractedData_<< std::endl;
-      //   return SUCCESS;
-      // }
     }
   }
   return FAILURE;

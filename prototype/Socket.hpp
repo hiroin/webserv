@@ -6,7 +6,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 #include <iostream>
 #include <sys/ioctl.h>
 #include <fcntl.h>

@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <string.h>
+#include <cstring>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>

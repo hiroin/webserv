@@ -5,7 +5,6 @@ HTTP1_SOURCE = main.cpp \
                recvData.cpp \
                HTTPMessageParser.cpp \
                Client.cpp \
-               ft_memset.cpp \
                ft_trim.cpp \
                ft_istchar.cpp \
                ft_isspase_and_htab.cpp \

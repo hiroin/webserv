@@ -50,11 +50,11 @@ bool Socket::resolve_hostname()
   std::string hosts;
   char buf[1048576];
   int r;
-  ft_memset(buf, 0, sizeof(buf));
+  memset(buf, 0, sizeof(buf));
   while ((r = read(fd, buf, sizeof(buf) - 1)) > 0)
   {
     hosts.append(buf);
-    ft_memset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
   }
   if (r == -1)
   {
@@ -76,7 +76,7 @@ bool Socket::resolve_hostname()
 
 void Socket::set_sockaddr_in()
 {
-  ft_memset(&this->serv_addr, 0, sizeof(this->serv_addr));
+  memset(&this->serv_addr, 0, sizeof(this->serv_addr));
   this->serv_addr.sin_family = AF_INET;
   if (this->host == "*")
     this->serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);

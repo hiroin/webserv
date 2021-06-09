@@ -441,8 +441,6 @@ HTTPMessageParser::~HTTPMessageParser()
 {
 }
 
-// clang++ -g -Wall -Wextra -Werror -std=c++98 -fsanitize=address,leak HTTPMessageParser.cpp ft_memcpy.cpp ft_replaceString.cpp ft_istchar.cpp ft_isspase_and_htab.cpp ft_isvchar.cpp ft_trim.cpp -D MAIN
-// "GET / HTTP/1.1\r\nHost: server\r\nUser-Agent: curl/7.58.0\r\nAccept: */*\r\n\r\nPOSTDATA"
 #ifdef MAIN
 int main()
 {
@@ -525,27 +523,3 @@ int main()
   return 0;
 }
 #endif
-
-// int main()
-// {
-//   std::cout << "--start--------------------------" << std::endl;
-//   {
-//     HTTPMessageParser c;
-//     if (!c.parseHeader("Host: 127.0.0.1"))
-//       return 1;
-//     // if (!c.parseHeader("Host: 127.0.0.1"))
-//     //   return 1;
-//     if (!c.parseHeader("Accept: */*"))
-//       return 1;
-//     // if (!c.parseHeader("Accept: */*"))
-//     //   return 1;
-//     if (!c.parseHeader("User-Agent: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1)"))
-//       return 1;
-//     std::map<std::string, std::string> headers = c.getHeaders();
-//     for(std::map<std::string, std::string>::const_iterator itr = headers.begin(); itr != headers.end(); ++itr)
-//     {
-//       std::cout << "\"" << itr->first << "\" = \"" << itr->second << "\"\n";
-//     }
-//   }
-//   std::cout << "--end----------------------------" << std::endl;
-// }

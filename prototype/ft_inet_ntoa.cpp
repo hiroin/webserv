@@ -6,7 +6,7 @@
 /*   By: user42 <user42@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/23 06:20:50 by user42            #+#    #+#             */
-/*   Updated: 2021/05/03 02:29:08 by user42           ###   ########.fr       */
+/*   Updated: 2021/06/09 09:15:38 by user42           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ static char		*ft_itoa(int n)
 
 	nb = n;
 	i = ft_digit_count(nb);
-	if (!(str = (char *)malloc(i * sizeof(char) + 1)))
+	if (!(str = new char[i * sizeof(char) + 1]))
 		return (NULL);
 	str[i--] = 0;
 	if (nb == 0)
@@ -71,18 +71,18 @@ std::string ft_inet_ntos (struct in_addr in)
   unsigned char *bytes = (unsigned char *) &in;
   tmp = ft_itoa(bytes[0]);
   ipaddress.append(tmp);
-  free(tmp);
+  delete[] tmp;
   ipaddress.append(".");
   tmp = ft_itoa(bytes[1]);
   ipaddress.append(tmp);
-  free(tmp);
+  delete[] tmp;
   ipaddress.append(".");
   tmp = ft_itoa(bytes[2]);
   ipaddress.append(tmp);
-  free(tmp);
+  delete[] tmp;
   ipaddress.append(".");
   tmp = ft_itoa(bytes[3]);
   ipaddress.append(tmp);
-  free(tmp);
+  delete[] tmp;
   return ipaddress;
 }
