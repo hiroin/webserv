@@ -3,7 +3,7 @@
 
 s_ConfigCommon::s_ConfigCommon()
 {
-  clientMaxBodySize = -1;
+  clientMaxBodySize = CLIENTMAXBODYSIZE;
   for (int i = 0; i < METHOD_NUM; i++)
   {
     allowMethodsBool[i] = true;
