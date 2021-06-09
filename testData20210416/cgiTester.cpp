@@ -34,7 +34,7 @@ bool Response::execCgiTester()
 		ret[1] = dup2(pipes[1], 1);
 		ret[2] = close(pipes[1]);
     // methodがGETの場合
-    close(0);    
+    close(0);
 		for(int i = 0; i < 3; i++)
 		{
 			if (ret[i] < 0)

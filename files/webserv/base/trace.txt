@@ -1,0 +1,28 @@
+== Info:   Trying 127.0.0.1...
+== Info: TCP_NODELAY set
+== Info: Connected to 127.0.0.1 (127.0.0.1) port 8080 (#0)
+=> Send header, 156 bytes (0x9c)
+0000: POST / HTTP/1.1
+0011: Host: 127.0.0.1:8080
+0027: User-Agent: curl/7.58.0
+0040: Accept: */*
+004d: Transfer-Encoding: chunked
+0069: Content-Type: application/x-www-form-urlencoded
+009a: 
+=> Send data, 5 bytes (0x5)
+0000: 0
+0003: 
+== Info: upload completely sent off: 5 out of 0 bytes
+<= Recv header, 33 bytes (0x21)
+0000: HTTP/1.1 405 Method Not Allowed
+<= Recv header, 31 bytes (0x1f)
+0000: Server: nginx/1.14.0 (Ubuntu)
+<= Recv header, 36 bytes (0x24)
+0000: Date: Mon, 7 Jun 2021 14:40:58 GMT
+<= Recv header, 12 bytes (0xc)
+0000: Allow: GET
+<= Recv header, 19 bytes (0x13)
+0000: Content-Length: 0
+<= Recv header, 2 bytes (0x2)
+0000: 
+== Info: Connection #0 to host 127.0.0.1 left intact

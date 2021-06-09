@@ -1,5 +1,5 @@
 CXX		= clang++
-HTTP1 = server
+HTTP1 = webserv
 HTTP1_SOURCE = main.cpp \
                Socket.cpp \
                recvData.cpp \

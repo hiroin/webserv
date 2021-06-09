@@ -1426,7 +1426,7 @@ void	Response::makeAutoIndexResponse()
 bool Response::isAutoIndex()
 {
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
-	return SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/' && getConfigCommon().autoindex.size() != 0;
+	return SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/' && getConfigCommon().autoindex == "on";
 }
 
 size_t	Response::getContentLength()

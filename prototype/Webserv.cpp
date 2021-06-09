@@ -264,7 +264,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           }
           else
             clients_[i].readDataFromFd.setFd(clients_[i].readFd);
-          coutLog(i);
+          // coutLog(i);
         }
         else if (clients_[i].status == SEND)
         {
@@ -314,6 +314,8 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           clients_[i].responseMessege = responses_[i]->responseMessege;
           clients_[i].sc.setSendData(const_cast<char *>(clients_[i].responseMessege.c_str()), clients_[i].responseMessege.size());
           clients_[i].status = SEND;
+          clients_[i].responseCode = responses_[i]->ResponseStatus;
+          coutLog(i);
           deleteResponses(i);
         }
       }
