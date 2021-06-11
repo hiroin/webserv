@@ -121,6 +121,7 @@ class Response
 		std::string ft_ito00(int n);
 		time_t getLastModified();
 		void setLastModified();
+		bool isRedirection();
 };
 
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
