@@ -791,6 +791,17 @@ bool Response::isCgiFile()
 	return false;
 }
 
+bool Response::isRedirection()
+{
+	s_ConfigCommon configCommon = getConfigCommon();
+		if (configCommon.rewrite.size() != 0)
+		{
+			return true;
+		}
+		return false;
+	return false;
+}
+
 Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(config), client(client), isAutoIndexApply(false), isCGI(false), readFd(-1), writeFd(-1)
 {
 	addSlashOnAbsolutePath();
@@ -811,6 +822,36 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 	/* メソッドが許可されているかを判断 */
 	if (isMethodAllowed())
 	{
+		// if (isRedirection()) //redirect が必要だったら
+		// {
+		// 	if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
+		// 	{
+		// 		ResponseStatus = 301;
+		// 	}
+		// 	if (client.hmp.method_ == httpMessageParser::POST)
+		// 	{
+		// 		ResponseStatus = 308;
+		// 	}
+		// 	setResponseLine(); //responseStatus と serverNameヘッダを設定
+		// 	setDate();
+		// 	std::string LocationPath;
+		// 	std::string AbsolutePath = client.hmp.absolutePath_;
+		// 	s_ConfigCommon configCommon = getConfigCommon();
+		// 	if (configLocation.path.size() != 0)
+		// 	{
+		// 		if (configLocation.path == "/")
+		// 			LocationPath = AbsolutePath.replace(0, configLocation.path.size(), configCommon.rewrite + "/");
+		// 		else
+		// 			LocationPath = AbsolutePath.replace(0, configLocation.path.size(), configCommon.rewrite);
+		// 	}
+		// 	else//server ディレクティブに書いてある場合
+		// 	{
+		// 		LocationPath = configCommon.rewrite;
+		// 	}
+		// 	responseMessege.append(std::string("Location: ") + LocationPath + "\r\nContent-Length: 0\r\n\r\n");
+		// 	client.status = SEND;
+		// 	return ;
+		// }
 		//ここから、メソッド毎に処理を分けて書いていく
 		if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
 		{

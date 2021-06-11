@@ -124,7 +124,7 @@ class parseConfig
   bool insertErrorPages(contextIterator itr, std::map<std::string, std::string>& errorPages);
   bool insertIndexs(contextIterator itr, std::vector<std::string>& indexs);
   bool insertListen(contextIterator itr, std::string& host, int& port);
-  bool insertRewrite(contextIterator itr, std::string& rewrite);
+  bool insertRewrite(contextIterator itr, std::map<std::string, std::string>& rewrite);
   bool insertRoot(contextIterator itr, std::string& root);
   bool insertServerNames(contextIterator itr, std::vector<std::string>& serverNames);
   bool insertUploadPath(contextIterator itr, std::string& uploadPath);

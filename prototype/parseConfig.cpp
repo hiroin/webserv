@@ -461,6 +461,8 @@ bool parseConfig::insertToConfigClass(Config& c)
         continue;
       if (insertUploadPath(itr, tmpConfigServer.configCommon.uploadPath))
         continue;
+      if (insertRewrite(itr, tmpConfigServer.configCommon.rewrite))
+        continue;
       std::string errorMessage = "Config Error : invalid directive ";
       errorMessage +=  itr->key ;
       throw std::runtime_error(errorMessage);
@@ -476,17 +478,9 @@ bool parseConfig::insertToConfigClass(Config& c)
           itrConfig->contexts.begin(); itr != itrConfig->contexts.end(); ++itr)
       {
         if (insertAlias(itr, tmpConfigLocation.alias))
-        {
-          if (tmpConfigLocation.alias != "" && tmpConfigLocation.rewrite != "")
-            throw std::runtime_error("Config Error : alias and rewrite are set to the same directive.");
           continue;
-        }
-        if (insertRewrite(itr, tmpConfigLocation.rewrite))
-        {
-          if (tmpConfigLocation.alias != "" && tmpConfigLocation.rewrite != "")
-            throw std::runtime_error("Config Error : alias and rewrite are set to the same directive.");
+        if (insertRewrite(itr, tmpConfigLocation.configCommon.rewrite))
           continue;
-        }
         if (insertAutoindex(itr, tmpConfigLocation.configCommon.autoindex))
           continue;
         if (insertAllowMethods(itr, tmpConfigLocation.configCommon.allowMethods, tmpConfigLocation.configCommon.allowMethodsBool))
@@ -605,17 +599,20 @@ bool parseConfig::insertAlias(contextIterator itr, std::string& alias)
   return false;
 }
 
-bool parseConfig::insertRewrite(contextIterator itr, std::string& rewrite)
+bool parseConfig::insertRewrite(contextIterator itr, std::map<std::string, std::string>& rewrite)
 {
+  (void)rewrite;
   if (itr->key == "rewrite")
   {
-    if (itr->values.size() > 1)
-      throw std::runtime_error("Config Error : duplicatie rewrite");
-    if (itr->values.at(0).value.size() >= 2)
-      throw std::runtime_error("Config Error : invalid rewrite");
-    std::string rewriteValue = itr->values.at(0).value.at(0);
-    // std::cout << "[DEBUG]alias : " << aliasValue << std::endl;
-    rewrite = rewriteValue;
+    for (std::vector<parseconfig::vvalues>::iterator itrValues = 
+        itr->values.begin(); itrValues != itr->values.end(); ++itrValues)
+    {
+      if (itrValues->value.size() != 2)
+        throw std::runtime_error("Config Error : invalid rewrite");
+      if (rewrite.count(itrValues->value.at(0)) > 0)
+        throw std::runtime_error("Config Error : duplicatie rewrite source");
+      rewrite.insert(std::make_pair(itrValues->value.at(0), itrValues->value.at(1)));
+    }
     return true;
   }
   return false;
@@ -980,6 +977,8 @@ void parseConfig::inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& 
       lower.allowMethodsBool[i] = higher.allowMethodsBool[i];
     }
   }
+  if (lower.authBasicFile.empty())
+    lower.authBasicFile = higher.authBasicFile;
   if (lower.authBasicRealm.empty())
     lower.authBasicRealm = higher.authBasicRealm;
   else if(lower.authBasicRealm == "off")
@@ -1002,6 +1001,10 @@ void parseConfig::inheritedCommonConfig(s_ConfigCommon& higher, s_ConfigCommon& 
     if (lower.errorPages.find(itr->first) == lower.errorPages.end())
       lower.errorPages[itr->first] = itr->second;
   }
+  if (lower.rewrite.empty())
+    lower.rewrite = higher.rewrite;
+  if (lower.uploadPath.empty())
+    lower.uploadPath = higher.uploadPath;
 }
 
 void parseConfig::inheritedFromHigherlevelDirectives(Config& c)

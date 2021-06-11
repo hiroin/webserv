@@ -53,6 +53,14 @@ void Config::printCommonConfig(s_ConfigCommon& c) const
     std::cout << *itr << " " ;
   }
   std::cout << std::endl;
+  std::cout << " rewrite           : " << std::endl;
+  for(std::map<std::string, std::string>::iterator itr = c.rewrite.begin();
+      itr != c.rewrite.end();
+      ++itr)
+  {
+    std::cout << "                     ";
+    std::cout << itr->first << " -> " << itr->second << std::endl;
+  }
   std::cout << " uploadPath        : " << c.uploadPath << std::endl;
 }
 

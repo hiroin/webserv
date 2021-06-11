@@ -2982,5 +2982,166 @@ TEST(Response_test, POST)
     int ResponseStatus = Response.ResponseStatus;
 
     EXPECT_EQ(413, ResponseStatus);
+  }
+}
+
+
+TEST(Response_test, methodDELETE)
+{
+  const char* configfile = "testcase/170_delete.conf";
+  Config config_;
+  parseConfig(configfile, config_);
+
+  // 0159
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::PUT;
+    client_.hmp.absolutePath_ = "/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["content-length"] = "10";
+
+    Response Response_put(client_, config_);
+    int ResponseStatus = Response_put.ResponseStatus;
+
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response(client_, config_);
+    ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(204, ResponseStatus);
+  }
+  // 0166
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::PUT;
+    client_.hmp.absolutePath_ = "/alias/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["content-length"] = "10";
+
+    Response Response_put(client_, config_);
+    int ResponseStatus = Response_put.ResponseStatus;
+
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/alias/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response(client_, config_);
+    ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(204, ResponseStatus);
   }  
+  // 0160
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(404, ResponseStatus);
+  }
+  // 0161
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::PUT;
+    client_.hmp.absolutePath_ = "/www/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["content-length"] = "10";
+
+    Response Response_put(client_, config_);
+    int ResponseStatus = Response_put.ResponseStatus;
+
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/www/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response(client_, config_);
+    ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(204, ResponseStatus);
+  }
+  // 0162
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::PUT;
+    client_.hmp.absolutePath_ = "/www/dir/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.hmp.headers_["content-length"] = "10";
+
+    Response Response_put(client_, config_);
+    int ResponseStatus = Response_put.ResponseStatus;
+
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/www/dir/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response(client_, config_);
+    ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(204, ResponseStatus);
+  }
+  // 0163
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/none/index.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(403, ResponseStatus);
+  }
+  // 0164
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/root.html";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(403, ResponseStatus);
+  }
+  // 0165
+  {
+    Client client_put_;
+    client_put_.port = 8080;
+    client_put_.host = "*";
+    client_put_.hmp.method_ = httpMessageParser::PUT;
+    client_put_.hmp.absolutePath_ = "/auth/index.htm";
+    client_put_.hmp.headers_["host"] = "127.0.0.1";
+    client_put_.hmp.headers_["transfer-encoding"] = "chunked";
+    client_put_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
+
+    Response Response_put(client_put_, config_);
+    int ResponseStatus = Response_put.ResponseStatus;
+
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::DELETE;
+    client_.hmp.absolutePath_ = "/auth/index.htm";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    Response Response_no_auth(client_, config_);
+    ResponseStatus = Response_no_auth.ResponseStatus;
+    EXPECT_EQ(401, ResponseStatus);
+
+    client_.hmp.headers_["authorization"] = "Basic dXNlcjpwYXNzd29yZA==";
+    Response Response_auth(client_, config_);
+    ResponseStatus = Response_auth.ResponseStatus;
+    EXPECT_EQ(204, ResponseStatus);
+  }
 }
