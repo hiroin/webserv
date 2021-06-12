@@ -101,6 +101,7 @@ class Response
 		bool isExecutable(std::string filePath);
 		void addEnvironmentValue();
 		int getCgiFd(); //CGIの読み取り用FDを取得する関数
+		int getCgiFdForWrite(); //CGIの書き込み用FDを取得する関数
 		int getTargetFileFd(); //ファイル読み取り用FDを取得する関数
 		void mergeCgiResult(std::string CgiResult);
 

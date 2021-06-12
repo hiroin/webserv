@@ -1816,6 +1816,14 @@ int Response::getCgiFd()
 		return -1;
 }
 
+int Response::getCgiFdForWrite()
+{
+	if (isCGI)
+		return writeFd;
+	else
+		return -1;
+}
+
 std::vector<std::string> splitByCRLF(std::string string)
 {
 	std::string separator = std::string("\r\n\r\n"); // 区切り文字
