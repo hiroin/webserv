@@ -787,7 +787,7 @@ bool Response::isCgiFile()
 	while (start != last)
 	{
 		std::string key = start->first;
-		int place = AbsolutePath.find(key);
+		size_t place = AbsolutePath.find(key);
 		if (place != std::string::npos)
 		{
 			return true;
@@ -817,7 +817,7 @@ std::string Response::makeRedirectLocation()
 	{
 		std::string key = start->first;
 		std::string value = start->second;
-		int place = AbsolutePath.find(key);
+		size_t place = AbsolutePath.find(key);
 		if (place != std::string::npos)
 		{
 			AbsolutePath.replace(place, key.size(), value);

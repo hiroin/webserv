@@ -780,13 +780,19 @@ bool Response::isExecutable(std::string filePath)
 
 bool Response::isCgiFile()
 {
-	s_ConfigCommon configCommon = getConfigCommon();
-	std::vector<std::string> cgiScripts = configCommon.cgiScripts;
-	std::string fileExtention = "." + getFileExtention(targetFilePath);
-	for (size_t i = 0; i < cgiScripts.size(); i++)
+	std::string AbsolutePath = this->client.hmp.absolutePath_;
+	std::map<std::string, std::string> rewrite = getConfigCommon().rewrite;
+	std::map<std::string, std::string>::iterator start = rewrite.begin();
+	std::map<std::string, std::string>::iterator last = rewrite.end();
+	while (start != last)
 	{
-		if (cgiScripts[i] == fileExtention)
+		std::string key = start->first;
+		size_t place = AbsolutePath.find(key);
+		if (place != std::string::npos)
+		{
 			return true;
+		}
+		++start;
 	}
 	return false;
 }
@@ -794,12 +800,31 @@ bool Response::isCgiFile()
 bool Response::isRedirection()
 {
 	s_ConfigCommon configCommon = getConfigCommon();
-		if (configCommon.rewrite.size() != 0)
-		{
-			return true;
-		}
-		return false;
+	if (configCommon.rewrite.size() != 0)
+	{
+		return true;
+	}
 	return false;
+}
+
+std::string Response::makeRedirectLocation()
+{
+	std::string AbsolutePath = this->client.hmp.absolutePath_;
+	std::map<std::string, std::string> rewrite = getConfigCommon().rewrite;
+	std::map<std::string, std::string>::iterator start = rewrite.begin();
+	std::map<std::string, std::string>::iterator last= rewrite.end();
+	while (start != last)
+	{
+		std::string key = start->first;
+		std::string value = start->second;
+		size_t place = AbsolutePath.find(key);
+		if (place != std::string::npos)
+		{
+			AbsolutePath.replace(place, key.size(), value);
+		}
+		++start;
+	}
+	return AbsolutePath;
 }
 
 Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(config), client(client), isAutoIndexApply(false), isCGI(false), readFd(-1), writeFd(-1)
@@ -822,38 +847,26 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 	/* メソッドが許可されているかを判断 */
 	if (isMethodAllowed())
 	{
-		// if (isRedirection()) //redirect が必要だったら
-		// {
-		// 	if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
-		// 	{
-		// 		ResponseStatus = 301;
-		// 	}
-		// 	if (client.hmp.method_ == httpMessageParser::POST)
-		// 	{
-		// 		ResponseStatus = 308;
-		// 	}
-		// 	setResponseLine(); //responseStatus と serverNameヘッダを設定
-		// 	setDate();
-		// 	std::string LocationPath;
-		// 	std::string AbsolutePath = client.hmp.absolutePath_;
-		// 	s_ConfigCommon configCommon = getConfigCommon();
-		// 	if (configLocation.path.size() != 0)
-		// 	{
-		// 		if (configLocation.path == "/")
-		// 			LocationPath = AbsolutePath.replace(0, configLocation.path.size(), configCommon.rewrite + "/");
-		// 		else
-		// 			LocationPath = AbsolutePath.replace(0, configLocation.path.size(), configCommon.rewrite);
-		// 	}
-		// 	else//server ディレクティブに書いてある場合
-		// 	{
-		// 		LocationPath = configCommon.rewrite;
-		// 	}
-		// 	responseMessege.append(std::string("Location: ") + LocationPath + "\r\nContent-Length: 0\r\n\r\n");
-		// 	client.status = SEND;
-		// 	return ;
-		// }
+		if (isRedirection()) //redirect が必要だったら
+		{
+			if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
+			{
+				ResponseStatus = 301;
+			}
+			if (client.hmp.method_ == httpMessageParser::POST)
+			{
+				ResponseStatus = 308;
+			}
+			setResponseLine(); //responseStatus と serverNameヘッダを設定
+			setDate();
+			std::string LocationPath = makeRedirectLocation();
+			responseMessege.append(std::string("Location: ") + LocationPath + "\r\n");
+			responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
+			client.status = SEND;
+			return ;
+		}
 		//ここから、メソッド毎に処理を分けて書いていく
-		if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
+		else if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
 		{
 			if (isAcceptCharsetSet())
 			{

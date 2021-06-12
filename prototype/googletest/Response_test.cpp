@@ -2985,7 +2985,6 @@ TEST(Response_test, POST)
   }
 }
 
-
 TEST(Response_test, methodDELETE)
 {
   const char* configfile = "testcase/170_delete.conf";
@@ -3143,5 +3142,134 @@ TEST(Response_test, methodDELETE)
     Response Response_auth(client_, config_);
     ResponseStatus = Response_auth.ResponseStatus;
     EXPECT_EQ(204, ResponseStatus);
+  }
+}
+
+TEST(Response_test, Redirect)
+{
+  const char* configfile = "testcase/180_redirect.conf";
+  Config config_;
+  parseConfig(configfile, config_);
+  {
+    // 0166
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+  }
+  {
+    // 0167
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/playstations4/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(301, ResponseStatus);
+    std::string &ResponseMessage = Response.responseMessege;
+    EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /ps4/\r\n.*"));    
+  }
+  {
+    // 0168
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/nintendoswith/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(301, ResponseStatus);
+    std::string &ResponseMessage = Response.responseMessege;
+    EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /ns/\r\n.*"));    
+  }
+  {
+    // 0169
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/sega/segasaturn/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(301, ResponseStatus);
+    std::string &ResponseMessage = Response.responseMessege;
+    EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /sega/ss/\r\n.*"));    
+  }
+  {
+    // 0170
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/segasaturn/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+  }
+  {
+    // 0171
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/playstations4/nintendoswith/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(301, ResponseStatus);
+    std::string &ResponseMessage = Response.responseMessege;
+    EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /ps4/ns/\r\n.*"));    
+  }
+  {
+    // 0172
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::GET;
+    client_.hmp.absolutePath_ = "/sega/playstations4/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(404, ResponseStatus);
+  }
+  {
+    // 0173
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::POST;
+    client_.hmp.absolutePath_ = "/playstations4/";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(308, ResponseStatus);
+    std::string &ResponseMessage = Response.responseMessege;
+    EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /ps4/\r\n.*"));    
   }
 }

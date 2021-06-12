@@ -18,6 +18,7 @@ bool Response::execPhpCgi()
 	}
 	//ここ以降、pipe して fork する
 	int pipes[2];
+
 	pid_t pid;
 	if (pipe(pipes) < 0)
 	{
@@ -35,6 +36,7 @@ bool Response::execPhpCgi()
 		ret[0] = close(pipes[0]);
 		ret[1] = dup2(pipes[1], 1);
 		ret[2] = close(pipes[1]);
+
 		for(int i = 0; i < 3; i++)
 		{
 			if (ret[i] < 0)
