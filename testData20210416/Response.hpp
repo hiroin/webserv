@@ -122,6 +122,7 @@ class Response
 		time_t getLastModified();
 		void setLastModified();
 		bool isRedirection();
+		std::string makeRedirectLocation();
 };
 
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
