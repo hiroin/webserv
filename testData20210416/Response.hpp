@@ -101,14 +101,17 @@ class Response
 		bool isExecutable(std::string filePath);
 		void addEnvironmentValue();
 		int getCgiFd(); //CGIの読み取り用FDを取得する関数
+		int getCgiFdForWrite(); //CGIの書き込み用FDを取得する関数
 		int getTargetFileFd(); //ファイル読み取り用FDを取得する関数
 		void mergeCgiResult(std::string CgiResult);
 
 		//php-cgi
 		bool execPhpCgi();
+		bool execPhpCgi_POST();
 		/////////////////////////////////
 
 		bool execCgi();
+		bool execCgi_POST();
 		//////////////////
 
 		bool execCgiTester();
@@ -123,6 +126,7 @@ class Response
 		void setLastModified();
 		bool isRedirection();
 		std::string makeRedirectLocation();
+
 };
 
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
