@@ -780,6 +780,19 @@ bool Response::isExecutable(std::string filePath)
 
 bool Response::isCgiFile()
 {
+	s_ConfigCommon configCommon = getConfigCommon();
+	std::vector<std::string> cgiScripts = configCommon.cgiScripts;
+	std::string fileExtention = "." + getFileExtention(targetFilePath);
+	for (size_t i = 0; i < cgiScripts.size(); i++)
+	{
+		if (cgiScripts[i] == fileExtention)
+			return true;
+	}
+	return false;
+}
+
+bool Response::isRedirection()
+{
 	std::string AbsolutePath = this->client.hmp.absolutePath_;
 	std::map<std::string, std::string> rewrite = getConfigCommon().rewrite;
 	std::map<std::string, std::string>::iterator start = rewrite.begin();
@@ -793,16 +806,6 @@ bool Response::isCgiFile()
 			return true;
 		}
 		++start;
-	}
-	return false;
-}
-
-bool Response::isRedirection()
-{
-	s_ConfigCommon configCommon = getConfigCommon();
-	if (configCommon.rewrite.size() != 0)
-	{
-		return true;
 	}
 	return false;
 }

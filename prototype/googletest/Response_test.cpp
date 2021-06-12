@@ -3202,7 +3202,7 @@ TEST(Response_test, Redirect)
     client_.port = 8080;
     client_.host = "*";
     client_.hmp.method_ = httpMessageParser::GET;
-    client_.hmp.absolutePath_ = "/sega/segasaturn/";
+    client_.hmp.absolutePath_ = "/sega/megadrive/";
     client_.hmp.headers_["host"] = "127.0.0.1";
 
     Response Response(client_, config_);
@@ -3210,7 +3210,7 @@ TEST(Response_test, Redirect)
 
     EXPECT_EQ(301, ResponseStatus);
     std::string &ResponseMessage = Response.responseMessege;
-    EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /sega/ss/\r\n.*"));    
+    EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /sega/md/\r\n.*"));    
   }
   {
     // 0170
@@ -3218,7 +3218,7 @@ TEST(Response_test, Redirect)
     client_.port = 8080;
     client_.host = "*";
     client_.hmp.method_ = httpMessageParser::GET;
-    client_.hmp.absolutePath_ = "/segasaturn/";
+    client_.hmp.absolutePath_ = "/megadrive/";
     client_.hmp.headers_["host"] = "127.0.0.1";
 
     Response Response(client_, config_);
