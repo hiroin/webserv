@@ -106,9 +106,11 @@ class Response
 
 		//php-cgi
 		bool execPhpCgi();
+		bool execPhpCgi_POST();
 		/////////////////////////////////
 
 		bool execCgi();
+		bool execCgi_POST();
 		//////////////////
 
 		bool execCgiTester();
@@ -123,6 +125,7 @@ class Response
 		void setLastModified();
 		bool isRedirection();
 		std::string makeRedirectLocation();
+
 };
 
 #endif /* A9308F37_DB41_4E16_8DFF_32241C903504 */
