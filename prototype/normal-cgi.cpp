@@ -54,7 +54,7 @@ void Response::addEnvironmentValue()
 	{
 		size_t bodySize = PutPostBody.size();
 		envp.push_back(std::string("CONTENT_LENGTH=") + ft_ultos(bodySize));
-		envp.push_back(std::string("CONTENT_TYPE=") + client.hmp.headers_["content-type"]);
+    envp.push_back(std::string("CONTENT_TYPE=") + client.hmp.headers_["content-type"]);
 	}
 	envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
   if (client.hmp.pathinfo_ != "")
@@ -64,10 +64,14 @@ void Response::addEnvironmentValue()
       configServer.root.append("/");
     envp.push_back(std::string("PATH_TRANSLATED=") + configServer.root + client.hmp.pathinfo_);
   }
+  else
+  {
+    envp.push_back(std::string("PATH_INFO=") + client.hmp.absolutePath_);
+  }
 	envp.push_back(std::string("QUERY_STRING=") + client.hmp.query_);
 	envp.push_back(std::string("REMOTE_ADDR=") + client.ip);
 	envp.push_back(std::string("REQUEST_METHOD=") + getMethodasString(client.hmp.method_));
-	envp.push_back(std::string("REQUEST_URI=") + client.hmp.requestTarget_);
+	envp.push_back(std::string("REQUEST_URI=") + client.hmp.absolutePath_);
 	envp.push_back(std::string("SCRIPT_NAME=") + client.hmp.absolutePath_);
 	envp.push_back(std::string("SCRIPT_FILENAME=") + targetFilePath);
 	envp.push_back(std::string("SERVER_NAME=") + client.hmp.headers_["host"]);
@@ -75,7 +79,6 @@ void Response::addEnvironmentValue()
 	envp.push_back(std::string("SERVER_PROTOCOL=") + "HTTP/1.1");
 	envp.push_back(std::string("SERVER_SOFTWARE=") + "webserv");
 	envp.push_back(std::string("REDIRECT_STATUS=") + "200");
-
 }
 
 bool Response::execCgi()
@@ -149,6 +152,7 @@ bool Response::execCgi()
 		for(size_t i = 0; i < envpSize; i++)
 		{
 			Cenvp[i] = const_cast<char*>(envp[i].c_str());
+
 		}
 		Cenvp[envpSize] = NULL;
 		if (execve(Cargv[0], Cargv, Cenvp)  == -1) //環境変数は他のものは必要なのかな？？？

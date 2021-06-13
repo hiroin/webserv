@@ -115,7 +115,10 @@ class Response
 		bool execCgi_POST();
 		//////////////////
 
+		//////////////////
 		bool execCgiTester();
+		bool execCgiTester_POST();
+
 		Response(int test_number);
 		Response(Client &client, Config &config);
 		Response(int ErrorCode ,Client &client, Config &config);
@@ -127,6 +130,7 @@ class Response
 		void setLastModified();
 		bool isRedirection();
 		std::string makeRedirectLocation();
+
 
 };
 

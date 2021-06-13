@@ -998,7 +998,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 				{
 					std::string SearchAbsolutePath = GetSerachAbsolutePath();
 					// PutPostBody = client.hmp.body_;
-          PutPostBody = client.body;
+					PutPostBody = client.body;
 					if (client.hmp.method_ == httpMessageParser::PUT)
 					{
 						if (isDirectoryAvailable())
@@ -1073,6 +1073,11 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 									if (getFileExtention(targetFilePath) == std::string("php"))
 									{
 										if (execPhpCgi_POST())
+											isCGI = true;
+									}
+									else if (getFileExtention(targetFilePath) == std::string("bla"))
+									{
+										if (execCgiTester_POST())
 											isCGI = true;
 									}
 									else
@@ -1162,8 +1167,13 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		if (!isCGI)
 		{
 			responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
+			std::string absolutePath = client.hmp.absolutePath_;
 			if (targetFilePath[targetFilePath.size() - 1] != '/' && !isExtention(targetFilePath))
+			{
+				if (absolutePath[absolutePath.size() - 1] != '/')
 				client.status = SEND;
+
+			}
 			client.status = WRITE;
 		}
 		else
