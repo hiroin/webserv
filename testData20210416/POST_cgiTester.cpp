@@ -6,7 +6,7 @@ std::vector<std::string> splitByPlus(std::string string);
 
 bool Response::execCgiTester_POST()
 {
-	std::string phpCgiPath = this->config.configGlobal.phpCgiPath;
+	std::string cgitesterPath = this->config.configGlobal.cgitesterPath;
 	if (!isReadable(targetFilePath))
 	{
 		ResponseStatus = 500;
@@ -48,7 +48,7 @@ bool Response::execCgiTester_POST()
 				exit(1); // exit
 			}
 		}
-		argv.push_back(phpCgiPath);
+		argv.push_back(cgitesterPath);
 		argv.push_back(targetFilePath);
 		addEnvironmentValue();
 		size_t argvSize = argv.size();

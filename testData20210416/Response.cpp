@@ -1167,8 +1167,13 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		if (!isCGI)
 		{
 			responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
+			std::string absolutePath = client.hmp.absolutePath_;
 			if (targetFilePath[targetFilePath.size() - 1] != '/' && !isExtention(targetFilePath))
+			{
+				if (absolutePath[absolutePath.size() - 1] != '/')
 				client.status = SEND;
+
+			}
 			client.status = WRITE;
 		}
 		else
