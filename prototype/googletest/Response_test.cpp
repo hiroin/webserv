@@ -2487,7 +2487,7 @@ TEST(Response_test, PUT)
     Response Response(client_, config_);
     int ResponseStatus = Response.ResponseStatus;
 
-    EXPECT_EQ(403, ResponseStatus);
+    EXPECT_EQ(201, ResponseStatus);
   }
   // 0140
   {
@@ -3271,5 +3271,59 @@ TEST(Response_test, Redirect)
     EXPECT_EQ(308, ResponseStatus);
     std::string &ResponseMessage = Response.responseMessege;
     EXPECT_THAT(ResponseMessage, MatchesRegex(".*\r\nLocation: /ps4/\r\n.*"));    
+  }
+}
+TEST(Response_test, POST_CGI)
+{
+  const char* configfile = "testcase/022_cgiscripts.conf";
+  Config config_;
+  parseConfig(configfile, config_);
+  ssize_t read_size;
+  char buf[1000];
+
+  // 0174
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::POST;
+    client_.hmp.absolutePath_ = "/index.php";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+    client_.body = "name=ap2";
+    client_.hmp.headers_["content-length"] = "8";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_LE(3, Response.getCgiFd());
+    EXPECT_LE(3, Response.getCgiFdForWrite());
+
+    const char *body = "name=ap2";
+    size_t write_size = write(Response.getCgiFdForWrite(), body, 8);   
+
+    std::string cgiOutput;
+    while (1)
+    {
+      memset(buf, 0, sizeof(buf));
+      read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+      if (read_size == 0 || read_size == -1)
+        break;
+      cgiOutput.append(buf);
+    }
+    // std::cout << "CGIの出力" << std::endl << cgiOutput << std::endl;
+    // std::cout << "Response.getCgiFd() = " << Response.getCgiFd() << std::endl;
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[GATEWAY_INTERFACE] => CGI/1.1\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[REMOTE_ADDR] => 127.0.0.1\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[REQUEST_METHOD] => POST\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[REQUEST_URI] => /index.php\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[SCRIPT_NAME] => /index.php\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[SCRIPT_FILENAME] => /tmp/webserv/base/index.php\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[SERVER_NAME] => 127.0.0.1\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[SERVER_PORT] => 8080\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[SERVER_PROTOCOL] => HTTP/1.1\n.*"));
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[SERVER_SOFTWARE] => webserv\n.*"));
+    close(Response.getCgiFd());
   }
 }

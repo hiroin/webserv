@@ -21,7 +21,9 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../readData.cpp \
 	../php-cgi.cpp \
 	../normal-cgi.cpp \
-	../cgiTester.cpp
+	../cgiTester.cpp \
+	../POST_normal-cgi.cpp \
+	../POST_phpCGI.cpp
 OBJS = $(SOURCE:.cpp=.o)
 
 .PHONY: all clean
@@ -42,7 +44,7 @@ gc: $(SOURCE) getChunked_test.cpp
 # 	g++ $(SOURCE) Response_test.cpp -o $(EXECFILE) -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main && rm /tmp/webserv/put/index.htm
 
 re: $(OBJS) Response_test.cpp
-	clang++ $(OBJS) Response_test.cpp -o test -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main && rm /tmp/webserv/put/index.htm
+	clang++ $(OBJS) Response_test.cpp -o test -g -std=c++11 -L/usr/local/lib -pthread -lgtest -lgtest_main && rm /tmp/webserv/put/index.htm && rm -rf /tmp/webserv/put/none/
 
 clean:
 	rm -rf *.o $(EXECFILE) test_ft
