@@ -13,10 +13,12 @@ int main()
     Client client;
     client.port = 5000;
     client.host = "*";
-    client.hmp.method_ = httpMessageParser::GET;
-    client.hmp.absolutePath_ = "/";
+    client.hmp.method_ = httpMessageParser::POST;
+    client.hmp.absolutePath_ = "/index.bla";
     client.hmp.headers_["host"] = "127.0.0.1";
-    client.hmp.headers_["authorization"] = "1234:tyuio";
+    client.hmp.headers_["transfer-encoding"] = std::string("chunked");
+    client.hmp.pathinfo_ = "/Users/iwasayoshiki/webserv/testData20210416/cgi_tester";
+    client.body = "abcd";
     Config config(1);
 
     Response Response(client, config);
@@ -34,5 +36,17 @@ int main()
     // std::cout << "--------response---------" << Response.errorFilePath << std::endl;
     // std::string &ResponseMessage = Response.responseMessege;
     // ResponseMessage.append("Additional Information");
+    sleep(1);
+    int writeFd = Response.getCgiFdForWrite();
+    std::cout << "writeFd = " << writeFd << std::endl;
+    int ret = write(writeFd, "abcd", 4);
+    // std::cout << ret << std::endl;
+    sleep(1);
+    char buf[1000];
+    int readFd = Response.getCgiFd();
+    std::cout << "readFd = " << readFd << std::endl;
+    ret = read(readFd, buf, 1000);
+    std::cout << ret << std::endl;
+    std::cout << buf << std::endl;
     std::cout << Response.responseMessege << std::endl;
 }

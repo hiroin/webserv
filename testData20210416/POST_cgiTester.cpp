@@ -35,7 +35,7 @@ bool Response::execCgiTester_POST()
 		int retIn[3];
 		retIn[0] = close(pipeIn[1]);
 		retIn[1] = dup2(pipeIn[0], 0);// fd = 0 でpipeの内容が読み込める
-		retIn[2] = close(pipeIn[0]); //こいつで
+		retIn[2] = close(pipeIn[0]);
 
 		int retOut[3];
 		retOut[0] = close(pipeOut[0]);
@@ -48,8 +48,10 @@ bool Response::execCgiTester_POST()
 				exit(1); // exit
 			}
 		}
-		argv.push_back(cgitesterPath);
+
 		argv.push_back(targetFilePath);
+		argv.push_back(targetFilePath);
+		// std::cout << "targetFilePath = " << targetFilePath << std::endl;
 		addEnvironmentValue();
 		size_t argvSize = argv.size();
 		size_t envpSize = envp.size();
@@ -64,10 +66,12 @@ bool Response::execCgiTester_POST()
 		for(size_t i = 0; i < envpSize; i++)
 		{
 			Cenvp[i] = const_cast<char*>(envp[i].c_str());
+			// std::cout << Cenvp[i] << std::endl;
 		}
 		Cenvp[envpSize] = NULL;
-		if (execve(Cargv[0], Cargv, Cenvp)  == -1)
+		if (execve(cgitesterPath.c_str(), Cargv, Cenvp)  == -1)
 		{
+			std::cout << "KITERU!" << std::endl;
 			exit(1);
 		}
 	}
