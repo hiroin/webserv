@@ -229,7 +229,33 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         responses_[i] = new Response(clients_[i], c);
         debugPrintResponceData(i);
         clients_[i].responseCode = responses_[i]->ResponseStatus;
-        if (clients_[i].status == WRITE)
+        if (clients_[i].status == READWRITE)
+        {
+          // CGIへボディを入力
+          clients_[i].writeFd = responses_[i]->getCgiFdForWrite();
+          if (clients_[i].writeFd == -1)
+          {
+            deleteResponses(i);
+            responseNot200(i, 500);
+          }
+          else
+          {
+            clients_[i].wc.setFd(clients_[i].writeFd);
+            clients_[i].wc.setSendData(const_cast<char *>(clients_[i].body.c_str()), clients_[i].body.size());
+          }
+          // CGIからのレスポンスを読み込み
+          clients_[i].readFd = responses_[i]->getCgiFd();
+         if (clients_[i].readFd == -1)
+          {
+            close(clients_[i].writeFd);
+            deleteResponses(i);
+            responseNot200(i, 500);
+          }
+          else
+            clients_[i].readDataFromFd.setFd(clients_[i].readFd);
+          deleteResponses(i);
+        }
+        else if (clients_[i].status == WRITE)
         {
           clients_[i].writeFd = responses_[i]->getFileFdForWrite();
           if (clients_[i].writeFd == -1)
