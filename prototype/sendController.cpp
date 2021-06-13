@@ -25,7 +25,6 @@ bool SendController::SendMessage(ssize_t len)
 		ssize_t r = write(CliantFd, ResponseMessage, LeftLength);
     if (r == -1)
     {
-      std::cout << errno << std::endl;
       throw std::runtime_error("write error.");
     }
     if (r != LeftLength)
