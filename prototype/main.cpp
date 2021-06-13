@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   signal(SIGABRT, stop);
   signal(SIGINT, stop);
   signal(SIGTERM, stop);
-  signal(SIGPIPE,SIG_IGN);
+  signal(SIGPIPE, SIG_IGN);
   signal(SIGCHLD, SIG_IGN);
   Config c;
   if (argc == 3 && (std::string(argv[2]) == "1" || std::string(argv[2]) == "2"))

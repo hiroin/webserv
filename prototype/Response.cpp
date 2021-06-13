@@ -780,13 +780,19 @@ bool Response::isExecutable(std::string filePath)
 
 bool Response::isCgiFile()
 {
-	s_ConfigCommon configCommon = getConfigCommon();
-	std::vector<std::string> cgiScripts = configCommon.cgiScripts;
-	std::string fileExtention = "." + getFileExtention(targetFilePath);
-	for (size_t i = 0; i < cgiScripts.size(); i++)
+	std::string AbsolutePath = this->client.hmp.absolutePath_;
+	std::map<std::string, std::string> rewrite = getConfigCommon().rewrite;
+	std::map<std::string, std::string>::iterator start = rewrite.begin();
+	std::map<std::string, std::string>::iterator last = rewrite.end();
+	while (start != last)
 	{
-		if (cgiScripts[i] == fileExtention)
+		std::string key = start->first;
+		size_t place = AbsolutePath.find(key);
+		if (place != std::string::npos)
+		{
 			return true;
+		}
+		++start;
 	}
 	return false;
 }
@@ -815,7 +821,7 @@ std::string Response::makeRedirectLocation()
 	std::string AbsolutePath = this->client.hmp.absolutePath_;
 	std::map<std::string, std::string> rewrite = getConfigCommon().rewrite;
 	std::map<std::string, std::string>::iterator start = rewrite.begin();
-	std::map<std::string, std::string>::iterator last= rewrite.end();
+	std::map<std::string, std::string>::iterator last = rewrite.end();
 	while (start != last)
 	{
 		std::string key = start->first;
@@ -866,7 +872,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 			responseMessege.append(std::string("Location: ") + LocationPath + "\r\n");
 			responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
 			client.status = SEND;
-			return ;
+			return;
 		}
 		//ここから、メソッド毎に処理を分けて書いていく
 		else if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
@@ -995,10 +1001,11 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 						else
 							ResponseStatus = 403;
 					}
-					else //CGI にリクエストをだす
+					else // メソッドがPOST の時入ってくる
 					{
+						setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
 						//absolutePath の最後が'/' で終了していたらファイル作って、読み込み用のFDを返す
-						if (client.hmp.absolutePath_[client.hmp.absolutePath_.size() - 1] == '/')
+						if (targetFilePath[targetFilePath.size() - 1] == '/')
 						{
 							//uploadPath にタイムスタンプでファイルを作成しておく
 							std::string createFilePath = getConfigCommon().uploadPath + "/" + getDatetimeStr();
@@ -1012,6 +1019,31 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 								close(fd);
 								targetFilePath = createFilePath;
 								ResponseStatus = 201;
+							}
+						}
+						else //CGI にリクエストをだす POST
+						{
+							if (ResponseStatus == 200)
+							{
+								//cgi を実行か判断
+								if (isCgiFile())
+								{
+									if (getFileExtention(targetFilePath) == std::string("php"))
+									{
+										if (execPhpCgi_POST())
+											isCGI = true;
+									}
+									else
+									{
+										if (execCgi_POST())
+											isCGI = true;
+										//phpでないCGI の実行
+									}
+								}
+								else //CGIじゃなかったら405を返す
+								{
+									ResponseStatus = 405;
+								}
 							}
 						}
 					}
@@ -1401,15 +1433,19 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 		}
 		// indexディレクティブがなかったら403
 		ResponseStatus = statusNo;					 //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
-		if (isAutoIndex() && isDirectoryAvailable()) //autoindex の時はここに入ってくる。
+		this->targetFilePath = GetSerachAbsolutePath();
+		if (client.hmp.method_ == httpMessageParser::GET)
 		{
-			isAutoIndexApply = true;
-			getAutoIndexContent(); //AutoIndex のBody を作る。
-			ResponseStatus = 200;
-			//autoindex の情報入れる
+			if (isAutoIndex() && isDirectoryAvailable()) //autoindex の時はここに入ってくる。
+			{
+				isAutoIndexApply = true;
+				getAutoIndexContent(); //AutoIndex のBody を作る。
+				ResponseStatus = 200;
+				//autoindex の情報入れる
+			}
+			this->targetFilePath = "";
+			return;
 		}
-		this->targetFilePath = "";
-		return;
 	}
 	else
 	{
@@ -1782,6 +1818,14 @@ int Response::getCgiFd()
 {
 	if (isCGI)
 		return readFd;
+	else
+		return -1;
+}
+
+int Response::getCgiFdForWrite()
+{
+	if (isCGI)
+		return writeFd;
 	else
 		return -1;
 }
