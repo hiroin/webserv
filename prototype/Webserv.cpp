@@ -330,7 +330,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           if (close(clients_[i].readFd) == -1)
             std::cout << "[EMERG] cannot close clients_[" << i << "]readFd : " << clients_[i].readFd << std::endl;
           clients_[i].readFd = -1;
-          std::cout << clients_[i].readDataFromFd.getReadData() << std::endl;
           if (responses_[i]->isCGI == true)
           {
             responses_[i]->mergeCgiResult(clients_[i].readDataFromFd.getReadData());
