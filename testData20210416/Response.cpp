@@ -210,7 +210,7 @@ float ft_stof(std::string str)
 	return (ret);
 }
 
-void getAcceptLanguages(std::map<std::string, std::vector<std::string>> &AcceptLanguageMap, std::string::iterator &itr)
+void getAcceptLanguages(std::map<std::string, std::vector<std::string> > &AcceptLanguageMap, std::string::iterator &itr)
 {
 	std::string LanguageRange;
 	std::string qValue = "1";
@@ -304,7 +304,7 @@ void setResponseMap(std::map<int, std::string> &ResponseMap)
 	ResponseMap[511] = "Network Authentication";
 }
 
-void getAcceptCharset(std::map<std::string, std::vector<std::string>> &AcceptCharsetMap, std::string::iterator &itr)
+void getAcceptCharset(std::map<std::string, std::vector<std::string> > &AcceptCharsetMap, std::string::iterator &itr)
 {
 	std::string Charset;
 	std::string qValue = "1";
@@ -452,10 +452,10 @@ bool Response::isMatchAcceptLanguageFromat(std::string src)
 	return (true);
 }
 
-std::map<std::string, std::vector<std::string>> Response::parseAcceptLanguage(std::string src)
+std::map<std::string, std::vector<std::string> > Response::parseAcceptLanguage(std::string src)
 {
 	//ここに入ってくる時点で、Accept-Languageの形式は満たしていることが決定している
-	std::map<std::string, std::vector<std::string>> AcceptLanguageMap;
+	std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
 	std::string::iterator itr = src.begin();
 	std::string::iterator last = src.end();
 	while (itr != last)
@@ -732,10 +732,10 @@ bool Response::isMatchAcceptCharsetFromat(std::string src)
 	return (true);
 }
 
-std::map<std::string, std::vector<std::string>> Response::parseAcceptCharset(std::string src)
+std::map<std::string, std::vector<std::string> > Response::parseAcceptCharset(std::string src)
 {
 	//ここに入ってくる時点で、Accept-Languageの形式は満たしていることが決定している
-	std::map<std::string, std::vector<std::string>> AcceptLanguageMap;
+	std::map<std::string, std::vector<std::string> > AcceptLanguageMap;
 	std::string::iterator itr = src.begin();
 	std::string::iterator last = src.end();
 	while (itr != last)
@@ -1074,6 +1074,11 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 										if (execPhpCgi_POST())
 											isCGI = true;
 									}
+									else if (getFileExtention(targetFilePath) == std::string("bla"))
+									{
+										if (execCgiTester_POST())
+											isCGI = true;
+									}
 									else
 									{
 										if (execCgi_POST())
@@ -1315,8 +1320,8 @@ std::string Response::GetSerachAbsolutePath()
 
 int Response::isLanguageFileExist(std::string SerachFileAbsolutePath)
 {
-	std::map<std::string, std::vector<std::string>>::reverse_iterator first = AcceptLanguageMap.rbegin();
-	std::map<std::string, std::vector<std::string>>::reverse_iterator last = AcceptLanguageMap.rend();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptLanguageMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptLanguageMap.rend();
 	while (first != last)
 	{
 		int statusNo;
@@ -1357,8 +1362,8 @@ void Response::setContentLanguage()
 
 int Response::isCharsetFileExist(std::string SerachFileAbsolutePath)
 {
-	std::map<std::string, std::vector<std::string>>::reverse_iterator first = AcceptCharsetMap.rbegin();
-	std::map<std::string, std::vector<std::string>>::reverse_iterator last = AcceptCharsetMap.rend();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptCharsetMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptCharsetMap.rend();
 	while (first != last)
 	{
 		int statusNo;
@@ -1391,8 +1396,8 @@ int Response::isCharsetFileExist(std::string SerachFileAbsolutePath)
 
 int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
 {
-	std::map<std::string, std::vector<std::string>>::reverse_iterator Cfirst = AcceptCharsetMap.rbegin();
-	std::map<std::string, std::vector<std::string>>::reverse_iterator Clast = AcceptCharsetMap.rend();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator Cfirst = AcceptCharsetMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator Clast = AcceptCharsetMap.rend();
 
 	while (Cfirst != Clast)
 	{
@@ -1404,8 +1409,8 @@ int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
 		{
 			targetFileWithCharset = SerachFileAbsolutePath + "." + Charset[i]; // Charsetつけた
 
-			std::map<std::string, std::vector<std::string>>::reverse_iterator Lfirst = AcceptLanguageMap.rbegin();
-			std::map<std::string, std::vector<std::string>>::reverse_iterator Llast = AcceptLanguageMap.rend();
+			std::map<std::string, std::vector<std::string> >::reverse_iterator Lfirst = AcceptLanguageMap.rbegin();
+			std::map<std::string, std::vector<std::string> >::reverse_iterator Llast = AcceptLanguageMap.rend();
 			while (Lfirst != Llast)
 			{
 				std::vector<std::string> Languages = Lfirst->second;
@@ -1728,8 +1733,8 @@ bool Response::isLanguageFile(std::string FilePath, std::string fileExtention)
 		return (false);
 
 	//LanguageFile だったら、AcceptLanguageMapに該当する奴がいないかチェックしていって、あったらtrueを返す
-	std::map<std::string, std::vector<std::string>>::reverse_iterator first = AcceptLanguageMap.rbegin();
-	std::map<std::string, std::vector<std::string>>::reverse_iterator last = AcceptLanguageMap.rend();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptLanguageMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptLanguageMap.rend();
 	while (first != last)
 	{
 		std::vector<std::string> values = first->second;
@@ -1752,8 +1757,8 @@ bool Response::isCharsetFile(std::string FilePath, std::string fileExtention)
 		return (false);
 
 	//LanguageFile だったら、AcceptLanguageMapに該当する奴がいないかチェックしていって、あったらtrueを返す
-	std::map<std::string, std::vector<std::string>>::reverse_iterator first = AcceptCharsetMap.rbegin();
-	std::map<std::string, std::vector<std::string>>::reverse_iterator last = AcceptCharsetMap.rend();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator first = AcceptCharsetMap.rbegin();
+	std::map<std::string, std::vector<std::string> >::reverse_iterator last = AcceptCharsetMap.rend();
 	while (first != last)
 	{
 		std::vector<std::string> values = first->second;
