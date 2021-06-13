@@ -253,7 +253,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           }
           else
             clients_[i].readDataFromFd.setFd(clients_[i].readFd);
-          deleteResponses(i);
         }
         else if (clients_[i].status == WRITE)
         {
@@ -302,7 +301,8 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
         else
           std::cout << "[EMERG] Irregularity status in Response" << std::endl;
       }
-      if (clients_[i].writeFd != -1 && FD_ISSET(clients_[i].writeFd, &writeFds_) && clients_[i].status == WRITE)
+      if (clients_[i].writeFd != -1 && FD_ISSET(clients_[i].writeFd, &writeFds_)
+        && (clients_[i].status == WRITE || clients_[i].status == READWRITE))
       {
         try
         {
@@ -312,7 +312,8 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             if (close(clients_[i].writeFd) == -1)
               std::cout << "[emerg] cannot close clients_[" << i << "]writeFd : " << clients_[i].writeFd << std::endl;
             clients_[i].writeFd = -1;
-            clients_[i].status = SEND;
+            if (clients_[i].status == WRITE)
+              clients_[i].status = SEND;
           }
         }
         catch(const std::exception& e)
@@ -322,7 +323,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           std::cerr << e.what() << '\n';
         }
       }
-      if (clients_[i].status == READ)
+      if (clients_[i].status == READ || clients_[i].status == READWRITE)
       {
         if (clients_[i].readDataFromFd.isCompleteRead())
         {
@@ -490,7 +491,8 @@ void Wevserv::initFD()
     }
     if (clients_[i].writeFd != -1)
     {
-      if (clients_[i].status == WRITE && clients_[i].writeFd != -1)
+      if ((clients_[i].status == WRITE || clients_[i].status == READWRITE)
+        && clients_[i].writeFd != -1)
         FD_SET(clients_[i].writeFd, &writeFds_);
       if (maxFd_ < (clients_[i].writeFd + 1))
         maxFd_ = clients_[i].writeFd + 1;

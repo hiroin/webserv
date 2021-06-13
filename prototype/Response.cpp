@@ -997,7 +997,8 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 				else
 				{
 					std::string SearchAbsolutePath = GetSerachAbsolutePath();
-					PutPostBody = client.hmp.body_;
+					// PutPostBody = client.hmp.body_;
+					PutPostBody = client.body;
 					if (client.hmp.method_ == httpMessageParser::PUT)
 					{
 						if (isDirectoryAvailable())

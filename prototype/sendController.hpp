@@ -2,6 +2,7 @@
 #define SENDCONTROLLER
 #include <iostream>
 #include <unistd.h>
+#include <errno.h>
 
 /*
 	SendControllerオブジェクト

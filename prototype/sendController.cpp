@@ -22,10 +22,12 @@ bool SendController::SendMessage(ssize_t len)
 {
 	if (LeftLength <= len)
 	{
-    // std::cout << "ResponseMessage : " << ResponseMessage << std::endl;
 		ssize_t r = write(CliantFd, ResponseMessage, LeftLength);
     if (r == -1)
+    {
+      std::cout << errno << std::endl;
       throw std::runtime_error("write error.");
+    }
     if (r != LeftLength)
     {
       ResponseMessage += r;

@@ -55,6 +55,7 @@ void Response::addEnvironmentValue()
 		size_t bodySize = PutPostBody.size();
 		envp.push_back(std::string("CONTENT_LENGTH=") + ft_ultos(bodySize));
 		envp.push_back(client.hmp.headers_["content-type"]);
+		envp.push_back(std::string("CONTENT_TYPE=application/x-www-form-urlencoded"));
 	}
 	envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
   if (client.hmp.pathinfo_ != "")
