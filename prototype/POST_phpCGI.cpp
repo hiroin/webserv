@@ -76,6 +76,6 @@ bool Response::execPhpCgi_POST()
 	close(pipeIn[0]);
 	readFd = pipeOut[0];
 	writeFd = pipeIn[1];
-	ResponseStatus = 201;
+	ResponseStatus = 200;
 	return true;
 }

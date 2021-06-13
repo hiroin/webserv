@@ -392,6 +392,33 @@ std::string getDatetimeStr()
 	return s.str();
 }
 
+static bool _mkdir(const char *dir)
+{
+	char tmp[1000];
+	char *p = NULL;
+	size_t len;
+
+	snprintf(tmp, sizeof(tmp), "%s", dir);
+	len = strlen(tmp);
+	if (tmp[len - 1] == '/')
+		tmp[len - 1] = 0;
+	for (p = tmp + 1; *p; p++)
+		if (*p == '/')
+		{
+			*p = 0;
+			if (mkdir(tmp, S_IRWXU) == -1 && errno != EEXIST)
+			{
+				return false;
+			}
+			*p = '/';
+		}
+	if (mkdir(tmp, S_IRWXU) == -1 && errno != EEXIST)
+	{
+		return false;
+	}
+	return true;
+}
+
 /*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /**********************Util Fanctions*******************/
 /*******************************************************/
@@ -832,7 +859,8 @@ std::string Response::makeRedirectLocation()
 
 Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(config), client(client), isAutoIndexApply(false), isCGI(false), readFd(-1), writeFd(-1)
 {
-	addSlashOnAbsolutePath();
+	if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
+		addSlashOnAbsolutePath();
 	DecideConfigServer();	//使用するserverディレクティブを決定
 	DecideConfigLocation(); //使用するlocationディレクティブを決定
 	/*Authorization をチェック*/
@@ -1111,8 +1139,12 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 	}
 	if (client.hmp.method_ == httpMessageParser::POST)
 	{
-		responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
-		client.status = READWRITE;
+		if (!isCGI)
+			responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
+		if (isCGI)
+			client.status = READWRITE;
+		else
+			client.status = WRITE;
 	}
 	if (client.hmp.method_ == httpMessageParser::DELETE)
 	{
@@ -1426,7 +1458,7 @@ void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返して�
 			}
 		}
 		// indexディレクティブがなかったら403
-		ResponseStatus = statusNo;					 //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
+		ResponseStatus = statusNo; //ここにくる場合は、404 not found になってる (autoindex の場合は別だけど)
 		this->targetFilePath = GetSerachAbsolutePath();
 		if (client.hmp.method_ == httpMessageParser::GET)
 		{
@@ -1454,6 +1486,13 @@ bool Response::isDirectoryAvailable()
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
 	if (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] != '/')
 		removeFilePart(SerachFileAbsolutePath);
+	if (client.hmp.method_ == httpMessageParser::PUT)
+	{
+		if (!_mkdir(SerachFileAbsolutePath.c_str()))
+		{
+			return false;
+		}
+	}
 	DIR *ret = opendir(SerachFileAbsolutePath.c_str());
 	if (ret == NULL)
 		return false;
