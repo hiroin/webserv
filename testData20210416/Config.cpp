@@ -189,6 +189,7 @@ Config::Config(int testPattern)
     s_ConfigServer tmpConfigServer;
     s_ConfigLocation tmpConfigLocation;
 
+    configGlobal.cgitesterPath = "/Users/iwasayoshiki/webserv/testData20210416/cgi_tester";
     configGlobal.servers.push_back(tmpConfigServer);
     configGlobal.servers[0].root = "/tmp/webserv/0";
     configGlobal.servers[0].configCommon.indexs.push_back("index.html");
@@ -207,9 +208,9 @@ Config::Config(int testPattern)
     configGlobal.servers[0].locations[2].path = "/";
     configGlobal.servers[0].locations[2].configCommon.indexs.push_back("index.htm");
     configGlobal.servers[0].locations[2].configCommon.errorPages["404"] = "/404.html";
-    configGlobal.servers[0].locations[2].configCommon.autoindex = "on";
-    configGlobal.servers[0].locations[2].configCommon.authBasicUid="dafdfasd";
-    configGlobal.servers[0].locations[2].configCommon.authBasicPassword="dafdfasd";
+    configGlobal.servers[0].locations[2].configCommon.uploadPath = "/tmp/webserv/0";
+    configGlobal.servers[0].locations[2].configCommon.cgiScripts.push_back(".bla");
+    configGlobal.servers[0].locations[2].configCommon.clientMaxBodySize = 10000;
     configGlobal.servers[0].host = "*";
     configGlobal.servers[0].port = 5000;
     configGlobal.servers.push_back(tmpConfigServer);
