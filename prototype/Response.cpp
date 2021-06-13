@@ -998,7 +998,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 				{
 					std::string SearchAbsolutePath = GetSerachAbsolutePath();
 					// PutPostBody = client.hmp.body_;
-					PutPostBody = client.body;
+          PutPostBody = client.body;
 					if (client.hmp.method_ == httpMessageParser::PUT)
 					{
 						if (isDirectoryAvailable())
@@ -1027,8 +1027,27 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 					else // メソッドがPOST の時入ってくる
 					{
 						setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
+						//"/" も拡張子もないPOSTリクエストは、ファイルがないものとして無視する
+						if (targetFilePath[targetFilePath.size() - 1] != '/' && !isExtention(targetFilePath))
+						{
+
+							std::string uploadPath = targetFilePath;
+							removeFilePart(uploadPath);
+							std::string createFilePath = uploadPath + "/" + getDatetimeStr();
+							int fd = open(createFilePath.c_str(), O_RDWR | O_CREAT, S_IREAD | S_IWRITE);
+							if (fd == -1)
+							{
+								ResponseStatus = 403;
+							}
+							else
+							{
+								close(fd);
+								targetFilePath = createFilePath;
+								ResponseStatus = 201;
+							}
+						}
 						//absolutePath の最後が'/' で終了していたらファイル作って、読み込み用のFDを返す
-						if (targetFilePath[targetFilePath.size() - 1] == '/')
+						else if (targetFilePath[targetFilePath.size() - 1] == '/')
 						{
 							//uploadPath にタイムスタンプでファイルを作成しておく
 							std::string createFilePath = getConfigCommon().uploadPath + "/" + getDatetimeStr();
@@ -1141,11 +1160,14 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 	if (client.hmp.method_ == httpMessageParser::POST)
 	{
 		if (!isCGI)
+		{
 			responseMessege.append(std::string("Content-Length: 0\r\n\r\n"));
-		if (isCGI)
-			client.status = READWRITE;
-		else
+			if (targetFilePath[targetFilePath.size() - 1] != '/' && !isExtention(targetFilePath))
+				client.status = SEND;
 			client.status = WRITE;
+		}
+		else
+			client.status = READWRITE;
 	}
 	if (client.hmp.method_ == httpMessageParser::DELETE)
 	{
