@@ -1013,7 +1013,8 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 					{
 						setTargetFileAndStatus(); //探しにいくファイルパスと、レスポンスステータスを決定
 						//"/" も拡張子もないPOSTリクエストは、ファイルがないものとして無視する
-						if (targetFilePath[targetFilePath.size() - 1] != '/' && !isExtention(targetFilePath))
+						std::string absolutePath = client.hmp.absolutePath_;
+						if (absolutePath[absolutePath.size() - 1] != '/' && !isExtention(absolutePath))
 						{
 
 							std::string uploadPath = targetFilePath;
@@ -1032,7 +1033,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 							}
 						}
 						//absolutePath の最後が'/' で終了していたらファイル作って、読み込み用のFDを返す
-						else if (targetFilePath[targetFilePath.size() - 1] == '/')
+						else if (absolutePath[absolutePath.size() - 1] == '/')
 						{
 							//uploadPath にタイムスタンプでファイルを作成しておく
 							std::string createFilePath = getConfigCommon().uploadPath + "/" + getDatetimeStr();
@@ -1459,7 +1460,6 @@ int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
 	this->targetFilePath = SerachFileAbsolutePath;
 	return (isTheFileExist(SerachFileAbsolutePath));
 }
-
 void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返してくる物をみて、ファイルがそもそも存在するかをチェック
 {
 	if (ResponseStatus == 406)
