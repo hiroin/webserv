@@ -4,7 +4,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <string>
 #include <errno.h>
 #include <dirent.h>
@@ -1212,6 +1211,12 @@ int Response::getFileFdForWrite()
 		writeFd = open(targetFilePath.c_str(), O_RDWR | O_CREAT, S_IRWXU);
 		if (writeFd == -1)
 			return (-1);
+    int r = fcntl(writeFd, F_SETFL, O_NONBLOCK);
+    if (r == -1)
+    {
+      close(writeFd);
+      return (-1);
+    }
 	}
 	return (writeFd);
 }
@@ -1645,6 +1650,12 @@ int Response::getTargetFileFd()
 		readFd = open(targetFilePath.c_str(), O_RDONLY);
 		if (readFd == -1)
 			return (-1);
+    int r = fcntl(readFd, F_SETFL, O_NONBLOCK);
+    if (r == -1)
+    {
+      close(readFd);
+      return (-1);
+    }
 	}
 	return readFd;
 }

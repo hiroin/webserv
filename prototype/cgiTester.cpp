@@ -22,6 +22,14 @@ bool Response::execCgiTester()
 		ResponseStatus = 500;
 		return false;
 	}
+  if (fcntl(pipes[0], F_SETFL, O_NONBLOCK) == -1
+    || fcntl(pipes[1], F_SETFL, O_NONBLOCK) == -1)
+  {
+    close(pipes[0]);
+    close(pipes[1]);
+		ResponseStatus = 500;
+    return (false);
+  }
 	if ((pid = fork()) < 0)
 	{
 		ResponseStatus = 500;

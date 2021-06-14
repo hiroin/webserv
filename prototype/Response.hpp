@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 
 class Response
 {
