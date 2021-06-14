@@ -25,6 +25,22 @@ bool Response::execCgiTester_POST()
 		ResponseStatus = 500;
 		return false;
 	}
+  if (fcntl(pipeIn[0], F_SETFL, O_NONBLOCK) == -1
+    || fcntl(pipeIn[1], F_SETFL, O_NONBLOCK) == -1)
+  {
+    close(pipeIn[0]);
+    close(pipeIn[1]);
+		ResponseStatus = 500;
+    return (false);
+  }
+  if (fcntl(pipeOut[0], F_SETFL, O_NONBLOCK) == -1
+    || fcntl(pipeOut[1], F_SETFL, O_NONBLOCK) == -1)
+  {
+    close(pipeOut[0]);
+    close(pipeOut[1]);
+		ResponseStatus = 500;
+    return (false);
+  }
 	if ((pid = fork()) < 0)
 	{
 		ResponseStatus = 500;
