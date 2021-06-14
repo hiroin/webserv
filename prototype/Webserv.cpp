@@ -306,6 +306,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         try
         {
+          std::cout << "WRITE/READWRITE" << std::endl;
           bool isFinish = clients_[i].wc.SendMessage(SEND_BUFFER_SIZE);
           if (isFinish)
           {
@@ -644,7 +645,7 @@ std::string Wevserv::getTime()
 
 void Wevserv::debugPrintGetRecvData(int i)
 {
-  if (c_.getDebugLevel() >= 1)
+  if (c_.getDebugLevel() >= 2)
   {
     std::cout << "--recvData-----------------------------" << std::endl;
     std::cout << clients_[i].receivedData.getRecvData();
@@ -654,7 +655,7 @@ void Wevserv::debugPrintGetRecvData(int i)
 
 void Wevserv::debugPrintGetReadData(int i)
 {
-  if (c_.getDebugLevel() >= 2)
+  if (c_.getDebugLevel() >= 3)
   {
     std::cout << "--readData-----------------------------" << std::endl;
     std::cout << clients_[i].readDataFromFd.getReadData();
