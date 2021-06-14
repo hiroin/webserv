@@ -306,9 +306,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
       {
         try
         {
-          std::cout << "WRITE/READWRITE BEGIN" << std::endl;
           bool isFinish = clients_[i].wc.SendMessage(SEND_BUFFER_SIZE);
-          std::cout << "WRITE/READWRITE END" << std::endl;
           if (isFinish)
           {
             if (close(clients_[i].writeFd) == -1)

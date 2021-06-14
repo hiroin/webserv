@@ -23,11 +23,9 @@ bool SendController::SendMessage(ssize_t len)
 	if (LeftLength <= len)
 	{
 		ssize_t r = write(CliantFd, ResponseMessage, LeftLength);
-    std::cout << "r = " << r << std::endl;
+    // std::cout << "r = " << r << std::endl;
     if (r == -1)
-    {
       throw std::runtime_error("write error.");
-    }
     if (r != LeftLength)
     {
       ResponseMessage += r;
@@ -40,7 +38,7 @@ bool SendController::SendMessage(ssize_t len)
 	else
 	{
 		ssize_t r = write(CliantFd, ResponseMessage, len);
-    std::cout << "r = " << r << std::endl;
+    // std::cout << "r = " << r << std::endl;
     if (r == -1)
       throw std::runtime_error("write error.");
 		ResponseMessage += r;
