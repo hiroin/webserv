@@ -59,10 +59,14 @@ void Response::addEnvironmentValue()
 	envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
   if (client.hmp.pathinfo_ != "")
   {
-    envp.push_back(std::string("PATH_INFO=") + client.hmp.absolutePath_);
+    envp.push_back(std::string("PATH_INFO=") + "/" + client.hmp.pathinfo_);
     if (configServer.root[configServer.root.size() - 1] != '/')
       configServer.root.append("/");
     envp.push_back(std::string("PATH_TRANSLATED=") + configServer.root + client.hmp.pathinfo_);
+  }
+  else
+  {
+    envp.push_back(std::string("PATH_INFO=") + client.hmp.absolutePath_);
   }
 	envp.push_back(std::string("QUERY_STRING=") + client.hmp.query_);
 	envp.push_back(std::string("REMOTE_ADDR=") + client.ip);
@@ -75,6 +79,17 @@ void Response::addEnvironmentValue()
 	envp.push_back(std::string("SERVER_PROTOCOL=") + "HTTP/1.1");
 	envp.push_back(std::string("SERVER_SOFTWARE=") + "webserv");
 	envp.push_back(std::string("REDIRECT_STATUS=") + "200");
+  // クライアントからのヘッダをCGIへ渡す
+  std::map<std::string, std::string>::iterator itr = client.hmp.headers_.begin();
+  std::map<std::string, std::string>::iterator endItr = client.hmp.headers_.end();
+  for (; itr != endItr; ++itr)
+  {
+    std::string first = itr->first;
+    std::replace(first.begin(), first.end(), '-', '_');
+    for (size_t i = 0; i < first.size(); ++i)
+      first[i] = std::toupper(first[i]);
+    envp.push_back("HTTP_" + first + "=" + itr->second);
+  }
 }
 
 bool Response::execCgi()
