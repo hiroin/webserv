@@ -3403,5 +3403,40 @@ TEST(Response_test, POST_CGI)
     EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[SERVER_SOFTWARE] => webserv\n.*"));
     EXPECT_THAT(cgiOutput, MatchesRegex(".*\\[POST_DATA] => name=ap2\n.*"));
     close(Response.getCgiFd());
+  }
+  // 0176
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::POST;
+    client_.hmp.absolutePath_ = "/404.cgi";
+    client_.hmp.requestTarget_ = "/404.cgi";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+    client_.body = "name=ap2";
+    client_.hmp.headers_["content-length"] = "8";
+
+    Response Response(client_, config_);
+    int ResponseStatus = Response.ResponseStatus;
+
+    EXPECT_EQ(200, ResponseStatus);
+    EXPECT_LE(3, Response.getCgiFd());
+    EXPECT_LE(3, Response.getCgiFdForWrite());
+
+    const char *body = "name=ap2";
+    size_t write_size = write(Response.getCgiFdForWrite(), body, 8);   
+
+    std::string cgiOutput;
+    while (1)
+    {
+      memset(buf, 0, sizeof(buf));
+      read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+      if (read_size == 0)
+        break;
+      cgiOutput.append(buf);
+    }
+    EXPECT_THAT(cgiOutput, MatchesRegex(".*\\HTTP/1.1 404 Not Found\n.*"));
+    close(Response.getCgiFd());
   }  
 }
