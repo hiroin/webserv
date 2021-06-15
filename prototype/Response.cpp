@@ -1109,9 +1109,16 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		}
 		else
 		{
-			responseMessege.append(std::string("Content-Length: 5\r\n"));
-			responseMessege.append(std::string("\r\n"));
-			responseMessege.append(std::string("Error"));
+      if (client.hmp.method_ == httpMessageParser::HEAD)
+      {
+        responseMessege.append(std::string("\r\n"));
+      }
+      else
+      {
+        responseMessege.append(std::string("Content-Length: 5\r\n"));
+        responseMessege.append(std::string("\r\n"));
+        responseMessege.append(std::string("Error"));
+      }
 			client.status = SEND;
 			return;
 		}
@@ -1122,16 +1129,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		client.status = SEND;
 		return;
 	}
-	if (client.hmp.method_ == httpMessageParser::HEAD)
-	{
-		setContenType(); //Languageを考えて選択する。
-		setLastModified();
-		setContentLength();
-		if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
-			setContentLanguage();
-		client.status = SEND;
-	}
-	if (client.hmp.method_ == httpMessageParser::GET)
+	if (client.hmp.method_ == httpMessageParser::GET || client.hmp.method_ == httpMessageParser::HEAD)
 	{
 		if (!isCGI)
 		{
@@ -1874,8 +1872,9 @@ void Response::setLastModified()
 
 void Response::AppendBodyOnResponseMessage(std::string body)
 {
-	responseMessege.append(std::string("\r\n"));
-	responseMessege.append(body);
+  responseMessege.append(std::string("\r\n"));
+  if (client.hmp.method_ == httpMessageParser::GET)
+    responseMessege.append(body);
 }
 
 int Response::getCgiFd()
@@ -1943,9 +1942,16 @@ void Response::mergeCgiResult(std::string CgiResult)
 		}
 		else
 		{
-			responseMessege.append(std::string("Content-Length: 5\r\n"));
-			responseMessege.append(std::string("\r\n"));
-			responseMessege.append(std::string("Error"));
+      if (client.hmp.method_ == httpMessageParser::HEAD)
+      {
+        responseMessege.append(std::string("\r\n"));
+      }
+      else
+      {
+        responseMessege.append(std::string("Content-Length: 5\r\n"));
+        responseMessege.append(std::string("\r\n"));
+        responseMessege.append(std::string("Error"));
+      }
 			client.status = SEND;
 			return;
 		}
