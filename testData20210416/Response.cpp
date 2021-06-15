@@ -181,7 +181,7 @@ float ft_stof(std::string str)
 	return (ret);
 }
 
-float ft_stoi(std::string str)
+int ft_stoi(std::string str)
 {
 	int ret = 0;
 	std::string upperPoint;
@@ -1160,7 +1160,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
     }
     else
       client.status = READ;
-    
+
 	}
 	if (client.hmp.method_ == httpMessageParser::GET)
 	{
@@ -2013,10 +2013,13 @@ void Response::mergeCgiResult(std::string CgiResult)
 		}
 		else
 		{
-			responseMessege.append(std::string("Content-Length: 5\r\n"));
-			responseMessege.append(std::string("\r\n"));
-			responseMessege.append(std::string("Error"));
-			client.status = SEND;
+			if (client.hmp.method_ != httpMessageParser::HEAD)
+			{
+				responseMessege.append(std::string("Content-Length: 5\r\n"));
+				responseMessege.append(std::string("\r\n"));
+				responseMessege.append(std::string("Error"));
+				client.status = SEND;
+			}
 			return;
 		}
 	}
@@ -2029,7 +2032,8 @@ void Response::mergeCgiResult(std::string CgiResult)
 		{
 			std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
 			size_t contentLength = HeaderBody[1].size();
-			responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
+			if (client.hmp.method_ != httpMessageParser::HEAD)
+				responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
 			responseMessege.append(CgiResult);
 		}
 		else //Statusあり Status に合わせて変更
@@ -2043,7 +2047,8 @@ void Response::mergeCgiResult(std::string CgiResult)
 
 			std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
 			size_t contentLength = HeaderBody[1].size();
-			responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
+			if (client.hmp.method_ != httpMessageParser::HEAD)
+				responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
 
 			std::string CgiResult_StatusRemoved;
 			CgiResult_StatusRemoved = removeStatus(CgiResult);
