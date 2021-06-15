@@ -1109,10 +1109,17 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		}
 		else
 		{
-			responseMessege.append(std::string("Content-Length: 5\r\n"));
-			responseMessege.append(std::string("\r\n"));
-			responseMessege.append(std::string("Error"));
-			client.status = SEND;
+      if (client.hmp.method_ == httpMessageParser::GET)
+      {
+        responseMessege.append(std::string("Content-Length: 5\r\n"));
+        responseMessege.append(std::string("\r\n"));
+  			responseMessege.append(std::string("Error"));
+      }
+      else
+      {
+        responseMessege.append(std::string("\r\n"));
+      }
+		client.status = SEND;
 			return;
 		}
 	}
@@ -1124,12 +1131,19 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 	}
 	if (client.hmp.method_ == httpMessageParser::HEAD)
 	{
-		setContenType(); //Languageを考えて選択する。
-		setLastModified();
-		setContentLength();
-		if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
-			setContentLanguage();
-		client.status = SEND;
+    if (!isCGI)
+    {
+      setContenType(); //Languageを考えて選択する。
+      setLastModified();
+      setContentLength();
+      if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
+        setContentLanguage();
+      responseMessege.append(std::string("\r\n"));
+      client.status = SEND;
+    }
+    else
+      client.status = READ;
+    
 	}
 	if (client.hmp.method_ == httpMessageParser::GET)
 	{
