@@ -181,6 +181,23 @@ float ft_stof(std::string str)
 	return (ret);
 }
 
+float ft_stoi(std::string str)
+{
+	int ret = 0;
+	std::string upperPoint;
+	std::string underPoint;
+	std::string::iterator itr = str.begin();
+	int count = 0;
+	while (std::isdigit(*itr))
+	{
+		ret *= 10;
+		ret += *itr - '0';
+		++itr;
+		count++;
+	}
+	return (ret);
+}
+
 void getAcceptLanguages(std::map<std::string, std::vector<std::string> > &AcceptLanguageMap, std::string::iterator &itr)
 {
 	std::string LanguageRange;
@@ -1935,8 +1952,47 @@ std::vector<std::string> splitByCRLF(std::string string)
 	return ret;
 }
 
+int getStatus(std::string CgiResult)
+{
+	int place = CgiResult.find("Status");
+	if (place == std::string::npos)
+		return 0;
+	else
+	{
+		std::string cgiResponseStatus = CgiResult.substr(place + 8, 3);
+		return ft_stoi(cgiResponseStatus);
+	}
+}
+
+//status を発見したらそこから\r\n まで何文字あるかをカウントする
+			//そしたら、replace でStatus を空文字に置換して返す
+std::string removeStatus(std::string CgiResult)
+{
+	int start = CgiResult.find("Status:");
+	int i = start;
+	while (CgiResult[i] != '\n')
+	{
+		i++;
+	}
+	CgiResult.replace(start, i - start + 1, ""); //Status の行を削除
+	return CgiResult;
+}
+
 void Response::mergeCgiResult(std::string CgiResult)
 {
+
+	//CGI の結果にStatus があればエラーとして処理する。
+	//Status が無ければ成功・あったらステータスこ～どを確認
+	//無ければ、成功とする
+	// httpMethod == HEADだったらボディを削除する
+	if (client.hmp.method_ == httpMessageParser::HEAD)
+	{
+		std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
+		if (HeaderBody[1].size() != 0)
+		{
+			CgiResult = HeaderBody[0] + "\r\n\r\n";
+		}
+	}
 	if (CgiResult.find("\r\n\r\n") == std::string::npos)
 	{
 		responseMessege.clear();
@@ -1966,10 +2022,34 @@ void Response::mergeCgiResult(std::string CgiResult)
 	}
 	else
 	{
-		std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
-		size_t contentLength = HeaderBody[1].size();
-		responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
-		responseMessege.append(CgiResult);
+		//Status をチェックしてステータス通りに返す, StatusヘッダはCgiResultから除くこと。
+		//HTTP/1.1 のコロン以下をStatus のコロン以下に置換
+		int CgiStatus = getStatus(CgiResult);
+		if (CgiStatus == 0) //Statusなし
+		{
+			std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
+			size_t contentLength = HeaderBody[1].size();
+			responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
+			responseMessege.append(CgiResult);
+		}
+		else //Statusあり Status に合わせて変更
+		{
+			std::map<int, std::string> ResponseMap;
+			setResponseMap(ResponseMap);
+			std::string oldStatus = ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus];
+			std::string newStatus = ft_itos(CgiStatus) + " " + ResponseMap[CgiStatus];
+			int place = responseMessege.find(oldStatus);
+			responseMessege.replace(place, oldStatus.size(), newStatus);
+
+			std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
+			size_t contentLength = HeaderBody[1].size();
+			responseMessege.append(std::string("Content-Length: ") + ft_ultos(contentLength) + "\r\n");
+
+			std::string CgiResult_StatusRemoved;
+			CgiResult_StatusRemoved = removeStatus(CgiResult);
+			//
+			responseMessege.append(CgiResult_StatusRemoved);
+		}
 	}
 	client.status = SEND;
 }
