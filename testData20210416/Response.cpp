@@ -1136,6 +1136,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		if (!isCGI)
 		{
 			setContenType();
+      setLastModified();
 			setContentLength();
 			if (isLanguageFile(targetFilePath, getFileExtention(targetFilePath)))
 				setContentLanguage();
