@@ -181,23 +181,6 @@ float ft_stof(std::string str)
 	return (ret);
 }
 
-int ft_stoi(std::string str)
-{
-	int ret = 0;
-	std::string upperPoint;
-	std::string underPoint;
-	std::string::iterator itr = str.begin();
-	int count = 0;
-	while (std::isdigit(*itr))
-	{
-		ret *= 10;
-		ret += *itr - '0';
-		++itr;
-		count++;
-	}
-	return (ret);
-}
-
 void getAcceptLanguages(std::map<std::string, std::vector<std::string> > &AcceptLanguageMap, std::string::iterator &itr)
 {
 	std::string LanguageRange;
@@ -1954,7 +1937,7 @@ std::vector<std::string> splitByCRLF(std::string string)
 
 int getStatus(std::string CgiResult)
 {
-	int place = CgiResult.find("Status");
+	size_t place = CgiResult.find("Status");
 	if (place == std::string::npos)
 		return 0;
 	else

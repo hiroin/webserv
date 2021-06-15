@@ -26,6 +26,7 @@
 #include "Config.hpp"
 #include "HTTPMessageParser.hpp"
 #include "Client.hpp"
+#include "ft.hpp"
 
 class Response
 {
