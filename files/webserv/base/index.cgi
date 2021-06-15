@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+if ($ENV{'REQUEST_METHOD'} eq 'POST') {
+    read(STDIN, $alldata, $ENV{'CONTENT_LENGTH'});
+}
+
 use CGI;
 my $cgi = new CGI;
 print $cgi->header;
@@ -29,3 +33,7 @@ print "[CONTENT_LENGTH] => $ENV{'CONTENT_LENGTH'}\n";
 print "[CONTENT_TYPE] => $ENV{'CONTENT_TYPE'}\n";
 print "[REMOTE_IDENT] => $ENV{'REMOTE_IDENT'}\n";
 print "[REMOTE_USER] => $ENV{'REMOTE_USER'}\n";
+
+if ($ENV{'REQUEST_METHOD'} eq 'POST') {
+    print "[POST_DATA] => $alldata\n";
+}

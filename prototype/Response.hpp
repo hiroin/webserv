@@ -19,6 +19,10 @@
 #include <unistd.h>
 #include <errno.h>
 #include <dirent.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include "Config.hpp"
 #include "HTTPMessageParser.hpp"
 #include "Client.hpp"
@@ -113,6 +117,7 @@ class Response
 		int getCgiFdForWrite(); //CGIの書き込み用FDを取得する関数
 		int getTargetFileFd(); //ファイル読み取り用FDを取得する関数
 		void mergeCgiResult(std::string CgiResult);
+    std::string getFileExtention(std::string FilePath);
 
 		//php-cgi
 		bool execPhpCgi();

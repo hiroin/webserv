@@ -65,20 +65,6 @@ std::string ft_ultos(unsigned long nu)
 	return (ret);
 }
 
-std::string getFileExtention(std::string FilePath)
-{
-	int i = FilePath.size() - 1;
-	int count = 0;
-	while (i >= 0)
-	{
-		if (FilePath[i] == '.')
-			break;
-		++count;
-		--i;
-	}
-	return (FilePath.substr(i + 1, count));
-}
-
 bool isEightAlphas(std::string::iterator &itr)
 {
 	int count = 0;
@@ -410,6 +396,20 @@ static bool _mkdir(const char *dir)
 
 /*******************************************************/
 /**********************Member Functions*******************/
+
+std::string Response::getFileExtention(std::string FilePath)
+{
+	int i = FilePath.size() - 1;
+	int count = 0;
+	while (i >= 0)
+	{
+		if (FilePath[i] == '.')
+			break;
+		++count;
+		--i;
+	}
+	return (FilePath.substr(i + 1, count));
+}
 
 bool Response::isMatchAcceptLanguageFromat(std::string src)
 {
@@ -1653,7 +1653,7 @@ void Response::setResponseLine()
 	setResponseMap(ResponseMap);
 	responseMessege.append(std::string("HTTP/1.1") + " ");
 	responseMessege.append(ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus] + "\r\n");
-	responseMessege.append("Server: nginx/1.14.0 (Ubuntu)\r\n");
+	responseMessege.append("Server: webserv\r\n");
 }
 
 void Response::setDate()

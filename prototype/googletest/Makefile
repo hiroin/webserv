@@ -23,7 +23,8 @@ SOURCE = ../HTTPMessageParser.cpp \
 	../normal-cgi.cpp \
 	../cgiTester.cpp \
 	../POST_normal-cgi.cpp \
-	../POST_phpCGI.cpp
+	../POST_phpCGI.cpp \
+	../POST_cgiTester.cpp
 OBJS = $(SOURCE:.cpp=.o)
 
 .PHONY: all clean

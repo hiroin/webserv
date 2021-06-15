@@ -57,21 +57,29 @@ void Response::addEnvironmentValue()
     envp.push_back(std::string("CONTENT_TYPE=") + client.hmp.headers_["content-type"]);
 	}
 	envp.push_back("GATEWAY_INTERFACE=CGI/1.1");
-  if (client.hmp.pathinfo_ != "")
-  {
-    envp.push_back(std::string("PATH_INFO=") + "/" + client.hmp.pathinfo_);
-    if (configServer.root[configServer.root.size() - 1] != '/')
-      configServer.root.append("/");
-    envp.push_back(std::string("PATH_TRANSLATED=") + configServer.root + client.hmp.pathinfo_);
-  }
+  if (getFileExtention(targetFilePath) == std::string("bla"))
+    envp.push_back(std::string("PATH_INFO=") + client.hmp.absolutePath_);
   else
   {
-    envp.push_back(std::string("PATH_INFO=") + client.hmp.absolutePath_);
+    if (client.hmp.pathinfo_ == "")
+      envp.push_back(std::string("PATH_INFO="));
+    else
+      envp.push_back(std::string("PATH_INFO=") + "/" + client.hmp.pathinfo_);
   }
-	envp.push_back(std::string("QUERY_STRING=") + client.hmp.query_);
+  if (configServer.root[configServer.root.size() - 1] != '/')
+    configServer.root.append("/");
+  envp.push_back(std::string("PATH_TRANSLATED=") + configServer.root + client.hmp.pathinfo_);
+  envp.push_back(std::string("QUERY_STRING=") + client.hmp.query_);
 	envp.push_back(std::string("REMOTE_ADDR=") + client.ip);
+  struct in_addr addr;
+  addr.s_addr = inet_addr(client.ip.c_str());
+  struct hostent *host = gethostbyaddr((const char *)&addr.s_addr, sizeof(addr.s_addr), AF_INET);
+  if (host == NULL)
+	  envp.push_back(std::string("REMOTE_HOST=") + client.ip);
+  else
+    envp.push_back(std::string("REMOTE_HOST=") + host->h_name);
 	envp.push_back(std::string("REQUEST_METHOD=") + getMethodasString(client.hmp.method_));
-	envp.push_back(std::string("REQUEST_URI=") + client.hmp.absolutePath_);
+	envp.push_back(std::string("REQUEST_URI=") + client.hmp.requestTarget_);
 	envp.push_back(std::string("SCRIPT_NAME=") + client.hmp.absolutePath_);
 	envp.push_back(std::string("SCRIPT_FILENAME=") + targetFilePath);
 	envp.push_back(std::string("SERVER_NAME=") + client.hmp.headers_["host"]);
