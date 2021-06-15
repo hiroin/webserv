@@ -1109,7 +1109,7 @@ Response::Response(Client &client, Config &config) : ResponseStatus(-1), config(
 		}
 		else
 		{
-      if (client.hmp.method_ == httpMessageParser::GET)
+      if (client.hmp.method_ != httpMessageParser::HEAD)
       {
         responseMessege.append(std::string("Content-Length: 5\r\n"));
         responseMessege.append(std::string("\r\n"));
