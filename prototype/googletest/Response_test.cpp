@@ -3474,4 +3474,140 @@ TEST(Response_test, POST_CGI)
     EXPECT_EQ(500, ResponseStatus);
     close(Response.getCgiFd());
   }
+  // 0178
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::POST;
+    client_.hmp.absolutePath_ = "/bad_cgi_001.cgi";
+    client_.hmp.requestTarget_ = "/bad_cgi_001.cgi";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+    client_.body = "name=ap2";
+    client_.hmp.headers_["content-length"] = "8";
+
+    Response Response(client_, config_);
+    EXPECT_LE(3, Response.getCgiFd());
+    EXPECT_LE(3, Response.getCgiFdForWrite());
+
+    const char *body = "name=ap2";
+    size_t write_size = write(Response.getCgiFdForWrite(), body, 8);   
+
+    std::string cgiOutput;
+    while (1)
+    {
+      memset(buf, 0, sizeof(buf));
+      read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+      if (read_size == 0)
+        break;
+      cgiOutput.append(buf);
+    }
+    Response.mergeCgiResult(cgiOutput);
+    int ResponseStatus = Response.ResponseStatus;
+    EXPECT_EQ(500, ResponseStatus);
+    close(Response.getCgiFd());
+  } 
+  // 0179
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::POST;
+    client_.hmp.absolutePath_ = "/bad_cgi_002.cgi";
+    client_.hmp.requestTarget_ = "/bad_cgi_002.cgi";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+    client_.body = "name=ap2";
+    client_.hmp.headers_["content-length"] = "8";
+
+    Response Response(client_, config_);
+    EXPECT_LE(3, Response.getCgiFd());
+    EXPECT_LE(3, Response.getCgiFdForWrite());
+
+    const char *body = "name=ap2";
+    size_t write_size = write(Response.getCgiFdForWrite(), body, 8);   
+
+    std::string cgiOutput;
+    while (1)
+    {
+      memset(buf, 0, sizeof(buf));
+      read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+      if (read_size == 0)
+        break;
+      cgiOutput.append(buf);
+    }
+    Response.mergeCgiResult(cgiOutput);
+    int ResponseStatus = Response.ResponseStatus;
+    EXPECT_EQ(500, ResponseStatus);
+    close(Response.getCgiFd());
+  }
+  // 0180
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::POST;
+    client_.hmp.absolutePath_ = "/bad_cgi_003.cgi";
+    client_.hmp.requestTarget_ = "/bad_cgi_003.cgi";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+    client_.body = "name=ap2";
+    client_.hmp.headers_["content-length"] = "8";
+
+    Response Response(client_, config_);
+    EXPECT_LE(3, Response.getCgiFd());
+    EXPECT_LE(3, Response.getCgiFdForWrite());
+
+    const char *body = "name=ap2";
+    size_t write_size = write(Response.getCgiFdForWrite(), body, 8);   
+
+    std::string cgiOutput;
+    while (1)
+    {
+      memset(buf, 0, sizeof(buf));
+      read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+      if (read_size == 0)
+        break;
+      cgiOutput.append(buf);
+    }
+    Response.mergeCgiResult(cgiOutput);
+    int ResponseStatus = Response.ResponseStatus;
+    EXPECT_EQ(500, ResponseStatus);
+    close(Response.getCgiFd());
+  }
+  // 0181
+  {
+    Client client_;
+    client_.port = 8080;
+    client_.host = "*";
+    client_.hmp.method_ = httpMessageParser::POST;
+    client_.hmp.absolutePath_ = "/bad_cgi_004.cgi";
+    client_.hmp.requestTarget_ = "/bad_cgi_004.cgi";
+    client_.hmp.headers_["host"] = "127.0.0.1";
+    client_.ip = "127.0.0.1";
+    client_.body = "name=ap2";
+    client_.hmp.headers_["content-length"] = "8";
+
+    Response Response(client_, config_);
+    EXPECT_LE(3, Response.getCgiFd());
+    EXPECT_LE(3, Response.getCgiFdForWrite());
+
+    const char *body = "name=ap2";
+    size_t write_size = write(Response.getCgiFdForWrite(), body, 8);   
+
+    std::string cgiOutput;
+    while (1)
+    {
+      memset(buf, 0, sizeof(buf));
+      read_size = read(Response.getCgiFd(), buf, sizeof(buf));
+      if (read_size == 0)
+        break;
+      cgiOutput.append(buf);
+    }
+    Response.mergeCgiResult(cgiOutput);
+    int ResponseStatus = Response.ResponseStatus;
+    EXPECT_EQ(500, ResponseStatus);
+    close(Response.getCgiFd());
+  }
 }
