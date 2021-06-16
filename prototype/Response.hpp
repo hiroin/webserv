@@ -119,6 +119,8 @@ class Response
 		int getTargetFileFd(); //ファイル読み取り用FDを取得する関数
 		void mergeCgiResult(std::string CgiResult);
     std::string getFileExtention(std::string FilePath);
+    bool isCgiResponseCorrect(std::string CgiResult);
+    bool validationHeader(std::string header);
 
 		//php-cgi
 		bool execPhpCgi();

@@ -1961,6 +1961,42 @@ std::string removeStatus(std::string CgiResult)
 	return CgiResult;
 }
 
+bool Response::validationHeader(std::string header)
+{
+  size_t i = 0;
+  if (!ft_istchar(header[i++]))
+    return FAILURE;
+  while (ft_istchar(header[i]))
+    i++;
+  if (header[i++] != ':')
+    return FAILURE;
+  while (ft_isspase_and_htab(header[i]))
+    i++;
+  if (!ft_isvchar(header[i++]))
+    return FAILURE;
+  while (ft_isvchar(header[i]) || ft_isspase_and_htab(header[i]))
+    i++;
+  if (i == header.size())
+    return SUCCESS;
+  return FAILURE;
+}
+
+bool Response::isCgiResponseCorrect(std::string CgiResult)
+{
+  std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
+  for (std::vector<std::string>::iterator itr = HeaderBody.begin();
+    itr != HeaderBody.end(); ++itr)
+  {
+    if (*itr == "")
+    {
+      return true;
+    }
+    if (!validationHeader(*itr))
+      return false;
+  }
+  return false;
+}
+
 void Response::mergeCgiResult(std::string CgiResult)
 {
 
@@ -1976,7 +2012,8 @@ void Response::mergeCgiResult(std::string CgiResult)
 			CgiResult = HeaderBody[0] + "\r\n\r\n";
 		}
 	}
-	if (CgiResult.find("\r\n\r\n") == std::string::npos)
+	if (CgiResult.find("\r\n\r\n") == std::string::npos
+    || !isCgiResponseCorrect(CgiResult))
 	{
 		responseMessege.clear();
 		ResponseStatus = 500;
