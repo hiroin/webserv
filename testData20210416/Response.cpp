@@ -1477,7 +1477,7 @@ int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
 }
 void Response::setTargetFileAndStatus() //GetSerachAbsolutePath() が返してくる物をみて、ファイルがそもそも存在するかをチェック
 {
-	if (ResponseStatus == 404)
+	if (ResponseStatus == 406)
 		return;
 	std::string SerachFileAbsolutePath = GetSerachAbsolutePath();
 	if (SerachFileAbsolutePath[SerachFileAbsolutePath.size() - 1] == '/')
