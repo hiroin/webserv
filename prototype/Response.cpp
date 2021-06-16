@@ -1362,7 +1362,7 @@ int Response::isLanguageFileExist(std::string SerachFileAbsolutePath)
 		}
 		++first;
 	}
-	return (406); //見つからなかったら406
+	return (404); //見つからなかったら404
 }
 
 void Response::setContentLanguage()
@@ -1404,7 +1404,7 @@ int Response::isCharsetFileExist(std::string SerachFileAbsolutePath)
 		}
 		++first;
 	}
-	return (406); //見つからなかったら406
+	return (404); //見つからなかったら404
 }
 
 int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
@@ -1452,13 +1452,13 @@ int Response::isCharsetAndLanguageFileExist(std::string SerachFileAbsolutePath)
 		}
 		++Cfirst;
 	}
-	return (406); //見つからなかったら406
+	return (404); //見つからなかったら404
 }
 
 int Response::isTargetFileAbailable(std::string SerachFileAbsolutePath)
 {
 	/**
-	 * Accept-Language を回していく、それで発見できなかったら406
+	 * Accept-Language を回していく、それで発見できなかったら404
 	 * **/
 	if (AcceptLanguageMap.size() != 0 && AcceptCharsetMap.size() == 0) //AcceptLanguageはあるけど、AcceptCharsetはない
 	{

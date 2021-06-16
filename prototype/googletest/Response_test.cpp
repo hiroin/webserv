@@ -1675,6 +1675,23 @@ TEST(Response_test, AcceptLanguage)
       EXPECT_EQ("/tmp/webserv/acceptlanguage/index.html", Response.targetFilePath);
     }
   }
+  {
+    // 0182
+    {
+      Client client_;
+      client_.port = 8080;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.headers_["host"] = "127.0.0.1";
+      client_.hmp.absolutePath_ = "/none.html";
+      client_.hmp.headers_["accept-language"] = "ja,en-US;q=0.9,en;q=0.8";
+
+      Response Response(client_, config_);
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(404, ResponseStatus);
+    }
+  }
 }
 
 TEST(Response_test, Authorization)
