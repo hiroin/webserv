@@ -390,6 +390,20 @@ static bool _mkdir(const char *dir)
 	return true;
 }
 
+std::vector<std::string> ft_split(std::string s, std::string d)
+{
+  std::vector<std::string> ret;
+  for(size_t i = 0, n; i <= s.length(); i = n + d.size())
+  {
+    n = s.find_first_of(d, i);
+    if(n == std::string::npos)
+      n = s.length();
+    std::string tmp = s.substr(i , n - i);
+    ret.push_back(tmp);
+  }
+  return ret;
+}
+
 /*^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
 /**********************Util Fanctions*******************/
 /*******************************************************/
@@ -1991,9 +2005,9 @@ bool Response::validationHeader(std::string header)
 
 bool Response::isCgiResponseCorrect(std::string CgiResult)
 {
-  std::vector<std::string> HeaderBody = splitByCRLF(CgiResult);
-  for (std::vector<std::string>::iterator itr = HeaderBody.begin();
-    itr != HeaderBody.end(); ++itr)
+  std::vector<std::string> Headers = ft_split(CgiResult, "\r\n");
+  for (std::vector<std::string>::iterator itr = Headers.begin();
+    itr != Headers.end(); ++itr)
   {
     if (*itr == "")
     {
