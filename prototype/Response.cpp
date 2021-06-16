@@ -2021,7 +2021,6 @@ bool Response::isCgiResponseCorrect(std::string CgiResult)
 
 void Response::mergeCgiResult(std::string CgiResult)
 {
-
 	//CGI の結果にStatus があればエラーとして処理する。
 	//Status が無ければ成功・あったらステータスこ～どを確認
 	//無ければ、成功とする
