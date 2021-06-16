@@ -1937,12 +1937,20 @@ std::vector<std::string> splitByCRLF(std::string string)
 
 int getStatus(std::string CgiResult)
 {
-	size_t place = CgiResult.find("Status");
+	size_t place = CgiResult.find("Status:");
 	if (place == std::string::npos)
 		return 0;
-	else
+  else
 	{
-		std::string cgiResponseStatus = CgiResult.substr(place + 8, 3);
+    place = place + 7;
+    while (ft_isspase_and_htab(CgiResult[place]))
+      place++;
+    if (!std::isdigit(CgiResult[place])
+      || !std::isdigit(CgiResult[place + 1])
+      || !std::isdigit(CgiResult[place + 2])
+      || !ft_isspase_and_htab(CgiResult[place + 3]))
+      return -1;
+		std::string cgiResponseStatus = CgiResult.substr(place, 3);
 		return ft_stoi(cgiResponseStatus);
 	}
 }
@@ -2013,7 +2021,8 @@ void Response::mergeCgiResult(std::string CgiResult)
 		}
 	}
 	if (CgiResult.find("\r\n\r\n") == std::string::npos
-    || !isCgiResponseCorrect(CgiResult))
+    || !isCgiResponseCorrect(CgiResult)
+    || getStatus(CgiResult) == -1)
 	{
 		responseMessege.clear();
 		ResponseStatus = 500;
