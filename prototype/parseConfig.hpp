@@ -1,7 +1,7 @@
 #ifndef _PARSECONFIG_H_
 #define _PARSECONFIG_H_
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
+#include <cerrno>
 #include "Config.hpp"
 #include "ft.hpp"
 

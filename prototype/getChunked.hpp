@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include <errno.h>
+#include <cerrno>
 #include "ft.hpp"
 #include "recvData.hpp"
 

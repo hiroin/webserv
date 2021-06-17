@@ -11,7 +11,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <cstdlib>
-#include <errno.h>
+#include <cerrno>
 #include "ft.hpp"
 
 class Socket {

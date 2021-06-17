@@ -1,7 +1,7 @@
 #ifndef _FT_H_
 #define _FT_H_
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <climits>

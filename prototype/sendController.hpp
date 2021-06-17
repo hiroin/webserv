@@ -1,8 +1,8 @@
-#ifndef SENDCONTROLLER
-#define SENDCONTROLLER
+#ifndef _SENDCONTROLLER_H_
+#define _SENDCONTROLLER_H_
 #include <iostream>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 
 /*
 	SendControllerオブジェクト
