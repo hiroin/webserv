@@ -25,7 +25,6 @@ bool readData::readFromFd()
   if (read_size == -1)
   {
     std::cout << "read() failed." << std::endl;
-    std::cout << "ERROR: " << errno << std::endl;
     readData_.erase();
     return FAILURE;
   }

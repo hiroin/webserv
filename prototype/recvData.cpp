@@ -22,14 +22,12 @@ bool recvData::recvFromSocket()
   memset(buf, 0, sizeof(buf));
   read_size = recv(fd_, buf, sizeof(buf), 0);
   if (read_size == 0) {
-    // std::cout << "graceful shutdown." << std::endl;
     recvData_.erase();
     extractedData_.erase();
     return FAILURE;
   }
   if (read_size == -1)
   {
-    // std::cout << "[EMERG]recvData::recvFromSocket() read() failed." << "ERROR: " << errno << std::endl;
     recvData_.erase();
     extractedData_.erase();
     return FAILURE;
