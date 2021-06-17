@@ -2021,7 +2021,6 @@ bool Response::isCgiResponseCorrect(std::string CgiResult)
 
 void Response::mergeCgiResult(std::string CgiResult)
 {
-
 	//CGI の結果にStatus があればエラーとして処理する。
 	//Status が無ければ成功・あったらステータスこ～どを確認
 	//無ければ、成功とする
@@ -2085,6 +2084,7 @@ void Response::mergeCgiResult(std::string CgiResult)
 			setResponseMap(ResponseMap);
 			std::string oldStatus = ft_itos(ResponseStatus) + " " + ResponseMap[ResponseStatus];
 			std::string newStatus = ft_itos(CgiStatus) + " " + ResponseMap[CgiStatus];
+      ResponseStatus = CgiStatus;
 			int place = responseMessege.find(oldStatus);
 			responseMessege.replace(place, oldStatus.size(), newStatus);
 
