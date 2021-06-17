@@ -280,6 +280,22 @@ TEST(Response_test, webserv_serverNames)
       EXPECT_EQ(200, ResponseStatus);
       EXPECT_EQ("/tmp/webserv/serverNames/5000/server1x/index.html", Response.targetFilePath);
     }
+    // 00183
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.absolutePath_ = "/index.html";
+      client_.hmp.headers_["host"] = "server10:8080";
+
+      Response Response(client_, config_);
+      int TargetFileFd = Response.getTargetFileFd();
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/serverNames/5000/server1x/index.html", Response.targetFilePath);
+    }
     // 0014
     {
       Client client_;
@@ -296,6 +312,22 @@ TEST(Response_test, webserv_serverNames)
       EXPECT_EQ(200, ResponseStatus);
       EXPECT_EQ("/tmp/webserv/serverNames/5000/server1x/index.html", Response.targetFilePath);
     }
+    // 00182
+    {
+      Client client_;
+      client_.port = 5000;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.absolutePath_ = "/index.html";
+      client_.hmp.headers_["host"] = "server11:5000";
+
+      Response Response(client_, config_);
+      int TargetFileFd = Response.getTargetFileFd();
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/serverNames/5000/server1x/index.html", Response.targetFilePath);
+    }    
     // 0015
     {
       Client client_;
@@ -304,6 +336,22 @@ TEST(Response_test, webserv_serverNames)
       client_.hmp.method_ = httpMessageParser::GET;
       client_.hmp.absolutePath_ = "/index.html";
       client_.hmp.headers_["host"] = "server20";
+
+      Response Response(client_, config_);
+      int TargetFileFd = Response.getTargetFileFd();
+      int ResponseStatus = Response.ResponseStatus;
+
+      EXPECT_EQ(200, ResponseStatus);
+      EXPECT_EQ("/tmp/webserv/serverNames/5001/server2x/index.html", Response.targetFilePath);
+    }
+    // 00184
+    {
+      Client client_;
+      client_.port = 5001;
+      client_.host = "*";
+      client_.hmp.method_ = httpMessageParser::GET;
+      client_.hmp.absolutePath_ = "/index.html";
+      client_.hmp.headers_["host"] = "server20:5001";
 
       Response Response(client_, config_);
       int TargetFileFd = Response.getTargetFileFd();

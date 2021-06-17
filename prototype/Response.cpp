@@ -1281,8 +1281,14 @@ bool Response::DecideConfigServer()
 {
 	int clientPort = client.port;
 	std::string clientHostName = client.host;
-	HTTPMessageParser hmp = client.hmp;
+	HTTPMessageParser hmp;
 
+	size_t place = client.hmp.headers_["host"].find(":");
+	if (place != std::string::npos)
+	{
+		client.hmp.headers_["host"] = client.hmp.headers_["host"].substr(0, place);
+	}
+	hmp  = client.hmp;
 	//ここから、configをなめていって該当設定を見つけよう。
 	std::vector<s_ConfigServer> servers = config.configGlobal.servers;
 	for (size_t i = 0; i < servers.size(); i++)
