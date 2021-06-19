@@ -513,6 +513,10 @@ bool Wevserv::isNotKeepConnectionCode(int code)
   switch (code)
   {
   case 400:
+  case 408:
+  case 409:
+  case 413:
+  case 414:
   case 500:
   case 501:
   case 502:
