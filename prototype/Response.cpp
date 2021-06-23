@@ -1216,7 +1216,9 @@ Response::Response(int ErrorCode, Client &client, Config &config) : ResponseStat
 		client.status = READ;
 		return;
 	}
-	responseMessege.append("Content-Length: 0\r\n");
+  responseMessege.append(std::string("Content-Length: 5\r\n"));
+  responseMessege.append(std::string("\r\n"));
+  responseMessege.append(std::string("Error"));
 	client.status = SEND;
 }
 

@@ -132,7 +132,10 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           else if (clients_[i].hmp.parseRequestTarget(clients_[i].hmp.getRequestTarget()))
           {
             debugPrintStartLine(i);
-            clients_[i].status = PARSE_HEADER;
+            if (clients_[i].hmp.query_.size() > httpMessageParser::MAX_URI_SIZE)
+              responseNot200(i, 414);
+            else
+              clients_[i].status = PARSE_HEADER;
           }
           else
             responseNot200(i, 400);
@@ -289,7 +292,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           }
           else
             clients_[i].readDataFromFd.setFd(clients_[i].readFd);
-          // coutLog(i);
         }
         else if (clients_[i].status == SEND)
         {
@@ -363,7 +365,6 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
             }
             else
             {
-              // initClientを作る
               clients_[i].status = PARSE_STARTLINE;
               clients_[i].hmp.clearData();
               clients_[i].body.clear();
@@ -516,7 +517,6 @@ bool Wevserv::isNotKeepConnectionCode(int code)
   case 408:
   case 409:
   case 413:
-  case 414:
   case 500:
   case 501:
   case 502:
