@@ -10,7 +10,8 @@
 
 namespace httpMessageParser {
   enum method {GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, OTHER};
-  const int MAX_URI_SIZE = 100;
+  const int MAX_URI_SIZE = 1000;
+  const int MAX_QUERY_SIZE = 100;
 }
 
 class HTTPMessageParser {

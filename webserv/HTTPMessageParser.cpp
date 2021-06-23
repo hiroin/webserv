@@ -38,6 +38,8 @@ int HTTPMessageParser::parseRequestLine(const std::string requestLine)
   requestTarget_ = requestLine.substr(firstSpPos + 1, secondSpPos - firstSpPos - 1);
   if (method_ == httpMessageParser::PUT && requestTarget_[requestTarget_.size() - 1] == '/')
     return 400;
+  if (requestTarget_.size() > httpMessageParser::MAX_URI_SIZE)
+    return 414;    
   // std::cout << "[DEBUG]requestTarget_ = \"" << requestTarget_ << "\"" << std::endl;
   HTTPVersion_ = requestLine.substr(secondSpPos + 1);
   // std::cout << "[DEBUG]HTTPVersion_ = \"" << HTTPVersion_ << "\"" << std::endl;

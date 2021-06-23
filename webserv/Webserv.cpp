@@ -132,7 +132,7 @@ Wevserv::Wevserv(Config& c) : c_(c), maxFd_(0)
           else if (clients_[i].hmp.parseRequestTarget(clients_[i].hmp.getRequestTarget()))
           {
             debugPrintStartLine(i);
-            if (clients_[i].hmp.query_.size() > httpMessageParser::MAX_URI_SIZE)
+            if (clients_[i].hmp.query_.size() > httpMessageParser::MAX_QUERY_SIZE)
               responseNot200(i, 414);
             else
               clients_[i].status = PARSE_HEADER;
